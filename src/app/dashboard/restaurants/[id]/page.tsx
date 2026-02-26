@@ -6,6 +6,9 @@ import Link from 'next/link';
 import {
   getRestaurant,
   getFeatureCatalog,
+  getRestaurantSubscription,
+  adminActivateSubscription,
+  adminDeactivateSubscription,
   toggleFeature,
   setRestaurantPlan,
   Restaurant,
@@ -14,19 +17,34 @@ import {
   RestaurantFeature,
   FeatureKey,
   PlanTier,
+  SubscriptionDetail,
 } from '@/lib/api';
 import { planColor, capitalize, formatDate, categoryInfo } from '@/lib/utils';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+
+type Tab = 'features' | 'billing';
+
+const SUB_STATUS_COLOR: Record<string, string> = {
+  trial: 'bg-blue-100 text-blue-700',
+  active: 'bg-green-100 text-green-700',
+  past_due: 'bg-yellow-100 text-yellow-700',
+  deactivated: 'bg-red-100 text-red-700',
+  cancelled: 'bg-gray-100 text-gray-500',
+};
 
 export default function RestaurantDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params.id);
 
+  const [tab, setTab] = useState<Tab>('features');
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [catalog, setCatalog] = useState<FeatureMeta[]>([]);
   const [plans, setPlans] = useState<PlanDefinition[]>([]);
   const [features, setFeatures] = useState<RestaurantFeature[]>([]);
+  const [sub, setSub] = useState<SubscriptionDetail | null>(null);
+  const [subLoading, setSubLoading] = useState(false);
+  const [subAction, setSubAction] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -51,6 +69,39 @@ export default function RestaurantDetailPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (tab !== 'billing' || sub !== null) return;
+    setSubLoading(true);
+    getRestaurantSubscription(id)
+      .then((d) => setSub(d.subscription))
+      .catch(() => {})
+      .finally(() => setSubLoading(false));
+  }, [tab, id, sub]);
+
+  async function handleActivate() {
+    if (!confirm('Manually activate this subscription?')) return;
+    setSubAction(true);
+    try {
+      await adminActivateSubscription(id);
+      const d = await getRestaurantSubscription(id);
+      setSub(d.subscription);
+    } finally {
+      setSubAction(false);
+    }
+  }
+
+  async function handleDeactivate() {
+    if (!confirm('Deactivate this subscription? The restaurant will lose access.')) return;
+    setSubAction(true);
+    try {
+      await adminDeactivateSubscription(id);
+      const d = await getRestaurantSubscription(id);
+      setSub(d.subscription);
+    } finally {
+      setSubAction(false);
+    }
+  }
 
   async function handleToggle(featureKey: FeatureKey, enabled: boolean) {
     setSaving(featureKey);
@@ -130,7 +181,125 @@ export default function RestaurantDetailPage() {
         </div>
       </div>
 
-      {/* Restaurant Info */}
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 border-b border-gray-200">
+        {(['features', 'billing'] as Tab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-4 py-2 text-sm font-medium capitalize transition border-b-2 -mb-px ${
+              tab === t
+                ? 'border-brand-500 text-brand-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'billing' && (
+        <div className="space-y-6">
+          {subLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+            </div>
+          ) : sub ? (
+            <>
+              {/* Subscription status card */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">Subscription</h2>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${SUB_STATUS_COLOR[sub.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                    {sub.status.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+                  <div>
+                    <div className="text-gray-500">Plan</div>
+                    <div className="font-semibold text-gray-900 capitalize">{sub.plan_tier}</div>
+                  </div>
+                  {sub.card_last_four && (
+                    <div>
+                      <div className="text-gray-500">Payment method</div>
+                      <div className="font-semibold text-gray-900">{sub.card_brand} •••• {sub.card_last_four}</div>
+                    </div>
+                  )}
+                  {sub.trial_ends_at && (
+                    <div>
+                      <div className="text-gray-500">Trial ends</div>
+                      <div className="font-semibold text-gray-900">{new Date(sub.trial_ends_at).toLocaleDateString()}</div>
+                    </div>
+                  )}
+                  {sub.current_period_end && (
+                    <div>
+                      <div className="text-gray-500">Next billing</div>
+                      <div className="font-semibold text-gray-900">{new Date(sub.current_period_end).toLocaleDateString()}</div>
+                    </div>
+                  )}
+                  {sub.grace_period_until && (
+                    <div>
+                      <div className="text-gray-500">Grace period until</div>
+                      <div className="font-semibold text-red-600">{new Date(sub.grace_period_until).toLocaleDateString()}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  {sub.status !== 'active' && (
+                    <button
+                      onClick={handleActivate}
+                      disabled={subAction}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg disabled:opacity-50 transition"
+                    >
+                      {subAction ? 'Working…' : 'Activate'}
+                    </button>
+                  )}
+                  {sub.status !== 'deactivated' && sub.status !== 'cancelled' && (
+                    <button
+                      onClick={handleDeactivate}
+                      disabled={subAction}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg disabled:opacity-50 transition"
+                    >
+                      {subAction ? 'Working…' : 'Deactivate'}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Payment history */}
+              {sub.events && sub.events.length > 0 && (
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment History</h2>
+                  <div className="space-y-2">
+                    {sub.events.map((evt) => (
+                      <div key={evt.id} className="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          evt.event_type === 'payment_succeeded' ? 'bg-green-100 text-green-700'
+                          : evt.event_type === 'payment_failed' ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {evt.event_type.replace(/_/g, ' ')}
+                        </span>
+                        <div className="flex items-center gap-4 text-gray-500">
+                          {evt.amount != null && (
+                            <span className="font-medium text-gray-900">₪{evt.amount.toFixed(0)}</span>
+                          )}
+                          <span>{new Date(evt.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-gray-400">No subscription found for this restaurant.</p>
+          )}
+        </div>
+      )}
+
+      {tab === 'features' && (
+      <>{/* Restaurant Info */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="text-sm font-semibold text-gray-500 mb-3">Details</h3>
@@ -304,6 +473,7 @@ export default function RestaurantDetailPage() {
           );
         })}
       </div>
+      </>)}
     </div>
   );
 }

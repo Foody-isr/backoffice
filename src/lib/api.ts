@@ -103,6 +103,41 @@ export interface PlanBreakdown {
   count: number;
 }
 
+export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'deactivated' | 'cancelled';
+
+export interface Subscription {
+  id: number;
+  restaurant_id: number;
+  status: SubscriptionStatus;
+  plan_tier: PlanTier;
+  card_last_four?: string;
+  card_brand?: string;
+  current_period_start?: string;
+  current_period_end?: string;
+  trial_ends_at?: string;
+  grace_period_until?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionEvent {
+  id: number;
+  subscription_id: number;
+  event_type: string;
+  amount?: number;
+  currency?: string;
+  created_at: string;
+}
+
+export interface SubscriptionDetail extends Subscription {
+  events: SubscriptionEvent[];
+}
+
+export interface SubscriptionWithRestaurant extends Subscription {
+  restaurant_name: string;
+  restaurant_slug: string;
+}
+
 export type FeatureKey =
   | 'pos'
   | 'menu_management'
@@ -256,4 +291,31 @@ export async function setRestaurantPlan(restaurantId: number, planTier: PlanTier
     method: 'PUT',
     body: JSON.stringify({ plan_tier: planTier }),
   });
+}
+
+// ─── Subscriptions (admin) ───────────────────────────────────────────────────
+
+export async function listSubscriptions(status?: SubscriptionStatus) {
+  const qs = status ? `?status=${status}` : '';
+  return apiFetch<{ subscriptions: SubscriptionWithRestaurant[] }>(`/api/v1/admin/subscriptions${qs}`);
+}
+
+export async function getRestaurantSubscription(restaurantId: number) {
+  return apiFetch<{ subscription: SubscriptionDetail }>(
+    `/api/v1/restaurants/${restaurantId}/subscription`
+  );
+}
+
+export async function adminActivateSubscription(restaurantId: number) {
+  return apiFetch<{ ok: boolean }>(
+    `/api/v1/admin/restaurants/${restaurantId}/subscription/activate`,
+    { method: 'POST' }
+  );
+}
+
+export async function adminDeactivateSubscription(restaurantId: number) {
+  return apiFetch<{ ok: boolean }>(
+    `/api/v1/admin/restaurants/${restaurantId}/subscription/deactivate`,
+    { method: 'POST' }
+  );
 }

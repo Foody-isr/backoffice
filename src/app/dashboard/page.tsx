@@ -1,23 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getDashboard, DashboardStats } from '@/lib/api';
+import { getDashboard, listSubscriptions, DashboardStats, SubscriptionWithRestaurant } from '@/lib/api';
 import { planColor, capitalize } from '@/lib/utils';
 import {
   BuildingStorefrontIcon,
   UsersIcon,
   ShoppingCartIcon,
   ChartBarIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [pastDue, setPastDue] = useState<SubscriptionWithRestaurant[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
     getDashboard()
       .then(setStats)
       .catch((e) => setError(e.message));
+    listSubscriptions('past_due')
+      .then((d) => setPastDue(d.subscriptions ?? []))
+      .catch(() => {});
   }, []);
 
   if (error) {
@@ -80,6 +85,31 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Past Due Alert */}
+      {pastDue.length > 0 && (
+        <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />
+            <h2 className="text-sm font-semibold text-yellow-800">
+              {pastDue.length} restaurant{pastDue.length !== 1 ? 's' : ''} with past-due payment
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {pastDue.map((s) => (
+              <div key={s.id} className="flex items-center justify-between text-sm">
+                <span className="font-medium text-yellow-900">{s.restaurant_name}</span>
+                <a
+                  href={`/dashboard/restaurants/${s.restaurant_id}`}
+                  className="text-yellow-700 underline hover:text-yellow-900"
+                >
+                  Manage →
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Plan Breakdown + Total Orders */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

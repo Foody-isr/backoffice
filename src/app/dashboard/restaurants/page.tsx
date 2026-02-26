@@ -2,18 +2,32 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { listRestaurants, Restaurant } from '@/lib/api';
+import { listRestaurants, listSubscriptions, Restaurant, SubscriptionWithRestaurant, SubscriptionStatus } from '@/lib/api';
 import { planColor, capitalize, formatShortDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
+const SUB_STATUS_COLOR: Record<SubscriptionStatus, string> = {
+  trial: 'bg-blue-100 text-blue-700',
+  active: 'bg-green-100 text-green-700',
+  past_due: 'bg-yellow-100 text-yellow-700',
+  deactivated: 'bg-red-100 text-red-700',
+  cancelled: 'bg-gray-100 text-gray-500',
+};
+
 export default function RestaurantsPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [subMap, setSubMap] = useState<Map<number, SubscriptionWithRestaurant>>(new Map());
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     loadRestaurants();
+    listSubscriptions().then((d) => {
+      const m = new Map<number, SubscriptionWithRestaurant>();
+      (d.subscriptions ?? []).forEach((s) => m.set(s.restaurant_id, s));
+      setSubMap(m);
+    }).catch(() => {});
   }, []);
 
   async function loadRestaurants(q?: string) {
@@ -87,6 +101,7 @@ export default function RestaurantsPage() {
                 <th className="px-4 py-3 font-semibold text-gray-600">Slug</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Owner</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Plan</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Subscription</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Created</th>
                 <th className="px-4 py-3 font-semibold text-gray-600"></th>
               </tr>
@@ -107,6 +122,17 @@ export default function RestaurantsPage() {
                       <span className="text-gray-400 text-xs">No plan</span>
                     )}
                   </td>
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const s = subMap.get(r.id);
+                      if (!s) return <span className="text-gray-400 text-xs">—</span>;
+                      return (
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${SUB_STATUS_COLOR[s.status]}`}>
+                          {s.status.replace('_', ' ')}
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{formatShortDate(r.created_at)}</td>
                   <td className="px-4 py-3">
                     <Link
@@ -120,7 +146,7 @@ export default function RestaurantsPage() {
               ))}
               {restaurants.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
                     No restaurants found
                   </td>
                 </tr>
