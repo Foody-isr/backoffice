@@ -10,6 +10,7 @@ import {
   CubeIcon,
   ArrowRightOnRectangleIcon,
   PlusCircleIcon,
+  SquaresPlusIcon,
 } from '@heroicons/react/24/outline';
 
 const nav = [
@@ -18,6 +19,7 @@ const nav = [
   { href: '/dashboard/users', label: 'Users', icon: UsersIcon },
   { href: '/dashboard/onboard', label: 'Onboard New', icon: PlusCircleIcon },
   { href: '/dashboard/features', label: 'Feature Catalog', icon: CubeIcon },
+  { href: '/dashboard/combos', label: 'Combo Menus', icon: SquaresPlusIcon },
 ];
 
 export default function Sidebar() {

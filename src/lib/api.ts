@@ -319,3 +319,109 @@ export async function adminDeactivateSubscription(restaurantId: number) {
     { method: 'POST' }
   );
 }
+
+// ─── Combo Menus ────────────────────────────────────────────────────
+
+export interface ComboStepItem {
+  id?: number;
+  menu_item_id: number;
+  price_delta: number;
+  menu_item?: {
+    id: number;
+    name: string;
+    image_url?: string;
+  };
+}
+
+export interface ComboStep {
+  id?: number;
+  name: string;
+  min_picks: number;
+  max_picks: number;
+  sort_order: number;
+  items: ComboStepItem[];
+}
+
+export interface ComboMenu {
+  id: number;
+  restaurant_id: number;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  is_active: boolean;
+  sort_order: number;
+  steps: ComboStep[];
+  created_at?: string;
+}
+
+export interface ComboInput {
+  name: string;
+  description?: string;
+  price: number;
+  image_url?: string;
+  is_active: boolean;
+  sort_order?: number;
+  steps: {
+    name: string;
+    min_picks: number;
+    max_picks: number;
+    sort_order: number;
+    items: { menu_item_id: number; price_delta: number }[];
+  }[];
+}
+
+export interface MenuItemRef {
+  id: number;
+  name: string;
+  price: number;
+  image_url?: string;
+  category_name?: string;
+}
+
+export interface MenuCategory {
+  id: number;
+  name: string;
+  items: MenuItemRef[];
+}
+
+export async function listCombos(restaurantId: number) {
+  return apiFetch<{ combos: ComboMenu[] }>(
+    `/api/v1/combos?restaurant_id=${restaurantId}`
+  );
+}
+
+export async function getCombo(restaurantId: number, comboId: number) {
+  return apiFetch<{ combo: ComboMenu }>(
+    `/api/v1/combos/${comboId}?restaurant_id=${restaurantId}`
+  );
+}
+
+export async function createCombo(restaurantId: number, input: ComboInput) {
+  return apiFetch<{ combo: ComboMenu }>(
+    `/api/v1/combos?restaurant_id=${restaurantId}`,
+    { method: 'POST', body: JSON.stringify(input) }
+  );
+}
+
+export async function updateCombo(restaurantId: number, comboId: number, input: ComboInput) {
+  return apiFetch<{ combo: ComboMenu }>(
+    `/api/v1/combos/${comboId}?restaurant_id=${restaurantId}`,
+    { method: 'PUT', body: JSON.stringify(input) }
+  );
+}
+
+export async function deleteCombo(restaurantId: number, comboId: number) {
+  return apiFetch<{ deleted: boolean }>(
+    `/api/v1/combos/${comboId}?restaurant_id=${restaurantId}`,
+    { method: 'DELETE' }
+  );
+}
+
+export async function fetchMenuItems(restaurantId: number): Promise<MenuCategory[]> {
+  // Use staff endpoint so combo_only items are included (public endpoint filters them out)
+  const data = await apiFetch<{ categories: MenuCategory[] }>(
+    `/api/v1/menu?restaurant_id=${restaurantId}`
+  );
+  return data.categories || [];
+}
