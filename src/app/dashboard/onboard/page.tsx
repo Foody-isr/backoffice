@@ -33,7 +33,6 @@ export default function OnboardPage() {
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
-  const [ownerPassword, setOwnerPassword] = useState('');
   const [selectedOwnerId, setSelectedOwnerId] = useState<number | undefined>();
 
   useEffect(() => {
@@ -78,7 +77,6 @@ export default function OnboardPage() {
       input.owner_name = ownerName;
       input.owner_email = ownerEmail;
       input.owner_phone = ownerPhone;
-      input.owner_password = ownerPassword;
     }
 
     try {
@@ -229,17 +227,15 @@ export default function OnboardPage() {
                   placeholder="+972-..."
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                <input
-                  type="password"
-                  required={ownerMode === 'new'}
-                  value={ownerPassword}
-                  onChange={(e) => setOwnerPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
-                  placeholder="Min 8 characters"
-                  minLength={8}
-                />
+              <div className="md:col-span-2">
+                <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-sm text-blue-700">
+                    An invitation email will be sent to the owner with a link to set up their password and complete their profile.
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
