@@ -11,6 +11,7 @@ import {
   ArrowRightOnRectangleIcon,
   PlusCircleIcon,
   SquaresPlusIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 
 const nav = [
@@ -20,6 +21,7 @@ const nav = [
   { href: '/dashboard/onboard', label: 'Onboard New', icon: PlusCircleIcon },
   { href: '/dashboard/features', label: 'Feature Catalog', icon: CubeIcon },
   { href: '/dashboard/combos', label: 'Combo Menus', icon: SquaresPlusIcon },
+  { href: '/dashboard/menu', label: 'Menu Manager', icon: ClipboardDocumentListIcon },
 ];
 
 export default function Sidebar() {

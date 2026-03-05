@@ -425,3 +425,65 @@ export async function fetchMenuItems(restaurantId: number): Promise<MenuCategory
   );
   return data.categories || [];
 }
+
+// ─── Menu Management ────────────────────────────────────────────────
+
+export interface MenuItemModifier {
+  id: number;
+  menu_item_id: number;
+  name: string;
+  action: 'add' | 'remove';
+  category: string;
+  price_delta: number;
+  is_active: boolean;
+  sort_order: number;
+  max_selection: number;
+  free_quantity: number;
+  extra_price: number;
+}
+
+export interface MenuItemFull {
+  id: number;
+  category_id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+  is_active: boolean;
+  combo_only: boolean;
+  sort_order: number;
+  modifiers?: MenuItemModifier[];
+}
+
+export interface MenuCategoryFull {
+  id: number;
+  restaurant_id: number;
+  name: string;
+  image_url: string;
+  sort_order: number;
+  items: MenuItemFull[];
+}
+
+export async function fetchMenuFull(restaurantId: number): Promise<MenuCategoryFull[]> {
+  const data = await apiFetch<{ categories: MenuCategoryFull[] }>(
+    `/api/v1/menu?restaurant_id=${restaurantId}&include_inactive_modifiers=true`
+  );
+  return data.categories || [];
+}
+
+export async function bulkCreateModifiers(restaurantId: number, modifiers: {
+  menu_item_id: number; name: string; action: string; category?: string;
+  price_delta: number; is_active: boolean; sort_order?: number;
+}[]) {
+  return apiFetch<{ modifiers: MenuItemModifier[] }>(
+    `/api/v1/menu/modifiers/bulk?restaurant_id=${restaurantId}`,
+    { method: 'POST', body: JSON.stringify({ modifiers }) }
+  );
+}
+
+export async function deleteModifier(restaurantId: number, modifierId: number) {
+  return apiFetch<void>(
+    `/api/v1/menu/modifiers/${modifierId}?restaurant_id=${restaurantId}`,
+    { method: 'DELETE' }
+  );
+}
