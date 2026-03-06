@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { listRestaurants, listSubscriptions, Restaurant, SubscriptionWithRestaurant, SubscriptionStatus } from '@/lib/api';
+import { listRestaurants, listSubscriptions, deleteRestaurant, Restaurant, SubscriptionWithRestaurant, SubscriptionStatus } from '@/lib/api';
 import { planColor, capitalize, formatShortDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -20,6 +20,7 @@ export default function RestaurantsPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadRestaurants();
@@ -44,6 +45,28 @@ export default function RestaurantsPage() {
 
   function handleSearch() {
     loadRestaurants(search);
+  }
+
+  async function handleDelete(r: Restaurant) {
+    const confirmed = window.confirm(
+      `⚠️ PERMANENT DELETE\n\nAre you sure you want to permanently delete "${r.name}" (#${r.id})?\n\nThis will delete ALL data: orders, menu, stock, tables, sessions, subscriptions, etc.\n\nThis action CANNOT be undone.`
+    );
+    if (!confirmed) return;
+
+    const doubleConfirm = window.confirm(
+      `Last chance! Type OK to confirm deletion of "${r.name}" and ALL its data.`
+    );
+    if (!doubleConfirm) return;
+
+    setDeletingId(r.id);
+    try {
+      await deleteRestaurant(r.id);
+      setRestaurants((prev) => prev.filter((rest) => rest.id !== r.id));
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to delete restaurant');
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   if (error) return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>;
@@ -135,12 +158,22 @@ export default function RestaurantsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{formatShortDate(r.created_at)}</td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/dashboard/restaurants/${r.id}`}
-                      className="text-brand-500 hover:text-brand-600 text-xs font-semibold"
-                    >
-                      Manage →
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/dashboard/restaurants/${r.id}`}
+                        className="text-brand-500 hover:text-brand-600 text-xs font-semibold"
+                      >
+                        Manage →
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(r)}
+                        disabled={deletingId === r.id}
+                        className="px-2 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
+                          bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                      >
+                        {deletingId === r.id ? 'Deleting…' : 'Delete'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

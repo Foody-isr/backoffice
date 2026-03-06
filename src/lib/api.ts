@@ -257,6 +257,12 @@ export async function sendResetPassword(userId: number) {
   });
 }
 
+export async function deleteUser(userId: number) {
+  return apiFetch<{ message: string }>(`/api/v1/admin/users/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
 // ─── Restaurants ────────────────────────────────────────────────────
 
 export async function listRestaurants(search?: string) {
@@ -266,6 +272,12 @@ export async function listRestaurants(search?: string) {
 
 export async function getRestaurant(id: number) {
   return apiFetch<{ restaurant: Restaurant }>(`/api/v1/admin/restaurants/${id}`);
+}
+
+export async function deleteRestaurant(id: number) {
+  return apiFetch<{ message: string }>(`/api/v1/admin/restaurants/${id}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function onboardRestaurant(input: OnboardInput) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { listUsers, sendResetPassword, User } from '@/lib/api';
+import { listUsers, sendResetPassword, deleteUser, User } from '@/lib/api';
 import { roleColor, capitalize, formatShortDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -15,6 +15,7 @@ export default function UsersPage() {
   const [error, setError] = useState('');
   const [resettingId, setResettingId] = useState<number | null>(null);
   const [resetSuccess, setResetSuccess] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -47,6 +48,28 @@ export default function UsersPage() {
       alert(e instanceof Error ? e.message : 'Failed to send reset email');
     } finally {
       setResettingId(null);
+    }
+  }
+
+  async function handleDeleteUser(u: User) {
+    const confirmed = window.confirm(
+      `\u26A0\uFE0F PERMANENT DELETE\n\nAre you sure you want to permanently delete user "${u.full_name}" (#${u.id})?\n\nThis will also delete ALL restaurants owned by this user and ALL their data (orders, menu, stock, etc).\n\nThis action CANNOT be undone.`
+    );
+    if (!confirmed) return;
+
+    const doubleConfirm = window.confirm(
+      `Last chance! Confirm deletion of user "${u.full_name}" and ALL associated data.`
+    );
+    if (!doubleConfirm) return;
+
+    setDeletingId(u.id);
+    try {
+      await deleteUser(u.id);
+      setUsers((prev) => prev.filter((user) => user.id !== u.id));
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to delete user');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -147,18 +170,28 @@ export default function UsersPage() {
                   <td className="px-4 py-3 text-gray-500 text-xs">{formatShortDate(u.created_at)}</td>
                   <td className="px-4 py-3">
                     {u.role !== 'superadmin' && (
-                      <button
-                        onClick={() => handleResetPassword(u.id)}
-                        disabled={resettingId === u.id}
-                        className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
-                          bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
-                      >
-                        {resettingId === u.id
-                          ? 'Sending…'
-                          : resetSuccess === u.id
-                            ? '✓ Sent'
-                            : 'Reset Password'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleResetPassword(u.id)}
+                          disabled={resettingId === u.id}
+                          className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
+                            bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
+                        >
+                          {resettingId === u.id
+                            ? 'Sending\u2026'
+                            : resetSuccess === u.id
+                              ? '\u2713 Sent'
+                              : 'Reset Password'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u)}
+                          disabled={deletingId === u.id}
+                          className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
+                            bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                        >
+                          {deletingId === u.id ? 'Deleting\u2026' : 'Delete'}
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
