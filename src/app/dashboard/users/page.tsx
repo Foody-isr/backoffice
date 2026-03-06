@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { listUsers, User } from '@/lib/api';
+import { listUsers, sendResetPassword, User } from '@/lib/api';
 import { roleColor, capitalize, formatShortDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -13,6 +13,8 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [resettingId, setResettingId] = useState<number | null>(null);
+  const [resetSuccess, setResetSuccess] = useState<number | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -32,6 +34,20 @@ export default function UsersPage() {
 
   function handleFilter() {
     loadUsers(roleFilter, search);
+  }
+
+  async function handleResetPassword(userId: number) {
+    setResettingId(userId);
+    setResetSuccess(null);
+    try {
+      await sendResetPassword(userId);
+      setResetSuccess(userId);
+      setTimeout(() => setResetSuccess(null), 3000);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to send reset email');
+    } finally {
+      setResettingId(null);
+    }
   }
 
   if (error) return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>;
@@ -96,6 +112,7 @@ export default function UsersPage() {
                 <th className="px-4 py-3 font-semibold text-gray-600">Role</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Restaurants</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Created</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -128,11 +145,27 @@ export default function UsersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{formatShortDate(u.created_at)}</td>
+                  <td className="px-4 py-3">
+                    {u.role !== 'superadmin' && (
+                      <button
+                        onClick={() => handleResetPassword(u.id)}
+                        disabled={resettingId === u.id}
+                        className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
+                          bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
+                      >
+                        {resettingId === u.id
+                          ? 'Sending…'
+                          : resetSuccess === u.id
+                            ? '✓ Sent'
+                            : 'Reset Password'}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
                     No users found
                   </td>
                 </tr>

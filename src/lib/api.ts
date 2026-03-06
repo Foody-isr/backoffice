@@ -251,6 +251,12 @@ export async function getUser(id: number) {
   return apiFetch<{ user: User }>(`/api/v1/admin/users/${id}`);
 }
 
+export async function sendResetPassword(userId: number) {
+  return apiFetch<{ message: string }>(`/api/v1/admin/users/${userId}/send-reset-password`, {
+    method: 'POST',
+  });
+}
+
 // ─── Restaurants ────────────────────────────────────────────────────
 
 export async function listRestaurants(search?: string) {
