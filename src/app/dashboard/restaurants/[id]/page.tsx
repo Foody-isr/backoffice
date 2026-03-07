@@ -173,9 +173,13 @@ export default function RestaurantDetailPage() {
               ID #{restaurant.id} · {restaurant.slug || 'no slug'} · Created {formatDate(restaurant.created_at)}
             </p>
           </div>
-          {restaurant.plan && (
+          {restaurant.plan ? (
             <span className={`px-3 py-1 rounded-full text-sm font-bold ${planColor(restaurant.plan.plan_tier)}`}>
               {capitalize(restaurant.plan.plan_tier)}
+            </span>
+          ) : (
+            <span className="px-3 py-1 rounded-full text-sm font-bold bg-amber-100 text-amber-700">
+              No Plan
             </span>
           )}
         </div>
@@ -395,7 +399,27 @@ export default function RestaurantDetailPage() {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-400">No plan assigned</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-amber-600">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <span className="text-sm font-medium">No plan assigned</span>
+              </div>
+              <p className="text-xs text-gray-400">Assign a plan to enable feature gating for this restaurant.</p>
+              <div className="flex gap-2">
+                {plans.map((p) => (
+                  <button
+                    key={p.tier}
+                    onClick={() => handlePlanChange(p.tier)}
+                    disabled={saving === 'plan'}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-gray-100 hover:bg-gray-200 text-gray-700 disabled:opacity-50"
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
