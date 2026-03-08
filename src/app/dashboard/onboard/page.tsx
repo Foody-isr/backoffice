@@ -34,6 +34,7 @@ export default function OnboardPage() {
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
+  const [ownerPassword, setOwnerPassword] = useState('');
   const [selectedOwnerId, setSelectedOwnerId] = useState<number | undefined>();
 
   useEffect(() => {
@@ -78,6 +79,9 @@ export default function OnboardPage() {
       input.owner_name = ownerName;
       input.owner_email = ownerEmail;
       input.owner_phone = ownerPhone;
+      if (ownerPassword.trim()) {
+        input.owner_password = ownerPassword.trim();
+      }
     }
 
     try {
@@ -137,11 +141,11 @@ export default function OnboardPage() {
                     <label className="block text-xs font-medium text-gray-500 mb-1">Temporary Password</label>
                     <div className="flex items-center gap-2">
                       <code className="flex-1 text-sm bg-white px-3 py-2 rounded border border-gray-200 font-mono">
-                        {success.tempPassword}
+                        {success.tempPassword || ownerPassword}
                       </code>
                       <button
                         type="button"
-                        onClick={() => navigator.clipboard.writeText(success.tempPassword || '')}
+                        onClick={() => navigator.clipboard.writeText(success.tempPassword || ownerPassword || '')}
                         className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                         title="Copy to clipboard"
                       >
@@ -326,6 +330,17 @@ export default function OnboardPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
                   placeholder="+972-..."
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password (optional)</label>
+                <input
+                  type="text"
+                  value={ownerPassword}
+                  onChange={(e) => setOwnerPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                  placeholder="Leave empty to auto-generate"
+                />
+                <p className="mt-1 text-xs text-gray-500">If empty, a random temporary password is generated and shown after onboarding.</p>
               </div>
               <div className="md:col-span-2">
                 <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
