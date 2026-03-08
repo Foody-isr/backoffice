@@ -19,6 +19,7 @@ export default function OnboardPage() {
   const [existingUsers, setExistingUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState<{ restaurant: any; tempPassword?: string } | null>(null);
 
   // Form state
   const [restaurantName, setRestaurantName] = useState('');
@@ -81,7 +82,7 @@ export default function OnboardPage() {
 
     try {
       const data = await onboardRestaurant(input);
-      router.push(`/dashboard/restaurants/${data.restaurant.id}`);
+      setSuccess({ restaurant: data.restaurant, tempPassword: data.temporary_password });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Onboarding failed');
     } finally {
@@ -90,6 +91,105 @@ export default function OnboardPage() {
   }
 
   const selectedPlan = plans.find((p) => p.tier === planTier);
+
+  // If onboarding successful, show credentials instead of form
+  if (success) {
+    return (
+      <div className="max-w-2xl">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Restaurant Onboarded Successfully! 🎉</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {success.restaurant.name} is now ready for demo setup.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+          {success.tempPassword && (
+            <>
+              <div className="pb-6 border-b border-gray-200">
+                <h2 className="text-base font-semibold text-gray-900 mb-3">
+                  Temporary Login Credentials
+                </h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  Use these credentials to log into <strong>foodypos</strong> and set up the restaurant for the demo.
+                  An invite email has been sent to the owner for them to set their own password.
+                </p>
+                
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-sm bg-white px-3 py-2 rounded border border-gray-200 font-mono">
+                        {ownerEmail}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(ownerEmail)}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Temporary Password</label>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-sm bg-white px-3 py-2 rounded border border-gray-200 font-mono">
+                        {success.tempPassword}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(success.tempPassword || '')}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-800">
+                    <strong>⚠️ Security Note:</strong> This password is temporary and for demo setup only.
+                    The restaurant owner will receive an invite email to set their own password.
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-900">Next Steps</h3>
+            <ol className="text-sm text-gray-600 space-y-2 list-decimal list-inside">
+              <li>Log into <strong>foodypos</strong> with the credentials above</li>
+              <li>Import the menu and configure settings</li>
+              <li>Test the demo workflow</li>
+            </ol>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => router.push(`/dashboard/restaurants/${success.restaurant.id}`)}
+              className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
+            >
+              View Restaurant Details
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard/onboard')}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
+            >
+              Onboard Another
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl">

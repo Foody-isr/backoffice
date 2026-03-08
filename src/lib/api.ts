@@ -281,7 +281,7 @@ export async function deleteRestaurant(id: number) {
 }
 
 export async function onboardRestaurant(input: OnboardInput) {
-  return apiFetch<{ restaurant: Restaurant }>('/api/v1/admin/restaurants/onboard', {
+  return apiFetch<{ restaurant: Restaurant; temporary_password?: string }>('/api/v1/admin/restaurants/onboard', {
     method: 'POST',
     body: JSON.stringify(input),
   });
