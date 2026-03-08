@@ -9,6 +9,7 @@ import {
   getRestaurantSubscription,
   adminActivateSubscription,
   adminDeactivateSubscription,
+  updateUserEmail,
   toggleFeature,
   setRestaurantPlan,
   Restaurant,
@@ -47,6 +48,8 @@ export default function RestaurantDetailPage() {
   const [subAction, setSubAction] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [ownerEmailDraft, setOwnerEmailDraft] = useState('');
+  const [ownerEmailSaving, setOwnerEmailSaving] = useState(false);
   const [error, setError] = useState('');
 
   const loadData = useCallback(async () => {
@@ -56,6 +59,7 @@ export default function RestaurantDetailPage() {
         getFeatureCatalog(),
       ]);
       setRestaurant(restData.restaurant);
+      setOwnerEmailDraft(restData.restaurant.owner?.email || '');
       setFeatures(restData.restaurant.features || []);
       setCatalog(catalogData.features);
       setPlans(catalogData.plans);
@@ -127,6 +131,28 @@ export default function RestaurantDetailPage() {
       alert(e instanceof Error ? e.message : 'Failed to change plan');
     } finally {
       setSaving(null);
+    }
+  }
+
+  async function handleOwnerEmailUpdate() {
+    if (!restaurant?.owner) return;
+    const nextEmail = ownerEmailDraft.trim();
+    if (!nextEmail) {
+      alert('Email is required');
+      return;
+    }
+    if (nextEmail === restaurant.owner.email) {
+      return;
+    }
+
+    setOwnerEmailSaving(true);
+    try {
+      await updateUserEmail(restaurant.owner.id, nextEmail);
+      await loadData();
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to update owner email');
+    } finally {
+      setOwnerEmailSaving(false);
     }
   }
 
@@ -346,6 +372,26 @@ export default function RestaurantDetailPage() {
               <div className="flex justify-between">
                 <span className="text-gray-500">Email</span>
                 <span className="text-gray-900 text-xs">{restaurant.owner.email}</span>
+              </div>
+              <div className="pt-2">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Update email (after demo)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={ownerEmailDraft}
+                    onChange={(e) => setOwnerEmailDraft(e.target.value)}
+                    className="flex-1 px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                    placeholder="owner@restaurant.com"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleOwnerEmailUpdate}
+                    disabled={ownerEmailSaving || ownerEmailDraft.trim() === restaurant.owner.email}
+                    className="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-xs font-semibold hover:bg-brand-700 disabled:opacity-50 transition"
+                  >
+                    {ownerEmailSaving ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Phone</span>

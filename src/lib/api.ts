@@ -251,6 +251,13 @@ export async function getUser(id: number) {
   return apiFetch<{ user: User }>(`/api/v1/admin/users/${id}`);
 }
 
+export async function updateUserEmail(userId: number, email: string) {
+  return apiFetch<{ user: User }>(`/api/v1/admin/users/${userId}/email`, {
+    method: 'PUT',
+    body: JSON.stringify({ email }),
+  });
+}
+
 export async function sendResetPassword(userId: number) {
   return apiFetch<{ message: string }>(`/api/v1/admin/users/${userId}/send-reset-password`, {
     method: 'POST',
