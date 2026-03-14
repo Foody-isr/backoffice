@@ -171,6 +171,7 @@ export interface OnboardInput {
   owner_phone?: string;
   owner_password?: string;
   plan_tier: PlanTier;
+  pos_platform?: 'ipad' | 'macos' | 'both';
 }
 
 // ─── HTTP helpers ───────────────────────────────────────────────────
@@ -260,6 +261,12 @@ export async function updateUserEmail(userId: number, email: string) {
 
 export async function sendResetPassword(userId: number) {
   return apiFetch<{ message: string }>(`/api/v1/admin/users/${userId}/send-reset-password`, {
+    method: 'POST',
+  });
+}
+
+export async function sendInviteEmail(userId: number) {
+  return apiFetch<{ message: string }>(`/api/v1/admin/users/${userId}/send-invite`, {
     method: 'POST',
   });
 }
