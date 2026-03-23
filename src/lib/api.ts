@@ -557,3 +557,21 @@ export async function updatePaymentConfig(restaurantId: number, config: UpdatePa
     body: JSON.stringify(config),
   });
 }
+
+// ── Custom Domain ──────────────────────────────────────────────────
+
+export interface CustomDomainResponse {
+  restaurant_id: number;
+  custom_domain: string;
+}
+
+export async function getCustomDomain(restaurantId: number): Promise<CustomDomainResponse> {
+  return apiFetch<CustomDomainResponse>(`/api/v1/admin/restaurants/${restaurantId}/custom-domain`);
+}
+
+export async function updateCustomDomain(restaurantId: number, domain: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/api/v1/admin/restaurants/${restaurantId}/custom-domain`, {
+    method: 'PUT',
+    body: JSON.stringify({ custom_domain: domain }),
+  });
+}

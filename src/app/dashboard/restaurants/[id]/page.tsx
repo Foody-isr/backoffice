@@ -14,6 +14,8 @@ import {
   setRestaurantPlan,
   getPaymentConfig,
   updatePaymentConfig,
+  getCustomDomain,
+  updateCustomDomain,
   Restaurant,
   FeatureMeta,
   PlanDefinition,
@@ -27,7 +29,7 @@ import {
 import { planColor, capitalize, formatDate, categoryInfo } from '@/lib/utils';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
-type Tab = 'features' | 'billing' | 'payment';
+type Tab = 'features' | 'billing' | 'payment' | 'domain';
 
 const SUB_STATUS_COLOR: Record<string, string> = {
   trial: 'bg-blue-100 text-blue-700',
@@ -62,6 +64,13 @@ export default function RestaurantDetailPage() {
   const [paymentSaving, setPaymentSaving] = useState(false);
   const [paymentProvider, setPaymentProvider] = useState<'payplus' | 'sumit'>('payplus');
   const [paymentCreds, setPaymentCreds] = useState<UpdatePaymentConfigInput>({ provider: 'payplus' });
+
+  // Custom domain state
+  const [customDomain, setCustomDomain] = useState('');
+  const [customDomainDraft, setCustomDomainDraft] = useState('');
+  const [domainLoading, setDomainLoading] = useState(false);
+  const [domainSaving, setDomainSaving] = useState(false);
+  const [domainLoaded, setDomainLoaded] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -106,6 +115,31 @@ export default function RestaurantDetailPage() {
       .catch(() => {})
       .finally(() => setPaymentLoading(false));
   }, [tab, id, paymentConfig]);
+
+  useEffect(() => {
+    if (tab !== 'domain' || domainLoaded) return;
+    setDomainLoading(true);
+    getCustomDomain(id)
+      .then((data) => {
+        setCustomDomain(data.custom_domain || '');
+        setCustomDomainDraft(data.custom_domain || '');
+        setDomainLoaded(true);
+      })
+      .catch(() => {})
+      .finally(() => setDomainLoading(false));
+  }, [tab, id, domainLoaded]);
+
+  async function handleDomainSave() {
+    setDomainSaving(true);
+    try {
+      await updateCustomDomain(id, customDomainDraft.trim());
+      setCustomDomain(customDomainDraft.trim());
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to update custom domain');
+    } finally {
+      setDomainSaving(false);
+    }
+  }
 
   async function handleActivate() {
     if (!confirm('Manually activate this subscription?')) return;
@@ -508,6 +542,197 @@ export default function RestaurantDetailPage() {
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
               >
                 {paymentSaving ? 'Saving...' : 'Save Payment Config'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'domain' && (
+        <div className="space-y-6">
+          {domainLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Custom Domain</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                Allow this restaurant to use their own domain instead of a Foody subdomain.
+              </p>
+
+              {/* Current status */}
+              {customDomain && (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg text-sm">
+                  <span className="text-gray-500">Current: </span>
+                  <span className="font-semibold text-gray-900">{customDomain}</span>
+                </div>
+              )}
+              {!customDomain && domainLoaded && (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg text-sm text-gray-400">
+                  No custom domain configured
+                </div>
+              )}
+
+              {/* Domain input */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
+                <input
+                  type="text"
+                  placeholder="e.g. mamietlv.co.il"
+                  value={customDomainDraft}
+                  onChange={(e) => setCustomDomainDraft(e.target.value)}
+                  className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">Leave empty to remove the custom domain.</p>
+              </div>
+
+              {/* DNS Setup Guide */}
+              <div className="mb-6 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-700">Setup Guide</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Follow these steps to connect a custom domain</p>
+                </div>
+                <div className="divide-y divide-gray-100">
+
+                  {/* Step 1 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">1</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Customer purchases a domain</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          The customer needs to own a domain (e.g. <span className="font-mono bg-gray-100 px-1 rounded">mamietlv.co.il</span>). They can purchase one from any registrar such as Namecheap, GoDaddy, Google Domains, or a local Israeli registrar.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">2</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Add a CNAME record in the DNS settings</p>
+                        <p className="text-xs text-gray-500 mt-1 mb-2">
+                          The customer (or you) should go to the domain&apos;s DNS management panel and add the following record:
+                        </p>
+                        <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="bg-gray-100 text-gray-600">
+                                <th className="px-3 py-2 text-left font-medium">Type</th>
+                                <th className="px-3 py-2 text-left font-medium">Name / Host</th>
+                                <th className="px-3 py-2 text-left font-medium">Value / Points to</th>
+                                <th className="px-3 py-2 text-left font-medium">TTL</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="text-gray-900">
+                                <td className="px-3 py-2 font-mono font-semibold">CNAME</td>
+                                <td className="px-3 py-2 font-mono">@ <span className="text-gray-400 font-sans">(or root)</span></td>
+                                <td className="px-3 py-2 font-mono text-brand-600 font-semibold">app.foody-pos.co.il</td>
+                                <td className="px-3 py-2 font-mono">Auto <span className="text-gray-400 font-sans">(or 3600)</span></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          If the registrar doesn&apos;t support CNAME on the root domain (@), use an <span className="font-semibold">A record</span> pointing to <span className="font-mono bg-gray-100 px-1 rounded">16.16.253.163</span> instead.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">3</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Remove conflicting records</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Make sure there are no existing <span className="font-mono bg-gray-100 px-1 rounded">A</span> or <span className="font-mono bg-gray-100 px-1 rounded">AAAA</span> records for the root domain that might conflict with the new CNAME. Delete them if they exist (common with default &quot;parked&quot; pages from the registrar).
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">4</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Wait for DNS propagation</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          DNS changes can take up to 24-48 hours to propagate worldwide, but usually take effect within a few minutes. You can verify the setup by running:
+                        </p>
+                        <div className="mt-2 bg-gray-900 rounded-lg px-3 py-2 text-xs font-mono text-green-400">
+                          dig {customDomainDraft || 'example.com'} CNAME +short
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Expected result: <span className="font-mono">app.foody-pos.co.il.</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 5 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">5</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">SSL / HTTPS configuration</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          If the customer uses <span className="font-semibold">Cloudflare</span> as their DNS provider (recommended), SSL is handled automatically &mdash; just make sure the proxy is enabled (orange cloud icon).
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          If they use another DNS provider, you&apos;ll need to configure an SSL certificate on our server (Nginx) for their domain using Let&apos;s Encrypt or a manual certificate.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 6 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">6</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Save the domain above and add Nginx config</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Enter the domain in the field above and click Save. Then add a server block in Nginx on the production server:
+                        </p>
+                        <div className="mt-2 bg-gray-900 rounded-lg px-3 py-2 text-xs font-mono text-green-400 whitespace-pre leading-relaxed">{`server {
+    listen 443 ssl;
+    server_name ${customDomainDraft || 'example.com'};
+
+    # SSL cert (Cloudflare origin or Let's Encrypt)
+    ssl_certificate     /etc/ssl/${customDomainDraft || 'example.com'}/cert.pem;
+    ssl_certificate_key /etc/ssl/${customDomainDraft || 'example.com'}/key.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}`}</div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          Then reload Nginx: <span className="font-mono bg-gray-100 px-1 rounded text-gray-600">sudo nginx -t && sudo systemctl reload nginx</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Save button */}
+              <button
+                onClick={handleDomainSave}
+                disabled={domainSaving || customDomainDraft === customDomain}
+                className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
+              >
+                {domainSaving ? 'Saving...' : 'Save Domain'}
               </button>
             </div>
           )}
