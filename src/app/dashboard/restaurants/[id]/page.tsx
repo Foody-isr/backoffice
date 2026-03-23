@@ -12,6 +12,8 @@ import {
   updateUserEmail,
   toggleFeature,
   setRestaurantPlan,
+  getPaymentConfig,
+  updatePaymentConfig,
   Restaurant,
   FeatureMeta,
   PlanDefinition,
@@ -19,11 +21,13 @@ import {
   FeatureKey,
   PlanTier,
   SubscriptionDetail,
+  PaymentConfigResponse,
+  UpdatePaymentConfigInput,
 } from '@/lib/api';
 import { planColor, capitalize, formatDate, categoryInfo } from '@/lib/utils';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
-type Tab = 'features' | 'billing';
+type Tab = 'features' | 'billing' | 'payment';
 
 const SUB_STATUS_COLOR: Record<string, string> = {
   trial: 'bg-blue-100 text-blue-700',
@@ -51,6 +55,13 @@ export default function RestaurantDetailPage() {
   const [ownerEmailDraft, setOwnerEmailDraft] = useState('');
   const [ownerEmailSaving, setOwnerEmailSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Payment config state
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfigResponse | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentSaving, setPaymentSaving] = useState(false);
+  const [paymentProvider, setPaymentProvider] = useState<'payplus' | 'sumit'>('payplus');
+  const [paymentCreds, setPaymentCreds] = useState<UpdatePaymentConfigInput>({ provider: 'payplus' });
 
   const loadData = useCallback(async () => {
     try {
@@ -82,6 +93,19 @@ export default function RestaurantDetailPage() {
       .catch(() => {})
       .finally(() => setSubLoading(false));
   }, [tab, id, sub]);
+
+  useEffect(() => {
+    if (tab !== 'payment' || paymentConfig !== null) return;
+    setPaymentLoading(true);
+    getPaymentConfig(id)
+      .then((cfg) => {
+        setPaymentConfig(cfg);
+        setPaymentProvider(cfg.provider);
+        setPaymentCreds({ provider: cfg.provider });
+      })
+      .catch(() => {})
+      .finally(() => setPaymentLoading(false));
+  }, [tab, id, paymentConfig]);
 
   async function handleActivate() {
     if (!confirm('Manually activate this subscription?')) return;
@@ -156,6 +180,29 @@ export default function RestaurantDetailPage() {
     }
   }
 
+  async function handlePaymentSave() {
+    setPaymentSaving(true);
+    try {
+      const input: UpdatePaymentConfigInput = { provider: paymentProvider };
+      if (paymentProvider === 'sumit') {
+        input.sumit_company_id = paymentCreds.sumit_company_id;
+        input.sumit_api_key = paymentCreds.sumit_api_key;
+        input.sumit_public_key = paymentCreds.sumit_public_key;
+      } else if (paymentCreds.payplus_api_key) {
+        input.payplus_api_key = paymentCreds.payplus_api_key;
+        input.payplus_secret_key = paymentCreds.payplus_secret_key;
+        input.payplus_payment_page_uid = paymentCreds.payplus_payment_page_uid;
+      }
+      await updatePaymentConfig(id, input);
+      // Reload config to see masked values
+      setPaymentConfig(null); // triggers reload via useEffect
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to save payment config');
+    } finally {
+      setPaymentSaving(false);
+    }
+  }
+
   function isFeatureEnabled(key: FeatureKey): boolean {
     const f = features.find((f) => f.feature_key === key);
     return f?.enabled ?? false;
@@ -213,7 +260,7 @@ export default function RestaurantDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200">
-        {(['features', 'billing'] as Tab[]).map((t) => (
+        {(['features', 'billing', 'payment'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -324,6 +371,145 @@ export default function RestaurantDetailPage() {
             </>
           ) : (
             <p className="text-sm text-gray-400">No subscription found for this restaurant.</p>
+          )}
+        </div>
+      )}
+
+      {tab === 'payment' && (
+        <div className="space-y-6">
+          {paymentLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Payment Provider</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                Choose which payment gateway this restaurant uses for online payments.
+              </p>
+
+              {/* Current status */}
+              {paymentConfig && (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg text-sm">
+                  <span className="text-gray-500">Current: </span>
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    paymentConfig.provider === 'sumit'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {paymentConfig.provider === 'sumit' ? 'Summit' : 'PayPlus'}
+                  </span>
+                  {paymentConfig.has_custom_credentials && (
+                    <span className="text-gray-500 ml-2">
+                      (Custom credentials{paymentConfig.masked_api_key ? `: ${paymentConfig.masked_api_key}` : ''})
+                    </span>
+                  )}
+                  {!paymentConfig.has_custom_credentials && paymentConfig.provider === 'payplus' && (
+                    <span className="text-gray-400 ml-2">(Using global defaults)</span>
+                  )}
+                </div>
+              )}
+
+              {/* Provider selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Provider</label>
+                <select
+                  value={paymentProvider}
+                  onChange={(e) => {
+                    const v = e.target.value as 'payplus' | 'sumit';
+                    setPaymentProvider(v);
+                    setPaymentCreds({ provider: v });
+                  }}
+                  className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  <option value="payplus">PayPlus (Global Default)</option>
+                  <option value="sumit">Summit</option>
+                </select>
+              </div>
+
+              {/* Summit credentials */}
+              {paymentProvider === 'sumit' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700">Summit Credentials</h3>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Company ID</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 12345678"
+                      value={paymentCreds.sumit_company_id || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, sumit_company_id: Number(e.target.value) || undefined })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">API Key</label>
+                    <input
+                      type="password"
+                      placeholder={paymentConfig?.masked_api_key || 'Enter API key'}
+                      value={paymentCreds.sumit_api_key || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, sumit_api_key: e.target.value || undefined })}
+                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Public Key <span className="text-gray-400">(optional)</span></label>
+                    <input
+                      type="password"
+                      placeholder={paymentConfig?.masked_public_key || 'Enter public key'}
+                      value={paymentCreds.sumit_public_key || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, sumit_public_key: e.target.value || undefined })}
+                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* PayPlus custom credentials (optional) */}
+              {paymentProvider === 'payplus' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700">PayPlus Credentials <span className="text-gray-400 font-normal">(leave empty to use global defaults)</span></h3>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">API Key</label>
+                    <input
+                      type="password"
+                      placeholder={paymentConfig?.masked_api_key || 'Global default'}
+                      value={paymentCreds.payplus_api_key || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, payplus_api_key: e.target.value || undefined })}
+                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Secret Key</label>
+                    <input
+                      type="password"
+                      placeholder={paymentConfig?.masked_secret_key || 'Global default'}
+                      value={paymentCreds.payplus_secret_key || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, payplus_secret_key: e.target.value || undefined })}
+                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Payment Page UID</label>
+                    <input
+                      type="password"
+                      placeholder={paymentConfig?.masked_payment_page_uid || 'Global default'}
+                      value={paymentCreds.payplus_payment_page_uid || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, payplus_payment_page_uid: e.target.value || undefined })}
+                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Save button */}
+              <button
+                onClick={handlePaymentSave}
+                disabled={paymentSaving}
+                className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
+              >
+                {paymentSaving ? 'Saving...' : 'Save Payment Config'}
+              </button>
+            </div>
           )}
         </div>
       )}

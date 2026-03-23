@@ -29,6 +29,7 @@ interface StepDraft {
   name: string;
   min_picks: number;
   max_picks: number;
+  fixed_modifier_name: string | null;
   items: StepItemDraft[];
 }
 
@@ -55,6 +56,7 @@ export default function ComboFormModal({ restaurantId, combo, onClose, onSaved }
       name: s.name,
       min_picks: s.min_picks,
       max_picks: s.max_picks,
+      fixed_modifier_name: s.fixed_modifier_name ?? null,
       items: (s.items || []).map((item) => ({
         menu_item_id: item.menu_item_id,
         menu_item_name: item.menu_item?.name ?? `Item #${item.menu_item_id}`,
@@ -84,7 +86,7 @@ export default function ComboFormModal({ restaurantId, combo, onClose, onSaved }
   const addStep = useCallback(() => {
     setSteps((prev) => [
       ...prev,
-      { name: '', min_picks: 1, max_picks: 1, items: [] },
+      { name: '', min_picks: 1, max_picks: 1, fixed_modifier_name: null, items: [] },
     ]);
   }, []);
 
@@ -176,6 +178,7 @@ export default function ComboFormModal({ restaurantId, combo, onClose, onSaved }
         min_picks: s.min_picks,
         max_picks: s.max_picks,
         sort_order: i,
+        fixed_modifier_name: s.fixed_modifier_name || null,
         items: s.items.map((it) => ({
           menu_item_id: it.menu_item_id,
           price_delta: it.price_delta,
@@ -440,6 +443,43 @@ function StepEditor({
             className="w-20 px-2 py-1 border border-gray-200 rounded text-sm bg-white focus:ring-1 focus:ring-brand-500 outline-none"
           />
         </div>
+
+        {/* Fixed modifier (size) — only shown when items are added */}
+        {step.items.length > 0 && (() => {
+          // Collect modifier names common to all selected items
+          const selectedIds = new Set(step.items.map((i) => i.menu_item_id));
+          const modNameSets: Set<string>[] = [];
+          for (const cat of menuCategories) {
+            for (const mi of cat.items) {
+              if (selectedIds.has(mi.id) && mi.modifiers?.length) {
+                modNameSets.push(new Set(mi.modifiers.map((m) => m.name)));
+              }
+            }
+          }
+          // Intersect: keep only modifier names present on ALL selected items that have modifiers
+          let commonNames: string[] = [];
+          if (modNameSets.length > 0) {
+            commonNames = Array.from(modNameSets[0]).filter((n) =>
+              modNameSets.every((s) => s.has(n))
+            );
+          }
+          if (commonNames.length === 0) return null;
+          return (
+            <div>
+              <label className="text-xs text-gray-500">Fixed size</label>
+              <select
+                value={step.fixed_modifier_name ?? ''}
+                onChange={(e) => onUpdate({ fixed_modifier_name: e.target.value || null })}
+                className="w-36 px-2 py-1 border border-gray-200 rounded text-sm bg-white focus:ring-1 focus:ring-brand-500 outline-none"
+              >
+                <option value="">None</option>
+                {commonNames.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Items list */}

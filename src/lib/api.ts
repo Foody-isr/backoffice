@@ -362,6 +362,7 @@ export interface ComboStepItem {
     id: number;
     name: string;
     image_url?: string;
+    modifiers?: MenuItemModifier[];
   };
 }
 
@@ -371,6 +372,7 @@ export interface ComboStep {
   min_picks: number;
   max_picks: number;
   sort_order: number;
+  fixed_modifier_name?: string | null;
   items: ComboStepItem[];
 }
 
@@ -399,6 +401,7 @@ export interface ComboInput {
     min_picks: number;
     max_picks: number;
     sort_order: number;
+    fixed_modifier_name?: string | null;
     items: { menu_item_id: number; price_delta: number }[];
   }[];
 }
@@ -409,6 +412,7 @@ export interface MenuItemRef {
   price: number;
   image_url?: string;
   category_name?: string;
+  modifiers?: MenuItemModifier[];
 }
 
 export interface MenuCategory {
@@ -518,4 +522,38 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
     `/api/v1/menu/modifiers/${modifierId}?restaurant_id=${restaurantId}`,
     { method: 'DELETE' }
   );
+}
+
+// ─── Payment Provider Config ────────────────────────────────────────
+
+export interface PaymentConfigResponse {
+  restaurant_id: number;
+  provider: 'payplus' | 'sumit';
+  has_custom_credentials: boolean;
+  masked_api_key?: string;
+  masked_secret_key?: string;
+  masked_public_key?: string;
+  masked_payment_page_uid?: string;
+  sumit_company_id?: number;
+}
+
+export interface UpdatePaymentConfigInput {
+  provider: 'payplus' | 'sumit';
+  payplus_api_key?: string;
+  payplus_secret_key?: string;
+  payplus_payment_page_uid?: string;
+  sumit_company_id?: number;
+  sumit_api_key?: string;
+  sumit_public_key?: string;
+}
+
+export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
+  return apiFetch<PaymentConfigResponse>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`);
+}
+
+export async function updatePaymentConfig(restaurantId: number, config: UpdatePaymentConfigInput): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`, {
+    method: 'PUT',
+    body: JSON.stringify(config),
+  });
 }
