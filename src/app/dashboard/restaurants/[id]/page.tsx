@@ -294,7 +294,7 @@ export default function RestaurantDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200">
-        {(['features', 'billing', 'payment'] as Tab[]).map((t) => (
+        {(['features', 'billing', 'payment', 'domain'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
