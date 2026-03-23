@@ -613,9 +613,22 @@ export default function RestaurantDetailPage() {
                     <div className="flex items-start gap-3">
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">2</span>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Add a DNS record pointing to Foody</p>
+                        <p className="text-sm font-medium text-gray-900">Add the domain in Vercel</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Go to <span className="font-semibold">Vercel</span> &rarr; project <span className="font-mono bg-gray-100 px-1 rounded">foodyweb</span> &rarr; <span className="font-semibold">Settings</span> &rarr; <span className="font-semibold">Domains</span> &rarr; add the custom domain. Vercel will handle SSL automatically.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="px-5 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">3</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Add a DNS record pointing to Vercel</p>
                         <p className="text-xs text-gray-500 mt-1 mb-3">
-                          Go to the domain&apos;s DNS management panel and add <span className="font-semibold">one</span> of the following records:
+                          Go to the domain&apos;s DNS management panel, remove any existing A/AAAA records for the root domain, and add <span className="font-semibold">one</span> of the following:
                         </p>
 
                         {/* Option A — A Record (works everywhere) */}
@@ -635,14 +648,14 @@ export default function RestaurantDetailPage() {
                                 <tr className="text-gray-900">
                                   <td className="px-3 py-2 font-mono font-semibold">A</td>
                                   <td className="px-3 py-2 font-mono">@ <span className="text-gray-400 font-sans">(or leave empty)</span></td>
-                                  <td className="px-3 py-2 font-mono text-brand-600 font-semibold">16.16.253.163</td>
+                                  <td className="px-3 py-2 font-mono text-brand-600 font-semibold">76.76.21.21</td>
                                   <td className="px-3 py-2 font-mono">3600</td>
                                 </tr>
                               </tbody>
                             </table>
                           </div>
                           <p className="text-xs text-gray-400 mt-1">
-                            The &quot;Name&quot; field varies by provider: some use <span className="font-mono">@</span>, some require leaving it empty, some want the full domain. Check your provider&apos;s docs.
+                            The &quot;Name&quot; field varies by provider: some use <span className="font-mono">@</span>, some require leaving it empty, some want the full domain name. Check your provider&apos;s docs.
                           </p>
                         </div>
 
@@ -663,29 +676,16 @@ export default function RestaurantDetailPage() {
                                 <tr className="text-gray-900">
                                   <td className="px-3 py-2 font-mono font-semibold">CNAME</td>
                                   <td className="px-3 py-2 font-mono">@</td>
-                                  <td className="px-3 py-2 font-mono text-brand-600 font-semibold">app.foody-pos.co.il</td>
+                                  <td className="px-3 py-2 font-mono text-brand-600 font-semibold">cname.vercel-dns.com</td>
                                   <td className="px-3 py-2 font-mono">3600</td>
                                 </tr>
                               </tbody>
                             </table>
                           </div>
                           <p className="text-xs text-gray-400 mt-1">
-                            CNAME on root is supported by Cloudflare, Namecheap, and Route53. Most Israeli registrars and GoDaddy do <span className="font-semibold">not</span> support it &mdash; use Option A instead.
+                            CNAME on root is supported by Cloudflare, Namecheap, and Route53. Most Israeli registrars do <span className="font-semibold">not</span> support it &mdash; use Option A instead.
                           </p>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="px-5 py-4">
-                    <div className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">3</span>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Remove conflicting records</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Make sure there are no existing <span className="font-mono bg-gray-100 px-1 rounded">A</span> or <span className="font-mono bg-gray-100 px-1 rounded">AAAA</span> records for the root domain that might conflict with the new CNAME. Delete them if they exist (common with default &quot;parked&quot; pages from the registrar).
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -695,15 +695,16 @@ export default function RestaurantDetailPage() {
                     <div className="flex items-start gap-3">
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">4</span>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Wait for DNS propagation</p>
+                        <p className="text-sm font-medium text-gray-900">Wait for DNS propagation &amp; Vercel verification</p>
                         <p className="text-xs text-gray-500 mt-1">
-                          DNS changes can take up to 24-48 hours to propagate worldwide, but usually take effect within a few minutes. You can verify the setup by running:
+                          DNS changes usually take effect within a few minutes but can take up to 48 hours. Go back to Vercel Domains and click <span className="font-semibold">Refresh</span> &mdash; once verified, Vercel will automatically provision an SSL certificate.
                         </p>
-                        <div className="mt-2 bg-gray-900 rounded-lg px-3 py-2 text-xs font-mono text-green-400">
-                          dig {customDomainDraft || 'example.com'} CNAME +short
+                        <p className="text-xs text-gray-500 mt-2">You can verify DNS from the terminal:</p>
+                        <div className="mt-1 bg-gray-900 rounded-lg px-3 py-2 text-xs font-mono text-green-400">
+                          dig {customDomainDraft || 'example.com'} A +short
                         </div>
                         <p className="text-xs text-gray-400 mt-1">
-                          Expected result: <span className="font-mono">app.foody-pos.co.il.</span>
+                          Expected result: <span className="font-mono">76.76.21.21</span> (Vercel)
                         </p>
                       </div>
                     </div>
@@ -714,43 +715,9 @@ export default function RestaurantDetailPage() {
                     <div className="flex items-start gap-3">
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">5</span>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">SSL / HTTPS configuration</p>
+                        <p className="text-sm font-medium text-gray-900">Save the domain above</p>
                         <p className="text-xs text-gray-500 mt-1">
-                          If the customer uses <span className="font-semibold">Cloudflare</span> as their DNS provider (recommended), SSL is handled automatically &mdash; just make sure the proxy is enabled (orange cloud icon).
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          If they use another DNS provider, you&apos;ll need to configure an SSL certificate on our server (Nginx) for their domain using Let&apos;s Encrypt or a manual certificate.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Step 6 */}
-                  <div className="px-5 py-4">
-                    <div className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 text-brand-700 text-xs font-bold flex items-center justify-center mt-0.5">6</span>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Save the domain above and add Nginx config</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Enter the domain in the field above and click Save. Then add a server block in Nginx on the production server:
-                        </p>
-                        <div className="mt-2 bg-gray-900 rounded-lg px-3 py-2 text-xs font-mono text-green-400 whitespace-pre leading-relaxed">{`server {
-    listen 443 ssl;
-    server_name ${customDomainDraft || 'example.com'};
-
-    # SSL cert (Cloudflare origin or Let's Encrypt)
-    ssl_certificate     /etc/ssl/${customDomainDraft || 'example.com'}/cert.pem;
-    ssl_certificate_key /etc/ssl/${customDomainDraft || 'example.com'}/key.pem;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}`}</div>
-                        <p className="text-xs text-gray-400 mt-2">
-                          Then reload Nginx: <span className="font-mono bg-gray-100 px-1 rounded text-gray-600">sudo nginx -t && sudo systemctl reload nginx</span>
+                          Enter the domain in the field above and click <span className="font-semibold">Save</span>. This links the domain to the restaurant in our database. No server configuration needed &mdash; Vercel handles SSL and hosting automatically.
                         </p>
                       </div>
                     </div>
