@@ -575,3 +575,35 @@ export async function updateCustomDomain(restaurantId: number, domain: string): 
     body: JSON.stringify({ custom_domain: domain }),
   });
 }
+
+// ── Spoke (Circuit) Delivery Config ─────────────────────────────────
+
+export interface SpokeConfigResponse {
+  configured: boolean;
+  enabled?: boolean;
+  depot_id?: string;
+  default_driver_name?: string;
+  default_driver_phone?: string;
+}
+
+export interface SpokeConfigInput {
+  api_key: string;
+  enabled: boolean;
+  depot_id: string;
+  default_driver_name: string;
+  default_driver_phone: string;
+}
+
+export async function getSpokeConfig(restaurantId: number): Promise<SpokeConfigResponse> {
+  return apiFetch<SpokeConfigResponse>(`/api/v1/spoke/config?restaurant_id=${restaurantId}`);
+}
+
+export async function updateSpokeConfig(
+  restaurantId: number,
+  config: SpokeConfigInput
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/api/v1/spoke/config?restaurant_id=${restaurantId}`, {
+    method: 'PUT',
+    body: JSON.stringify(config),
+  });
+}

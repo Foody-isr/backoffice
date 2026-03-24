@@ -16,6 +16,8 @@ import {
   updatePaymentConfig,
   getCustomDomain,
   updateCustomDomain,
+  getSpokeConfig,
+  updateSpokeConfig,
   Restaurant,
   FeatureMeta,
   PlanDefinition,
@@ -25,11 +27,12 @@ import {
   SubscriptionDetail,
   PaymentConfigResponse,
   UpdatePaymentConfigInput,
+  SpokeConfigResponse,
 } from '@/lib/api';
 import { planColor, capitalize, formatDate, categoryInfo } from '@/lib/utils';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
-type Tab = 'features' | 'billing' | 'payment' | 'domain';
+type Tab = 'features' | 'billing' | 'payment' | 'domain' | 'spoke';
 
 const SUB_STATUS_COLOR: Record<string, string> = {
   trial: 'bg-blue-100 text-blue-700',
@@ -71,6 +74,18 @@ export default function RestaurantDetailPage() {
   const [domainLoading, setDomainLoading] = useState(false);
   const [domainSaving, setDomainSaving] = useState(false);
   const [domainLoaded, setDomainLoaded] = useState(false);
+
+  // Spoke config state
+  const [spokeConfig, setSpokeConfig] = useState<SpokeConfigResponse | null>(null);
+  const [spokeLoading, setSpokeLoading] = useState(false);
+  const [spokeSaving, setSpokeSaving] = useState(false);
+  const [spokeForm, setSpokeForm] = useState({
+    api_key: '',
+    enabled: false,
+    depot_id: '',
+    default_driver_name: '',
+    default_driver_phone: '',
+  });
 
   const loadData = useCallback(async () => {
     try {
@@ -128,6 +143,45 @@ export default function RestaurantDetailPage() {
       .catch(() => {})
       .finally(() => setDomainLoading(false));
   }, [tab, id, domainLoaded]);
+
+  useEffect(() => {
+    if (tab !== 'spoke' || spokeConfig !== null) return;
+    setSpokeLoading(true);
+    getSpokeConfig(id)
+      .then((cfg) => {
+        setSpokeConfig(cfg);
+        if (cfg.configured) {
+          setSpokeForm((p) => ({
+            ...p,
+            enabled: cfg.enabled ?? false,
+            depot_id: cfg.depot_id ?? '',
+            default_driver_name: cfg.default_driver_name ?? '',
+            default_driver_phone: cfg.default_driver_phone ?? '',
+          }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSpokeLoading(false));
+  }, [tab, id, spokeConfig]);
+
+  async function handleSpokeSave() {
+    if (!spokeForm.api_key && !spokeConfig?.configured) return;
+    setSpokeSaving(true);
+    try {
+      await updateSpokeConfig(id, {
+        ...spokeForm,
+        api_key: spokeForm.api_key || '__unchanged__',
+      });
+      // Reload config
+      const cfg = await getSpokeConfig(id);
+      setSpokeConfig(cfg);
+      setSpokeForm((p) => ({ ...p, api_key: '' }));
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to save Spoke config');
+    } finally {
+      setSpokeSaving(false);
+    }
+  }
 
   async function handleDomainSave() {
     setDomainSaving(true);
@@ -294,7 +348,7 @@ export default function RestaurantDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200">
-        {(['features', 'billing', 'payment', 'domain'] as Tab[]).map((t) => (
+        {(['features', 'billing', 'payment', 'domain', 'spoke'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -733,6 +787,97 @@ export default function RestaurantDetailPage() {
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
               >
                 {domainSaving ? 'Saving...' : 'Save Domain'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'spoke' && (
+        <div className="space-y-6">
+          {spokeLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Spoke Delivery Integration</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                Connect this restaurant&apos;s Spoke (Circuit) account to automate delivery route optimization and customer ETA notifications.
+              </p>
+
+              {spokeConfig?.configured && (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg text-sm">
+                  <span className="text-green-600 font-medium">&#10003; API key configured</span>
+                  <span className="text-gray-400 ml-2">
+                    &middot; {spokeConfig.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                  <input
+                    type="password"
+                    className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    value={spokeForm.api_key}
+                    onChange={(e) => setSpokeForm((p) => ({ ...p, api_key: e.target.value }))}
+                    placeholder={spokeConfig?.configured ? '••••••••  (saved — enter new key to replace)' : 'Enter Spoke API key'}
+                  />
+                </div>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={spokeForm.enabled}
+                    onChange={(e) => setSpokeForm((p) => ({ ...p, enabled: e.target.checked }))}
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Enable Spoke integration</div>
+                    <div className="text-xs text-gray-500">When enabled, delivery plans can be created and optimized via Spoke</div>
+                  </div>
+                </label>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Depot ID <span className="text-gray-400 font-normal">(optional)</span></label>
+                  <input
+                    className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    value={spokeForm.depot_id}
+                    onChange={(e) => setSpokeForm((p) => ({ ...p, depot_id: e.target.value }))}
+                    placeholder="Spoke depot ID"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Default Driver Name</label>
+                    <input
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      value={spokeForm.default_driver_name}
+                      onChange={(e) => setSpokeForm((p) => ({ ...p, default_driver_name: e.target.value }))}
+                      placeholder="Driver name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Default Driver Phone</label>
+                    <input
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      value={spokeForm.default_driver_phone}
+                      onChange={(e) => setSpokeForm((p) => ({ ...p, default_driver_phone: e.target.value }))}
+                      placeholder="+972..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSpokeSave}
+                disabled={spokeSaving || (!spokeForm.api_key && !spokeConfig?.configured)}
+                className="mt-6 px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
+              >
+                {spokeSaving ? 'Saving...' : 'Save Spoke Config'}
               </button>
             </div>
           )}
