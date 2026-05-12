@@ -12,17 +12,25 @@ import {
 } from '@/lib/api';
 import { planColor, capitalize } from '@/lib/utils';
 
+type SetupMode = 'invite' | 'manual';
+
 export default function OnboardPage() {
   const router = useRouter();
   const [plans, setPlans] = useState<PlanDefinition[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState<{ restaurant: any; tempPassword?: string } | null>(null);
+  const [success, setSuccess] = useState<{
+    restaurant: any;
+    tempPassword?: string;
+    mode: SetupMode;
+  } | null>(null);
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'sent' | 'error'>('idle');
 
-  // Minimal form — just email + plan
+  const [setupMode, setSetupMode] = useState<SetupMode>('invite');
   const [ownerEmail, setOwnerEmail] = useState('');
+  const [restaurantName, setRestaurantName] = useState('');
+  const [ownerPassword, setOwnerPassword] = useState('');
   const [planTier, setPlanTier] = useState<PlanTier>('starter');
 
   useEffect(() => {
@@ -35,14 +43,21 @@ export default function OnboardPage() {
     setLoading(true);
 
     const input: OnboardInput = {
-      restaurant_name: '', // Owner fills this during setup
+      restaurant_name: setupMode === 'manual' ? restaurantName.trim() : '',
       owner_email: ownerEmail,
       plan_tier: planTier,
     };
+    if (setupMode === 'manual') {
+      input.owner_password = ownerPassword;
+    }
 
     try {
       const data = await onboardRestaurant(input);
-      setSuccess({ restaurant: data.restaurant, tempPassword: data.temporary_password });
+      setSuccess({
+        restaurant: data.restaurant,
+        tempPassword: data.temporary_password,
+        mode: setupMode,
+      });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Onboarding failed');
     } finally {
@@ -51,16 +66,32 @@ export default function OnboardPage() {
   }
 
   const selectedPlan = plans.find((p) => p.tier === planTier);
+  const submitDisabled =
+    loading ||
+    !ownerEmail.trim() ||
+    (setupMode === 'manual' && ownerPassword.length < 8);
 
   // ─── Success screen ────────────────────────────────────────────────
   if (success) {
+    const isManual = success.mode === 'manual';
     return (
       <div className="max-w-2xl">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Invitation Sent!</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isManual ? 'Restaurant Created' : 'Invitation Sent!'}
+          </h1>
           <p className="text-sm text-gray-500 mt-1">
-            An onboarding email has been sent to <strong>{ownerEmail}</strong>.
-            They will complete their restaurant setup from the link in the email.
+            {isManual ? (
+              <>
+                The account for <strong>{ownerEmail}</strong> is ready. Share the
+                credentials below with the owner so they can sign in.
+              </>
+            ) : (
+              <>
+                An onboarding email has been sent to <strong>{ownerEmail}</strong>.
+                They will complete their restaurant setup from the link in the email.
+              </>
+            )}
           </p>
         </div>
 
@@ -73,18 +104,22 @@ export default function OnboardPage() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-green-900">Onboarding email sent</p>
+                <p className="text-sm font-medium text-green-900">
+                  {isManual ? 'Account ready' : 'Onboarding email sent'}
+                </p>
                 <p className="text-xs text-green-700 mt-1">
-                  The owner will set their password, fill in restaurant details, and choose their POS platform.
+                  {isManual
+                    ? 'The owner can sign in immediately with the credentials below.'
+                    : 'The owner will set their password, fill in restaurant details, and choose their POS platform.'}
                 </p>
               </div>
             </div>
           </div>
 
-          {success.tempPassword && (
+          {(success.tempPassword || isManual) && (
             <div className="pb-6 border-b border-gray-200">
               <h2 className="text-base font-semibold text-gray-900 mb-3">
-                Temporary Credentials (for demo setup)
+                {isManual ? 'Owner Credentials' : 'Temporary Credentials (for demo setup)'}
               </h2>
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div>
@@ -103,14 +138,20 @@ export default function OnboardPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Temporary Password</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {isManual ? 'Password' : 'Temporary Password'}
+                  </label>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 text-sm bg-white px-3 py-2 rounded border border-gray-200 font-mono">
-                      {success.tempPassword}
+                      {isManual ? ownerPassword : success.tempPassword}
                     </code>
                     <button
                       type="button"
-                      onClick={() => navigator.clipboard.writeText(success.tempPassword || '')}
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          isManual ? ownerPassword : success.tempPassword || ''
+                        )
+                      }
                       className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                     >
                       Copy
@@ -118,50 +159,54 @@ export default function OnboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-xs text-amber-800">
-                  <strong>Note:</strong> This is a temporary password for demo access.
-                  The owner will set their own password via the onboarding email.
-                </p>
-              </div>
+              {!isManual && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-800">
+                    <strong>Note:</strong> This is a temporary password for demo access.
+                    The owner will set their own password via the onboarding email.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Resend invite */}
-          <div className="pb-6 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                disabled={inviteSending}
-                onClick={async () => {
-                  const ownerId = success.restaurant?.owner_id;
-                  if (!ownerId) return;
-                  setInviteSending(true);
-                  setInviteStatus('idle');
-                  try {
-                    await sendInviteEmail(ownerId);
-                    setInviteStatus('sent');
-                  } catch {
-                    setInviteStatus('error');
-                  } finally {
-                    setInviteSending(false);
-                  }
-                }}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                {inviteSending ? 'Sending...' : 'Resend Invite Email'}
-              </button>
-              {inviteStatus === 'sent' && (
-                <span className="text-sm text-green-600 font-medium">Sent!</span>
-              )}
-              {inviteStatus === 'error' && (
-                <span className="text-sm text-red-600 font-medium">Failed to send</span>
-              )}
+          {/* Resend invite (only meaningful for invite mode) */}
+          {!isManual && (
+            <div className="pb-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={inviteSending}
+                  onClick={async () => {
+                    const ownerId = success.restaurant?.owner_id;
+                    if (!ownerId) return;
+                    setInviteSending(true);
+                    setInviteStatus('idle');
+                    try {
+                      await sendInviteEmail(ownerId);
+                      setInviteStatus('sent');
+                    } catch {
+                      setInviteStatus('error');
+                    } finally {
+                      setInviteSending(false);
+                    }
+                  }}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  {inviteSending ? 'Sending...' : 'Resend Invite Email'}
+                </button>
+                {inviteStatus === 'sent' && (
+                  <span className="text-sm text-green-600 font-medium">Sent!</span>
+                )}
+                {inviteStatus === 'error' && (
+                  <span className="text-sm text-red-600 font-medium">Failed to send</span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex gap-3">
             <button
@@ -176,6 +221,8 @@ export default function OnboardPage() {
               onClick={() => {
                 setSuccess(null);
                 setOwnerEmail('');
+                setRestaurantName('');
+                setOwnerPassword('');
                 setPlanTier('starter');
                 setInviteStatus('idle');
               }}
@@ -195,8 +242,9 @@ export default function OnboardPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Onboard New Restaurant</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Enter the owner&apos;s email and select a plan. They&apos;ll receive an onboarding email
-          to set up their account, restaurant details, and POS.
+          {setupMode === 'invite'
+            ? "Enter the owner's email and select a plan. They'll receive an onboarding email to set up their account, restaurant details, and POS."
+            : "Set up the restaurant and account yourself. The owner can sign in immediately with the credentials you choose."}
         </p>
       </div>
 
@@ -207,21 +255,104 @@ export default function OnboardPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Email */}
+        {/* Setup mode */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Owner Email</h2>
-          <input
-            type="email"
-            required
-            value={ownerEmail}
-            onChange={(e) => setOwnerEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
-            placeholder="owner@restaurant.com"
-            autoFocus
-          />
-          <p className="mt-2 text-xs text-gray-500">
-            An onboarding email will be sent to this address with a link to complete setup.
-          </p>
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Setup Mode</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setSetupMode('invite')}
+              className={`p-4 rounded-xl border-2 text-left transition ${
+                setupMode === 'invite'
+                  ? 'border-brand-500 bg-brand-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="text-sm font-semibold text-gray-900">Send invite email</div>
+              <p className="text-xs text-gray-500 mt-1">
+                Owner receives a link and finishes setup themselves.
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSetupMode('manual')}
+              className={`p-4 rounded-xl border-2 text-left transition ${
+                setupMode === 'manual'
+                  ? 'border-brand-500 bg-brand-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="text-sm font-semibold text-gray-900">Manual setup</div>
+              <p className="text-xs text-gray-500 mt-1">
+                Pick the password yourself and hand the credentials over.
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {/* Owner & restaurant details */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <h2 className="text-base font-semibold text-gray-900">
+            {setupMode === 'manual' ? 'Owner & Restaurant' : 'Owner Email'}
+          </h2>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Owner email
+            </label>
+            <input
+              type="email"
+              required
+              value={ownerEmail}
+              onChange={(e) => setOwnerEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+              placeholder="owner@restaurant.com"
+              autoFocus
+            />
+            {setupMode === 'invite' && (
+              <p className="mt-2 text-xs text-gray-500">
+                An onboarding email will be sent to this address with a link to complete setup.
+              </p>
+            )}
+          </div>
+
+          {setupMode === 'manual' && (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Restaurant name <span className="text-gray-400">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={restaurantName}
+                  onChange={(e) => setRestaurantName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                  placeholder="Joe's Pizza"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Leave blank to let the owner name their restaurant later.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Password
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={ownerPassword}
+                  onChange={(e) => setOwnerPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none font-mono"
+                  placeholder="At least 8 characters"
+                  minLength={8}
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  The owner can change this later from their account settings. No invite email will be sent.
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Plan Selection */}
@@ -273,10 +404,16 @@ export default function OnboardPage() {
         <div className="flex gap-3">
           <button
             type="submit"
-            disabled={loading || !ownerEmail.trim()}
+            disabled={submitDisabled}
             className="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white font-semibold rounded-lg text-sm transition"
           >
-            {loading ? 'Sending...' : 'Send Onboarding Email'}
+            {loading
+              ? setupMode === 'manual'
+                ? 'Creating...'
+                : 'Sending...'
+              : setupMode === 'manual'
+                ? 'Create Restaurant'
+                : 'Send Onboarding Email'}
           </button>
           <button
             type="button"
