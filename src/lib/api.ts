@@ -576,6 +576,70 @@ export async function updateCustomDomain(restaurantId: number, domain: string): 
   });
 }
 
+// ─── Ingredient Icon Library ────────────────────────────────────────
+
+export interface IngredientIcon {
+  id: number;
+  name: string;
+  slug: string;
+  image_url: string;
+  category: string;
+  aliases: string[];
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GenerateIconInput {
+  name: string;
+  category?: string;
+  aliases?: string[];
+  tags?: string[];
+}
+
+export interface UpdateIconInput {
+  name?: string;
+  category?: string;
+  aliases?: string[];
+  tags?: string[];
+  image_url?: string;
+}
+
+export async function listIngredientIcons(params?: { q?: string; category?: string; limit?: number }) {
+  const qs = new URLSearchParams();
+  if (params?.q) qs.set('q', params.q);
+  if (params?.category) qs.set('category', params.category);
+  if (params?.limit) qs.set('limit', String(params.limit));
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<{ icons: IngredientIcon[] }>(`/api/v1/admin/ingredient-icons${query}`);
+}
+
+export async function getIngredientIconPrompt(name: string) {
+  return apiFetch<{ prompt: string }>(
+    `/api/v1/admin/ingredient-icons/prompt?name=${encodeURIComponent(name)}`
+  );
+}
+
+export async function generateIngredientIcon(input: GenerateIconInput) {
+  return apiFetch<IngredientIcon>('/api/v1/admin/ingredient-icons/generate', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateIngredientIcon(id: number, input: UpdateIconInput) {
+  return apiFetch<IngredientIcon>(`/api/v1/admin/ingredient-icons/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteIngredientIcon(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/ingredient-icons/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // ── Spoke (Circuit) Delivery Config ─────────────────────────────────
 
 export interface SpokeConfigResponse {

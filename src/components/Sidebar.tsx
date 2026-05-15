@@ -12,6 +12,7 @@ import {
   PlusCircleIcon,
   SquaresPlusIcon,
   ClipboardDocumentListIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 const nav = [
@@ -22,6 +23,7 @@ const nav = [
   { href: '/dashboard/features', label: 'Feature Catalog', icon: CubeIcon },
   { href: '/dashboard/combos', label: 'Combo Menus', icon: SquaresPlusIcon },
   { href: '/dashboard/menu', label: 'Menu Manager', icon: ClipboardDocumentListIcon },
+  { href: '/dashboard/ingredient-icons', label: 'Ingredient Icons', icon: SparklesIcon },
 ];
 
 export default function Sidebar() {
