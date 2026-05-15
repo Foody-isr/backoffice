@@ -7,7 +7,9 @@ import {
   deleteIngredientIcon,
   updateIngredientIcon,
   getIngredientIconPrompt,
+  listIconPackagings,
   IngredientIcon,
+  IconPackagingOption,
 } from '@/lib/api';
 import {
   MagnifyingGlassIcon,
@@ -23,18 +25,36 @@ export default function IngredientIconsPage() {
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
 
+  // Capitalize the first letter of the server-supplied phrase so the
+  // dropdown reads like UI copy ("Glass bottle") rather than prompt text
+  // ("glass bottle"). Kept local since this is the only place it's used.
+  const humanizePackagingPhrase = (s: string) =>
+    s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+
   // Generate form state
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
+  const [packaging, setPackaging] = useState(''); // '' = fresh
   const [aliases, setAliases] = useState('');
   const [generating, setGenerating] = useState(false);
   const [previewPrompt, setPreviewPrompt] = useState('');
+  const [packagingOptions, setPackagingOptions] = useState<IconPackagingOption[]>([]);
 
   // Edit modal state
   const [editing, setEditing] = useState<IngredientIcon | null>(null);
 
   useEffect(() => {
     load();
+    listIconPackagings()
+      .then((d) => {
+        // Sort alphabetically by user-facing phrase for a stable dropdown
+        // order independent of the server map's iteration order.
+        const sorted = [...(d.packagings || [])].sort((a, b) =>
+          a.phrase.localeCompare(b.phrase),
+        );
+        setPackagingOptions(sorted);
+      })
+      .catch(() => {});
   }, []);
 
   // Live prompt preview — purely informational, so the operator sees what
@@ -46,7 +66,7 @@ export default function IngredientIconsPage() {
     }
     let cancelled = false;
     const t = setTimeout(() => {
-      getIngredientIconPrompt(name.trim())
+      getIngredientIconPrompt(name.trim(), packaging || undefined)
         .then((d) => {
           if (!cancelled) setPreviewPrompt(d.prompt);
         })
@@ -56,7 +76,7 @@ export default function IngredientIconsPage() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [name]);
+  }, [name, packaging]);
 
   async function load(q?: string) {
     setLoading(true);
@@ -83,11 +103,13 @@ export default function IngredientIconsPage() {
       const icon = await generateIngredientIcon({
         name: name.trim(),
         category: category.trim() || undefined,
+        packaging: packaging || undefined,
         aliases: aliasList.length ? aliasList : undefined,
       });
       setIcons((prev) => [icon, ...prev]);
       setName('');
       setCategory('');
+      setPackaging('');
       setAliases('');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Generation failed');
@@ -131,38 +153,55 @@ export default function IngredientIconsPage() {
       {/* Generate form */}
       <section className="bg-white border border-gray-200 rounded-xl p-5">
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Generate new icon</h2>
-        <form onSubmit={handleGenerate} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <form onSubmit={handleGenerate} className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-gray-600 mb-1">Name (English)</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Tomato"
+              placeholder="Salted Butter"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
               required
             />
+          </div>
+          <div className="md:col-span-1">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Packaging
+            </label>
+            <select
+              value={packaging}
+              onChange={(e) => setPackaging(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="">Fresh — no packaging</option>
+              {packagingOptions.map((opt) => (
+                <option key={opt.key} value={opt.key}>
+                  {humanizePackagingPhrase(opt.phrase)}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
             <input
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder="Vegetable"
+              placeholder="Dairy"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
           </div>
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Aliases <span className="text-gray-400 font-normal">(comma-separated, fr/he/…)</span>
+              Aliases <span className="text-gray-400 font-normal">(comma-separated)</span>
             </label>
             <input
               value={aliases}
               onChange={(e) => setAliases(e.target.value)}
-              placeholder="Tomate, עגבנייה"
+              placeholder="Beurre, חמאה"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
           </div>
-          <div className="md:col-span-3 flex items-center justify-between">
+          <div className="md:col-span-4 flex items-center justify-between">
             <p className="text-xs text-gray-400">
               ~$0.04 per icon (gpt-image-1, high quality, transparent background)
             </p>

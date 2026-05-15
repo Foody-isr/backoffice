@@ -593,8 +593,20 @@ export interface IngredientIcon {
 export interface GenerateIconInput {
   name: string;
   category?: string;
+  /** Empty string / "fresh" / "none" → bare ingredient template.
+   *  Otherwise a key from listIconPackagings() (or a free-form phrase). */
+  packaging?: string;
   aliases?: string[];
   tags?: string[];
+}
+
+export interface IconPackagingOption {
+  key: string;
+  phrase: string;
+}
+
+export async function listIconPackagings() {
+  return apiFetch<{ packagings: IconPackagingOption[] }>('/api/v1/admin/ingredient-icons/packagings');
 }
 
 export interface UpdateIconInput {
@@ -614,9 +626,11 @@ export async function listIngredientIcons(params?: { q?: string; category?: stri
   return apiFetch<{ icons: IngredientIcon[] }>(`/api/v1/admin/ingredient-icons${query}`);
 }
 
-export async function getIngredientIconPrompt(name: string) {
+export async function getIngredientIconPrompt(name: string, packaging?: string) {
+  const qs = new URLSearchParams({ name });
+  if (packaging) qs.set('packaging', packaging);
   return apiFetch<{ prompt: string }>(
-    `/api/v1/admin/ingredient-icons/prompt?name=${encodeURIComponent(name)}`
+    `/api/v1/admin/ingredient-icons/prompt?${qs.toString()}`
   );
 }
 
