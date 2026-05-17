@@ -173,12 +173,17 @@ export default function IngredientIconsPage() {
               onChange={(e) => setPackaging(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
             >
-              <option value="">Fresh — no packaging</option>
-              {packagingOptions.map((opt) => (
-                <option key={opt.key} value={opt.key}>
-                  {humanizePackagingPhrase(opt.phrase)}
-                </option>
-              ))}
+              <optgroup label="No container">
+                <option value="">Fresh ingredient (tomato, herb, fish…)</option>
+                <option value="standalone">Standalone item (label, cup, takeaway box…)</option>
+              </optgroup>
+              <optgroup label="Packaged in">
+                {packagingOptions.map((opt) => (
+                  <option key={opt.key} value={opt.key}>
+                    {humanizePackagingPhrase(opt.phrase)}
+                  </option>
+                ))}
+              </optgroup>
             </select>
           </div>
           <div className="md:col-span-1">
