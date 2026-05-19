@@ -685,3 +685,141 @@ export async function updateSpokeConfig(
     body: JSON.stringify(config),
   });
 }
+
+// ─── Market & Playbook ──────────────────────────────────────────────
+
+export interface Objection {
+  q: string;
+  a: string;
+}
+
+export interface Competitor {
+  name: string;
+  notes: string;
+}
+
+export interface LeadSegment {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  pain_points: string[];
+  key_features: string[];
+  pitch_angle: string;
+  objections: Objection[];
+  demo_notes: string;
+  pricing_notes: string;
+  typical_deal_size: string;
+  disqualifiers: string[];
+  competitors: Competitor[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LeadSegmentWithCount extends LeadSegment {
+  prospect_count: number;
+}
+
+export interface LeadSegmentInput {
+  slug: string;
+  name: string;
+  description: string;
+  pain_points: string[];
+  key_features: string[];
+  pitch_angle: string;
+  objections: Objection[];
+  demo_notes: string;
+  pricing_notes: string;
+  typical_deal_size: string;
+  disqualifiers: string[];
+  competitors: Competitor[];
+  sort_order: number;
+}
+
+export interface MarketProspect {
+  id: number;
+  segment_id: number | null;
+  name: string;
+  city: string;
+  website: string;
+  socials: string;
+  notes: string;
+  starred: boolean;
+  created_at: string;
+  updated_at: string;
+  segment?: LeadSegment | null;
+}
+
+export interface MarketProspectInput {
+  segment_id: number | null;
+  name: string;
+  city: string;
+  website: string;
+  socials: string;
+  notes: string;
+  starred: boolean;
+}
+
+export interface ProspectFilters {
+  segment_id?: number;
+  starred?: boolean;
+  search?: string;
+}
+
+export async function listSegments() {
+  return apiFetch<{ segments: LeadSegmentWithCount[] }>('/api/v1/admin/market/segments');
+}
+
+export async function getSegment(slug: string) {
+  return apiFetch<{ segment: LeadSegment }>(`/api/v1/admin/market/segments/${encodeURIComponent(slug)}`);
+}
+
+export async function createSegment(input: LeadSegmentInput) {
+  return apiFetch<{ segment: LeadSegment }>('/api/v1/admin/market/segments', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateSegment(id: number, input: LeadSegmentInput) {
+  return apiFetch<{ segment: LeadSegment }>(`/api/v1/admin/market/segments/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteSegment(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/market/segments/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function listProspects(filters?: ProspectFilters) {
+  const qs = new URLSearchParams();
+  if (filters?.segment_id) qs.set('segment_id', String(filters.segment_id));
+  if (filters?.starred) qs.set('starred', 'true');
+  if (filters?.search) qs.set('search', filters.search);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<{ prospects: MarketProspect[] }>(`/api/v1/admin/market/prospects${query}`);
+}
+
+export async function createProspect(input: MarketProspectInput) {
+  return apiFetch<{ prospect: MarketProspect }>('/api/v1/admin/market/prospects', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateProspect(id: number, input: MarketProspectInput) {
+  return apiFetch<{ prospect: MarketProspect }>(`/api/v1/admin/market/prospects/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteProspect(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/market/prospects/${id}`, {
+    method: 'DELETE',
+  });
+}
