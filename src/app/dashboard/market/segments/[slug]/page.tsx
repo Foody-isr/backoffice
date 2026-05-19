@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, use } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import {
@@ -25,11 +25,11 @@ import SegmentFormModal from '../../SegmentFormModal';
 import ProspectFormModal from '../../ProspectFormModal';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 export default function SegmentDetailPage({ params }: PageProps) {
-  const { slug } = use(params);
+  const { slug } = params;
 
   const [segment, setSegment] = useState<LeadSegment | null>(null);
   const [segments, setSegments] = useState<LeadSegmentWithCount[]>([]);
