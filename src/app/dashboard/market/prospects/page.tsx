@@ -8,6 +8,8 @@ import {
   deleteProspect,
   LeadSegmentWithCount,
   MarketProspect,
+  ProspectStatus,
+  PROSPECT_STATUSES,
 } from '@/lib/api';
 import {
   ArrowLeftIcon,
@@ -20,6 +22,7 @@ import {
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { formatShortDate } from '@/lib/utils';
 import ProspectFormModal from '../ProspectFormModal';
+import ProspectStatusChip, { statusLabel } from '@/components/ProspectStatusChip';
 
 export default function ProspectsPage() {
   const [segments, setSegments] = useState<LeadSegmentWithCount[]>([]);
@@ -29,6 +32,7 @@ export default function ProspectsPage() {
 
   const [search, setSearch] = useState('');
   const [segmentFilter, setSegmentFilter] = useState<number | 'all' | 'none'>('all');
+  const [statusFilter, setStatusFilter] = useState<ProspectStatus | 'all'>('all');
   const [starredOnly, setStarredOnly] = useState(false);
 
   const [creating, setCreating] = useState(false);
@@ -66,6 +70,7 @@ export default function ProspectsPage() {
     if (starredOnly && !p.starred) return false;
     if (segmentFilter === 'none' && p.segment_id !== null) return false;
     if (typeof segmentFilter === 'number' && p.segment_id !== segmentFilter) return false;
+    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       if (!p.name.toLowerCase().includes(s) && !p.city.toLowerCase().includes(s)) return false;
@@ -126,6 +131,16 @@ export default function ProspectsPage() {
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as ProspectStatus | 'all')}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+        >
+          <option value="all">All statuses</option>
+          {PROSPECT_STATUSES.map((s) => (
+            <option key={s} value={s}>{statusLabel(s)}</option>
+          ))}
+        </select>
         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
           <input
             type="checkbox"
@@ -164,6 +179,7 @@ export default function ProspectsPage() {
               <tr className="bg-gray-50 text-left">
                 <th className="px-4 py-3 font-semibold text-gray-600 w-8"></th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Name</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Segment</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">City</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Updated</th>
@@ -187,6 +203,9 @@ export default function ProspectsPage() {
                     >
                       {p.name}
                     </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <ProspectStatusChip status={p.status} />
                   </td>
                   <td className="px-4 py-3">
                     {p.segment ? (

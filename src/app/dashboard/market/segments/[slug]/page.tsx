@@ -11,6 +11,8 @@ import {
   LeadSegment,
   LeadSegmentWithCount,
   MarketProspect,
+  ProspectStatus,
+  PROSPECT_STATUSES,
 } from '@/lib/api';
 import {
   ArrowLeftIcon,
@@ -23,6 +25,7 @@ import {
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import SegmentFormModal from '../../SegmentFormModal';
 import ProspectFormModal from '../../ProspectFormModal';
+import ProspectStatusChip, { statusLabel } from '@/components/ProspectStatusChip';
 
 interface PageProps {
   params: { slug: string };
@@ -42,6 +45,7 @@ export default function SegmentDetailPage({ params }: PageProps) {
   const [creatingProspect, setCreatingProspect] = useState(false);
 
   const [starredOnly, setStarredOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<ProspectStatus | 'all'>('all');
   const [search, setSearch] = useState('');
 
   const loadSegment = useCallback(async () => {
@@ -95,12 +99,19 @@ export default function SegmentDetailPage({ params }: PageProps) {
 
   const filtered = prospects.filter((p) => {
     if (starredOnly && !p.starred) return false;
+    if (statusFilter !== 'all' && p.status !== statusFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       if (!p.name.toLowerCase().includes(s) && !p.city.toLowerCase().includes(s)) return false;
     }
     return true;
   });
+
+  // Breakdown counts across ALL prospects in this segment (not filtered).
+  const breakdown = PROSPECT_STATUSES.map((s) => ({
+    status: s,
+    count: prospects.filter((p) => p.status === s).length,
+  })).filter((b) => b.count > 0);
 
   if (loading) {
     return (
@@ -188,8 +199,20 @@ export default function SegmentDetailPage({ params }: PageProps) {
         </button>
       </div>
 
-      <div className="flex gap-3 mb-3">
-        <div className="relative flex-1 max-w-xs">
+      {breakdown.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-3 text-xs text-gray-500">
+          {breakdown.map((b, i) => (
+            <span key={b.status} className="flex items-center gap-1">
+              {i > 0 && <span className="text-gray-300">·</span>}
+              <span className="font-semibold text-gray-700">{b.count}</span>
+              <span>{statusLabel(b.status).toLowerCase()}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-3 mb-3">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
@@ -199,6 +222,16 @@ export default function SegmentDetailPage({ params }: PageProps) {
             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
           />
         </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as ProspectStatus | 'all')}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+        >
+          <option value="all">All statuses</option>
+          {PROSPECT_STATUSES.map((s) => (
+            <option key={s} value={s}>{statusLabel(s)}</option>
+          ))}
+        </select>
         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
           <input
             type="checkbox"
@@ -233,6 +266,7 @@ export default function SegmentDetailPage({ params }: PageProps) {
               <tr className="bg-gray-50 text-left">
                 <th className="px-4 py-3 font-semibold text-gray-600 w-8"></th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Name</th>
+                <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">City</th>
                 <th className="px-4 py-3 font-semibold text-gray-600">Website</th>
                 <th className="px-4 py-3 font-semibold text-gray-600 text-right">Actions</th>
@@ -255,6 +289,9 @@ export default function SegmentDetailPage({ params }: PageProps) {
                     >
                       {p.name}
                     </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <ProspectStatusChip status={p.status} />
                   </td>
                   <td className="px-4 py-3 text-gray-500">{p.city || '—'}</td>
                   <td className="px-4 py-3 text-gray-500 truncate max-w-xs">

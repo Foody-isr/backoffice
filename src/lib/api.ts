@@ -737,6 +737,32 @@ export interface LeadSegmentInput {
   sort_order: number;
 }
 
+export type ProspectStatus = 'researching' | 'pitched' | 'won' | 'lost' | 'on_hold';
+
+export type ProspectCloseReason =
+  | ''
+  | 'price'
+  | 'competitor_won'
+  | 'feature_gap'
+  | 'timing'
+  | 'no_decision_maker'
+  | 'ghosted'
+  | 'other';
+
+export const PROSPECT_STATUSES: ProspectStatus[] = [
+  'researching',
+  'pitched',
+  'won',
+  'lost',
+  'on_hold',
+];
+
+export const CLOSED_PROSPECT_STATUSES: ProspectStatus[] = ['won', 'lost', 'on_hold'];
+
+export function isClosedStatus(s: ProspectStatus): boolean {
+  return CLOSED_PROSPECT_STATUSES.includes(s);
+}
+
 export interface MarketProspect {
   id: number;
   segment_id: number | null;
@@ -746,6 +772,13 @@ export interface MarketProspect {
   socials: string;
   notes: string;
   starred: boolean;
+  status: ProspectStatus;
+  what_offered: string[];
+  loved: string[];
+  did_not_love: string[];
+  close_reason: ProspectCloseReason;
+  close_reason_detail: string;
+  closed_at: string | null;
   created_at: string;
   updated_at: string;
   segment?: LeadSegment | null;
@@ -759,11 +792,18 @@ export interface MarketProspectInput {
   socials: string;
   notes: string;
   starred: boolean;
+  status: ProspectStatus;
+  what_offered: string[];
+  loved: string[];
+  did_not_love: string[];
+  close_reason: ProspectCloseReason;
+  close_reason_detail: string;
 }
 
 export interface ProspectFilters {
   segment_id?: number;
   starred?: boolean;
+  status?: ProspectStatus;
   search?: string;
 }
 
@@ -799,6 +839,7 @@ export async function listProspects(filters?: ProspectFilters) {
   const qs = new URLSearchParams();
   if (filters?.segment_id) qs.set('segment_id', String(filters.segment_id));
   if (filters?.starred) qs.set('starred', 'true');
+  if (filters?.status) qs.set('status', filters.status);
   if (filters?.search) qs.set('search', filters.search);
   const query = qs.toString() ? `?${qs.toString()}` : '';
   return apiFetch<{ prospects: MarketProspect[] }>(`/api/v1/admin/market/prospects${query}`);
