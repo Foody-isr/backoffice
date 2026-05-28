@@ -12,16 +12,20 @@ import {
   PlusCircleIcon,
   SquaresPlusIcon,
   ClipboardDocumentListIcon,
+  SparklesIcon,
+  PresentationChartLineIcon,
 } from '@heroicons/react/24/outline';
 
 const nav = [
   { href: '/dashboard', label: 'Dashboard', icon: HomeIcon },
   { href: '/dashboard/restaurants', label: 'Restaurants', icon: BuildingStorefrontIcon },
+  { href: '/dashboard/market', label: 'Market', icon: PresentationChartLineIcon },
   { href: '/dashboard/users', label: 'Users', icon: UsersIcon },
   { href: '/dashboard/onboard', label: 'Onboard New', icon: PlusCircleIcon },
   { href: '/dashboard/features', label: 'Feature Catalog', icon: CubeIcon },
   { href: '/dashboard/combos', label: 'Combo Menus', icon: SquaresPlusIcon },
   { href: '/dashboard/menu', label: 'Menu Manager', icon: ClipboardDocumentListIcon },
+  { href: '/dashboard/ingredient-icons', label: 'Ingredient Icons', icon: SparklesIcon },
 ];
 
 export default function Sidebar() {

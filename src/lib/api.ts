@@ -576,6 +576,84 @@ export async function updateCustomDomain(restaurantId: number, domain: string): 
   });
 }
 
+// ─── Ingredient Icon Library ────────────────────────────────────────
+
+export interface IngredientIcon {
+  id: number;
+  name: string;
+  slug: string;
+  image_url: string;
+  category: string;
+  aliases: string[];
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GenerateIconInput {
+  name: string;
+  category?: string;
+  /** Empty string / "fresh" / "none" → bare ingredient template.
+   *  Otherwise a key from listIconPackagings() (or a free-form phrase). */
+  packaging?: string;
+  aliases?: string[];
+  tags?: string[];
+}
+
+export interface IconPackagingOption {
+  key: string;
+  phrase: string;
+}
+
+export async function listIconPackagings() {
+  return apiFetch<{ packagings: IconPackagingOption[] }>('/api/v1/admin/ingredient-icons/packagings');
+}
+
+export interface UpdateIconInput {
+  name?: string;
+  category?: string;
+  aliases?: string[];
+  tags?: string[];
+  image_url?: string;
+}
+
+export async function listIngredientIcons(params?: { q?: string; category?: string; limit?: number }) {
+  const qs = new URLSearchParams();
+  if (params?.q) qs.set('q', params.q);
+  if (params?.category) qs.set('category', params.category);
+  if (params?.limit) qs.set('limit', String(params.limit));
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<{ icons: IngredientIcon[] }>(`/api/v1/admin/ingredient-icons${query}`);
+}
+
+export async function getIngredientIconPrompt(name: string, packaging?: string) {
+  const qs = new URLSearchParams({ name });
+  if (packaging) qs.set('packaging', packaging);
+  return apiFetch<{ prompt: string }>(
+    `/api/v1/admin/ingredient-icons/prompt?${qs.toString()}`
+  );
+}
+
+export async function generateIngredientIcon(input: GenerateIconInput) {
+  return apiFetch<IngredientIcon>('/api/v1/admin/ingredient-icons/generate', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateIngredientIcon(id: number, input: UpdateIconInput) {
+  return apiFetch<IngredientIcon>(`/api/v1/admin/ingredient-icons/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteIngredientIcon(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/ingredient-icons/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // ── Spoke (Circuit) Delivery Config ─────────────────────────────────
 
 export interface SpokeConfigResponse {
@@ -605,5 +683,184 @@ export async function updateSpokeConfig(
   return apiFetch<{ message: string }>(`/api/v1/spoke/config?restaurant_id=${restaurantId}`, {
     method: 'PUT',
     body: JSON.stringify(config),
+  });
+}
+
+// ─── Market & Playbook ──────────────────────────────────────────────
+
+export interface Objection {
+  q: string;
+  a: string;
+}
+
+export interface Competitor {
+  name: string;
+  notes: string;
+}
+
+export interface LeadSegment {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  pain_points: string[];
+  key_features: string[];
+  pitch_angle: string;
+  objections: Objection[];
+  demo_notes: string;
+  pricing_notes: string;
+  typical_deal_size: string;
+  disqualifiers: string[];
+  competitors: Competitor[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LeadSegmentWithCount extends LeadSegment {
+  prospect_count: number;
+}
+
+export interface LeadSegmentInput {
+  slug: string;
+  name: string;
+  description: string;
+  pain_points: string[];
+  key_features: string[];
+  pitch_angle: string;
+  objections: Objection[];
+  demo_notes: string;
+  pricing_notes: string;
+  typical_deal_size: string;
+  disqualifiers: string[];
+  competitors: Competitor[];
+  sort_order: number;
+}
+
+export type ProspectStatus = 'researching' | 'pitched' | 'won' | 'lost' | 'on_hold';
+
+export type ProspectCloseReason =
+  | ''
+  | 'price'
+  | 'competitor_won'
+  | 'feature_gap'
+  | 'timing'
+  | 'no_decision_maker'
+  | 'ghosted'
+  | 'other';
+
+export const PROSPECT_STATUSES: ProspectStatus[] = [
+  'researching',
+  'pitched',
+  'won',
+  'lost',
+  'on_hold',
+];
+
+export const CLOSED_PROSPECT_STATUSES: ProspectStatus[] = ['won', 'lost', 'on_hold'];
+
+export function isClosedStatus(s: ProspectStatus): boolean {
+  return CLOSED_PROSPECT_STATUSES.includes(s);
+}
+
+export interface MarketProspect {
+  id: number;
+  segment_id: number | null;
+  name: string;
+  city: string;
+  website: string;
+  socials: string;
+  notes: string;
+  starred: boolean;
+  status: ProspectStatus;
+  what_offered: string[];
+  loved: string[];
+  did_not_love: string[];
+  close_reason: ProspectCloseReason;
+  close_reason_detail: string;
+  closed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  segment?: LeadSegment | null;
+}
+
+export interface MarketProspectInput {
+  segment_id: number | null;
+  name: string;
+  city: string;
+  website: string;
+  socials: string;
+  notes: string;
+  starred: boolean;
+  status: ProspectStatus;
+  what_offered: string[];
+  loved: string[];
+  did_not_love: string[];
+  close_reason: ProspectCloseReason;
+  close_reason_detail: string;
+}
+
+export interface ProspectFilters {
+  segment_id?: number;
+  starred?: boolean;
+  status?: ProspectStatus;
+  search?: string;
+}
+
+export async function listSegments() {
+  return apiFetch<{ segments: LeadSegmentWithCount[] }>('/api/v1/admin/market/segments');
+}
+
+export async function getSegment(slug: string) {
+  return apiFetch<{ segment: LeadSegment }>(`/api/v1/admin/market/segments/${encodeURIComponent(slug)}`);
+}
+
+export async function createSegment(input: LeadSegmentInput) {
+  return apiFetch<{ segment: LeadSegment }>('/api/v1/admin/market/segments', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateSegment(id: number, input: LeadSegmentInput) {
+  return apiFetch<{ segment: LeadSegment }>(`/api/v1/admin/market/segments/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteSegment(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/market/segments/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function listProspects(filters?: ProspectFilters) {
+  const qs = new URLSearchParams();
+  if (filters?.segment_id) qs.set('segment_id', String(filters.segment_id));
+  if (filters?.starred) qs.set('starred', 'true');
+  if (filters?.status) qs.set('status', filters.status);
+  if (filters?.search) qs.set('search', filters.search);
+  const query = qs.toString() ? `?${qs.toString()}` : '';
+  return apiFetch<{ prospects: MarketProspect[] }>(`/api/v1/admin/market/prospects${query}`);
+}
+
+export async function createProspect(input: MarketProspectInput) {
+  return apiFetch<{ prospect: MarketProspect }>('/api/v1/admin/market/prospects', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateProspect(id: number, input: MarketProspectInput) {
+  return apiFetch<{ prospect: MarketProspect }>(`/api/v1/admin/market/prospects/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteProspect(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/market/prospects/${id}`, {
+    method: 'DELETE',
   });
 }
