@@ -965,3 +965,71 @@ export async function uploadPOSLoginSlideImage(file: File): Promise<string> {
   const data = await res.json();
   return data.image_url as string;
 }
+
+// ─── Infrastructure panel (EC2 monitor + dev scheduler + cost) ──────────
+
+export interface InfraInstance {
+  instance_id: string;
+  name: string;
+  state: string; // running | stopped | pending | stopping | ...
+  instance_type: string;
+  public_ip?: string;
+  private_ip?: string;
+  availability_zone?: string;
+  launched_at?: string;
+  controllable: boolean; // true only for the dev instance
+  is_dev: boolean;
+}
+
+export interface InfraSchedule {
+  mode: 'auto' | 'always_on';
+  timezone: string;
+  start_hour: number;
+  end_hour: number;
+  weekdays: string;
+  dev_instance_id: string;
+  should_be_on_now: boolean;
+  next_transition?: string;
+}
+
+export interface InfraCostLine {
+  service: string;
+  amount: number;
+}
+
+export interface InfraCost {
+  month_to_date: number;
+  forecast: number;
+  currency: string;
+  by_service: InfraCostLine[];
+  period_start: string;
+  period_end: string;
+  as_of: string;
+}
+
+export async function getInstances(): Promise<{ instances: InfraInstance[] }> {
+  return apiFetch<{ instances: InfraInstance[] }>('/api/v1/admin/infra/instances');
+}
+
+export async function startInstance(id: string): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>(`/api/v1/admin/infra/instances/${id}/start`, { method: 'POST' });
+}
+
+export async function stopInstance(id: string): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>(`/api/v1/admin/infra/instances/${id}/stop`, { method: 'POST' });
+}
+
+export async function getSchedule(): Promise<InfraSchedule> {
+  return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule');
+}
+
+export async function setScheduleMode(mode: 'auto' | 'always_on'): Promise<InfraSchedule> {
+  return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule', {
+    method: 'PUT',
+    body: JSON.stringify({ mode }),
+  });
+}
+
+export async function getCost(refresh = false): Promise<InfraCost> {
+  return apiFetch<InfraCost>(`/api/v1/admin/infra/cost${refresh ? '?refresh=1' : ''}`);
+}
