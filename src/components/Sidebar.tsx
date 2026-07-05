@@ -14,6 +14,8 @@ import {
   ClipboardDocumentListIcon,
   SparklesIcon,
   PresentationChartLineIcon,
+  DevicePhoneMobileIcon,
+  ServerStackIcon,
 } from '@heroicons/react/24/outline';
 
 const nav = [
@@ -26,6 +28,8 @@ const nav = [
   { href: '/dashboard/combos', label: 'Combo Menus', icon: SquaresPlusIcon },
   { href: '/dashboard/menu', label: 'Menu Manager', icon: ClipboardDocumentListIcon },
   { href: '/dashboard/ingredient-icons', label: 'Ingredient Icons', icon: SparklesIcon },
+  { href: '/dashboard/pos-login-screen', label: 'POS Login Screen', icon: DevicePhoneMobileIcon },
+  { href: '/dashboard/servers', label: 'Servers', icon: ServerStackIcon },
 ];
 
 export default function Sidebar() {

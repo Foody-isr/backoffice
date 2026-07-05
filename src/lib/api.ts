@@ -864,3 +864,172 @@ export async function deleteProspect(id: number) {
     method: 'DELETE',
   });
 }
+
+// ─── POS Login Screen ───────────────────────────────────────────────
+// Foody-curated content for the foodypos login carousel. Each slide is a
+// background photo + localized headline + caption; the eyebrow line is a
+// single global setting. Read by the POS over a public endpoint.
+
+/** A piece of UI copy in each supported language. English is the fallback. */
+export interface LocalizedText {
+  en: string;
+  fr: string;
+  he: string;
+}
+
+export const emptyLocalizedText = (): LocalizedText => ({ en: '', fr: '', he: '' });
+
+export interface POSLoginSlide {
+  id: number;
+  image_url: string;
+  headline: LocalizedText;
+  caption_title: LocalizedText;
+  caption_subtitle: LocalizedText;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface POSLoginSlideInput {
+  image_url: string;
+  headline: LocalizedText;
+  caption_title: LocalizedText;
+  caption_subtitle: LocalizedText;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface POSLoginConfig {
+  id: number;
+  eyebrow: LocalizedText;
+  updated_at: string;
+}
+
+export async function listPOSLoginSlides() {
+  return apiFetch<{ slides: POSLoginSlide[] }>('/api/v1/admin/pos-login-slides');
+}
+
+export async function createPOSLoginSlide(input: POSLoginSlideInput) {
+  return apiFetch<POSLoginSlide>('/api/v1/admin/pos-login-slides', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updatePOSLoginSlide(id: number, input: POSLoginSlideInput) {
+  return apiFetch<POSLoginSlide>(`/api/v1/admin/pos-login-slides/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deletePOSLoginSlide(id: number) {
+  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/pos-login-slides/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function reorderPOSLoginSlides(ids: number[]) {
+  return apiFetch<{ reordered: boolean }>('/api/v1/admin/pos-login-slides/reorder', {
+    method: 'POST',
+    body: JSON.stringify({ ids }),
+  });
+}
+
+export async function getPOSLoginConfig() {
+  return apiFetch<POSLoginConfig>('/api/v1/admin/pos-login-config');
+}
+
+export async function updatePOSLoginConfig(eyebrow: LocalizedText) {
+  return apiFetch<POSLoginConfig>('/api/v1/admin/pos-login-config', {
+    method: 'PUT',
+    body: JSON.stringify({ eyebrow }),
+  });
+}
+
+/** Uploads a slide background image (multipart) and returns its stored URL. */
+export async function uploadPOSLoginSlideImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append('image', file);
+  const token = getToken();
+  const res = await fetch(`${API_URL}/api/v1/admin/pos-login-slides/upload-image`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+    throw new Error(err.error || 'Upload failed');
+  }
+  const data = await res.json();
+  return data.image_url as string;
+}
+
+// ─── Infrastructure panel (EC2 monitor + dev scheduler + cost) ──────────
+
+export interface InfraInstance {
+  instance_id: string;
+  name: string;
+  state: string; // running | stopped | pending | stopping | ...
+  instance_type: string;
+  public_ip?: string;
+  private_ip?: string;
+  availability_zone?: string;
+  launched_at?: string;
+  controllable: boolean; // true only for the dev instance
+  is_dev: boolean;
+}
+
+export interface InfraSchedule {
+  mode: 'auto' | 'always_on';
+  timezone: string;
+  start_hour: number;
+  end_hour: number;
+  weekdays: string;
+  dev_instance_id: string;
+  should_be_on_now: boolean;
+  next_transition?: string;
+}
+
+export interface InfraCostLine {
+  service: string;
+  amount: number;
+}
+
+export interface InfraCost {
+  month_to_date: number;
+  forecast: number;
+  currency: string;
+  by_service: InfraCostLine[];
+  period_start: string;
+  period_end: string;
+  as_of: string;
+}
+
+export async function getInstances(): Promise<{ instances: InfraInstance[] }> {
+  return apiFetch<{ instances: InfraInstance[] }>('/api/v1/admin/infra/instances');
+}
+
+export async function startInstance(id: string): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>(`/api/v1/admin/infra/instances/${id}/start`, { method: 'POST' });
+}
+
+export async function stopInstance(id: string): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>(`/api/v1/admin/infra/instances/${id}/stop`, { method: 'POST' });
+}
+
+export async function getSchedule(): Promise<InfraSchedule> {
+  return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule');
+}
+
+export async function setScheduleMode(mode: 'auto' | 'always_on'): Promise<InfraSchedule> {
+  return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule', {
+    method: 'PUT',
+    body: JSON.stringify({ mode }),
+  });
+}
+
+export async function getCost(refresh = false): Promise<InfraCost> {
+  return apiFetch<InfraCost>(`/api/v1/admin/infra/cost${refresh ? '?refresh=1' : ''}`);
+}
