@@ -165,6 +165,13 @@ export interface OnboardInput {
   address?: string;
   phone?: string;
   timezone?: string;
+  /**
+   * The language the restaurant writes its menu in. It becomes the base-column
+   * language of the whole catalog, so leaving it to default means an Israeli
+   * restaurant gets flagged English and its Hebrew menu is later filed away as
+   * a "translation". Defaults to 'en' server-side when omitted.
+   */
+  default_locale?: 'en' | 'he' | 'fr';
   owner_id?: number;
   owner_name?: string;
   owner_email?: string;
