@@ -155,7 +155,8 @@ export type FeatureKey =
   | 'multi_restaurant'
   | 'custom_api'
   | 'whatsapp_notif'
-  | 'push_notif';
+  | 'push_notif'
+  | 'catering';
 
 export type PlanTier = 'starter' | 'premium' | 'enterprise';
 
