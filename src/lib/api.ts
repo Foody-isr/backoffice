@@ -534,25 +534,33 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 
 // ─── Payment Provider Config ────────────────────────────────────────
 
+export type PaymentProvider = 'payplus' | 'sumit' | 'cibus';
+
 export interface PaymentConfigResponse {
   restaurant_id: number;
-  provider: 'payplus' | 'sumit';
+  provider: PaymentProvider;
   has_custom_credentials: boolean;
   masked_api_key?: string;
   masked_secret_key?: string;
   masked_public_key?: string;
   masked_payment_page_uid?: string;
   sumit_company_id?: number;
+  masked_cibus_restaurant_id?: string;
+  masked_cibus_pos_id?: string;
+  masked_cibus_company_code?: string;
 }
 
 export interface UpdatePaymentConfigInput {
-  provider: 'payplus' | 'sumit';
+  provider: PaymentProvider;
   payplus_api_key?: string;
   payplus_secret_key?: string;
   payplus_payment_page_uid?: string;
   sumit_company_id?: number;
   sumit_api_key?: string;
   sumit_public_key?: string;
+  cibus_restaurant_id?: string;
+  cibus_pos_id?: string;
+  cibus_company_code?: string;
 }
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
@@ -561,6 +569,35 @@ export async function getPaymentConfig(restaurantId: number): Promise<PaymentCon
 
 export async function updatePaymentConfig(restaurantId: number, config: UpdatePaymentConfigInput): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`, {
+    method: 'PUT',
+    body: JSON.stringify(config),
+  });
+}
+
+// ── Cibus (Pluxee) platform-level config ───────────────────────────
+// Shared across all restaurants. The restaurant-level terminal creds live on the
+// per-restaurant payment config; this is Foody's integration environment/creds.
+
+export interface CibusConfigResponse {
+  environment: 'sandbox' | 'production';
+  endpoint_url: string;
+  masked_integrator_key?: string;
+  masked_integrator_secret?: string;
+}
+
+export interface UpdateCibusConfigInput {
+  environment: 'sandbox' | 'production';
+  endpoint_url?: string;
+  integrator_key?: string;
+  integrator_secret?: string;
+}
+
+export async function getCibusConfig(): Promise<CibusConfigResponse> {
+  return apiFetch<CibusConfigResponse>('/api/v1/admin/cibus-config');
+}
+
+export async function updateCibusConfig(config: UpdateCibusConfigInput): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/api/v1/admin/cibus-config', {
     method: 'PUT',
     body: JSON.stringify(config),
   });

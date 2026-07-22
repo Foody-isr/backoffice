@@ -26,6 +26,7 @@ import {
   PlanTier,
   SubscriptionDetail,
   PaymentConfigResponse,
+  PaymentProvider,
   UpdatePaymentConfigInput,
   SpokeConfigResponse,
 } from '@/lib/api';
@@ -65,7 +66,7 @@ export default function RestaurantDetailPage() {
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfigResponse | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentSaving, setPaymentSaving] = useState(false);
-  const [paymentProvider, setPaymentProvider] = useState<'payplus' | 'sumit'>('payplus');
+  const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('payplus');
   const [paymentCreds, setPaymentCreds] = useState<UpdatePaymentConfigInput>({ provider: 'payplus' });
 
   // Custom domain state
@@ -276,6 +277,10 @@ export default function RestaurantDetailPage() {
         input.sumit_company_id = paymentCreds.sumit_company_id;
         input.sumit_api_key = paymentCreds.sumit_api_key;
         input.sumit_public_key = paymentCreds.sumit_public_key;
+      } else if (paymentProvider === 'cibus') {
+        input.cibus_restaurant_id = paymentCreds.cibus_restaurant_id;
+        input.cibus_pos_id = paymentCreds.cibus_pos_id;
+        input.cibus_company_code = paymentCreds.cibus_company_code;
       } else if (paymentCreds.payplus_api_key) {
         input.payplus_api_key = paymentCreds.payplus_api_key;
         input.payplus_secret_key = paymentCreds.payplus_secret_key;
@@ -504,7 +509,7 @@ export default function RestaurantDetailPage() {
                 <select
                   value={paymentProvider}
                   onChange={(e) => {
-                    const v = e.target.value as 'payplus' | 'sumit';
+                    const v = e.target.value as PaymentProvider;
                     setPaymentProvider(v);
                     setPaymentCreds({ provider: v });
                   }}
@@ -512,6 +517,7 @@ export default function RestaurantDetailPage() {
                 >
                   <option value="payplus">PayPlus (Global Default)</option>
                   <option value="sumit">Summit</option>
+                  <option value="cibus">Cibus (Pluxee)</option>
                 </select>
               </div>
 
@@ -547,6 +553,50 @@ export default function RestaurantDetailPage() {
                       value={paymentCreds.sumit_public_key || ''}
                       onChange={(e) => setPaymentCreds({ ...paymentCreds, sumit_public_key: e.target.value || undefined })}
                       className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Cibus (Pluxee) credentials */}
+              {paymentProvider === 'cibus' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700">Cibus (Pluxee) Terminal</h3>
+                  <p className="text-xs text-gray-500 max-w-md">
+                    The restaurant is already a Cibus merchant. Enter the Cibus terminal identity it was
+                    provisioned with. Foody&apos;s servers must be IP-allowlisted by Cibus for these to work.
+                  </p>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Restaurant ID</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder={paymentConfig?.masked_cibus_restaurant_id || 'e.g. 1001'}
+                      value={paymentCreds.cibus_restaurant_id || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, cibus_restaurant_id: e.target.value || undefined })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">POS ID</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder={paymentConfig?.masked_cibus_pos_id || 'e.g. 7'}
+                      value={paymentCreds.cibus_pos_id || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, cibus_pos_id: e.target.value || undefined })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Company Code</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder={paymentConfig?.masked_cibus_company_code || 'e.g. 42'}
+                      value={paymentCreds.cibus_company_code || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, cibus_company_code: e.target.value || undefined })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                 </div>
