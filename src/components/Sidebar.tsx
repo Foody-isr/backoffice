@@ -16,6 +16,8 @@ import {
   PresentationChartLineIcon,
   DevicePhoneMobileIcon,
   ServerStackIcon,
+  CreditCardIcon,
+  CircleStackIcon,
 } from '@heroicons/react/24/outline';
 
 const nav = [
@@ -29,7 +31,9 @@ const nav = [
   { href: '/dashboard/menu', label: 'Menu Manager', icon: ClipboardDocumentListIcon },
   { href: '/dashboard/ingredient-icons', label: 'Ingredient Icons', icon: SparklesIcon },
   { href: '/dashboard/pos-login-screen', label: 'POS Login Screen', icon: DevicePhoneMobileIcon },
+  { href: '/dashboard/payments', label: 'Payments', icon: CreditCardIcon },
   { href: '/dashboard/servers', label: 'Servers', icon: ServerStackIcon },
+  { href: '/dashboard/clone', label: 'Clone Data', icon: CircleStackIcon },
 ];
 
 export default function Sidebar() {

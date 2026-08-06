@@ -155,7 +155,8 @@ export type FeatureKey =
   | 'multi_restaurant'
   | 'custom_api'
   | 'whatsapp_notif'
-  | 'push_notif';
+  | 'push_notif'
+  | 'catering';
 
 export type PlanTier = 'starter' | 'premium' | 'enterprise';
 
@@ -165,6 +166,13 @@ export interface OnboardInput {
   address?: string;
   phone?: string;
   timezone?: string;
+  /**
+   * The language the restaurant writes its menu in. It becomes the base-column
+   * language of the whole catalog, so leaving it to default means an Israeli
+   * restaurant gets flagged English and its Hebrew menu is later filed away as
+   * a "translation". Defaults to 'en' server-side when omitted.
+   */
+  default_locale?: 'en' | 'he' | 'fr';
   owner_id?: number;
   owner_name?: string;
   owner_email?: string;
@@ -526,25 +534,33 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 
 // ─── Payment Provider Config ────────────────────────────────────────
 
+export type PaymentProvider = 'payplus' | 'sumit' | 'cibus';
+
 export interface PaymentConfigResponse {
   restaurant_id: number;
-  provider: 'payplus' | 'sumit';
+  provider: PaymentProvider;
   has_custom_credentials: boolean;
   masked_api_key?: string;
   masked_secret_key?: string;
   masked_public_key?: string;
   masked_payment_page_uid?: string;
   sumit_company_id?: number;
+  masked_cibus_restaurant_id?: string;
+  masked_cibus_pos_id?: string;
+  masked_cibus_company_code?: string;
 }
 
 export interface UpdatePaymentConfigInput {
-  provider: 'payplus' | 'sumit';
+  provider: PaymentProvider;
   payplus_api_key?: string;
   payplus_secret_key?: string;
   payplus_payment_page_uid?: string;
   sumit_company_id?: number;
   sumit_api_key?: string;
   sumit_public_key?: string;
+  cibus_restaurant_id?: string;
+  cibus_pos_id?: string;
+  cibus_company_code?: string;
 }
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
@@ -553,6 +569,35 @@ export async function getPaymentConfig(restaurantId: number): Promise<PaymentCon
 
 export async function updatePaymentConfig(restaurantId: number, config: UpdatePaymentConfigInput): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`, {
+    method: 'PUT',
+    body: JSON.stringify(config),
+  });
+}
+
+// ── Cibus (Pluxee) platform-level config ───────────────────────────
+// Shared across all restaurants. The restaurant-level terminal creds live on the
+// per-restaurant payment config; this is Foody's integration environment/creds.
+
+export interface CibusConfigResponse {
+  environment: 'sandbox' | 'production';
+  endpoint_url: string;
+  masked_integrator_key?: string;
+  masked_integrator_secret?: string;
+}
+
+export interface UpdateCibusConfigInput {
+  environment: 'sandbox' | 'production';
+  endpoint_url?: string;
+  integrator_key?: string;
+  integrator_secret?: string;
+}
+
+export async function getCibusConfig(): Promise<CibusConfigResponse> {
+  return apiFetch<CibusConfigResponse>('/api/v1/admin/cibus-config');
+}
+
+export async function updateCibusConfig(config: UpdateCibusConfigInput): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>('/api/v1/admin/cibus-config', {
     method: 'PUT',
     body: JSON.stringify(config),
   });
@@ -1032,4 +1077,125 @@ export async function setScheduleMode(mode: 'auto' | 'always_on'): Promise<Infra
 
 export async function getCost(refresh = false): Promise<InfraCost> {
   return apiFetch<InfraCost>(`/api/v1/admin/infra/cost${refresh ? '?refresh=1' : ''}`);
+}
+
+// ─── Environment clone ──────────────────────────────────────────────
+//
+// Moves one restaurant's whole dataset between environments so a production bug
+// can be reproduced with the real data. The bundle travels through this browser:
+// export it from one environment, then upload it to the other. Each half is
+// authenticated by the normal superadmin login on that environment, so there is
+// no shared secret and production needs no configuration at all.
+//
+// All routes act on whichever API NEXT_PUBLIC_API_URL points at. Export works
+// everywhere, including production; apply is refused on production.
+
+export type CloneCluster = 'stock' | 'users_roles' | 'push_tokens' | 'integrations';
+
+export interface CloneStatus {
+  env: string;
+  is_clone_target: boolean;
+  optional_clusters: CloneCluster[];
+  offset_k: number;
+  bundle_version: number;
+}
+
+export interface CloneRestaurant {
+  id: number;
+  name: string;
+  slug: string;
+  orders: number;
+  items: number;
+}
+
+export interface CloneTableReport {
+  name: string;
+  cluster: string;
+  deleted: number;
+  inserted: number;
+  source: number;
+  nulled?: number;
+}
+
+export interface CloneOrphan {
+  table: string;
+  column: string;
+  parent: string;
+  count: number;
+}
+
+export interface CloneReport {
+  dry_run: boolean;
+  restaurant_id: number;
+  restaurant_name: string;
+  source_env: string;
+  target_env: string;
+  clusters: string[];
+  tables: CloneTableReport[];
+  total_inserted: number;
+  total_deleted: number;
+  orphans?: CloneOrphan[];
+  warnings?: string[];
+  skipped?: Record<string, string>;
+  committed: boolean;
+}
+
+export async function getCloneStatus(): Promise<CloneStatus> {
+  return apiFetch<CloneStatus>('/api/v1/admin/env-clone/status');
+}
+
+export async function getCloneRestaurants(): Promise<{ restaurants: CloneRestaurant[] }> {
+  return apiFetch<{ restaurants: CloneRestaurant[] }>('/api/v1/admin/env-clone/restaurants');
+}
+
+// downloadCloneBundle exports a restaurant from the current environment as a
+// JSON file. That file is both the transport to the other environment and the
+// backup to keep before overwriting anything.
+export async function downloadCloneBundle(restaurantId: number, clusters: CloneCluster[]): Promise<void> {
+  const token = getToken();
+  const query = new URLSearchParams({ restaurant_id: String(restaurantId) });
+  if (clusters.length > 0) query.set('clusters', clusters.join(','));
+
+  const res = await fetch(`${API_URL}/api/v1/admin/env-clone/export?${query.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `API error ${res.status}`);
+  }
+
+  // Prefer the filename the server chose, which records the source environment.
+  const disposition = res.headers.get('Content-Disposition') ?? '';
+  const match = disposition.match(/filename="([^"]+)"/);
+  const filename = match?.[1] || `foody-restaurant-${restaurantId}.json`;
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// applyCloneBundle uploads a bundle to the current environment. It previews
+// unless confirm is true, so a mis-picked file cannot destroy anything.
+export async function applyCloneBundle(file: File, confirm: boolean): Promise<CloneReport> {
+  const token = getToken();
+  const form = new FormData();
+  form.append('bundle', file);
+
+  const res = await fetch(`${API_URL}/api/v1/admin/env-clone/apply${confirm ? '?confirm=1' : ''}`, {
+    method: 'POST',
+    // No Content-Type: the browser sets the multipart boundary itself.
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `API error ${res.status}`);
+  }
+  return res.json();
 }
