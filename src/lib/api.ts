@@ -273,6 +273,19 @@ export async function sendResetPassword(userId: number) {
   });
 }
 
+export async function setUserPassword(userId: number, password: string) {
+  return apiFetch<{ ok: boolean }>(`/api/v1/admin/users/${userId}/password`, {
+    method: 'PUT',
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function revokeUserSessions(userId: number) {
+  return apiFetch<{ ok: boolean }>(`/api/v1/admin/users/${userId}/revoke-sessions`, {
+    method: 'POST',
+  });
+}
+
 export async function sendInviteEmail(userId: number) {
   return apiFetch<{ message: string }>(`/api/v1/admin/users/${userId}/send-invite`, {
     method: 'POST',
