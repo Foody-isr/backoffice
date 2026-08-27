@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { listUsers, sendResetPassword, deleteUser, User } from '@/lib/api';
 import { roleColor, capitalize, formatShortDate } from '@/lib/utils';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import SetPasswordModal from './SetPasswordModal';
 
 const ROLES = ['', 'superadmin', 'owner', 'manager', 'cashier', 'waiter', 'chef'];
 
@@ -16,6 +17,7 @@ export default function UsersPage() {
   const [resettingId, setResettingId] = useState<number | null>(null);
   const [resetSuccess, setResetSuccess] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [passwordUser, setPasswordUser] = useState<User | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -172,6 +174,13 @@ export default function UsersPage() {
                     {u.role !== 'superadmin' && (
                       <div className="flex items-center gap-2">
                         <button
+                          onClick={() => setPasswordUser(u)}
+                          className="px-3 py-1 text-xs font-medium rounded-lg transition
+                            bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                        >
+                          Set Password
+                        </button>
+                        <button
                           onClick={() => handleResetPassword(u.id)}
                           disabled={resettingId === u.id}
                           className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
@@ -181,7 +190,7 @@ export default function UsersPage() {
                             ? 'Sending\u2026'
                             : resetSuccess === u.id
                               ? '\u2713 Sent'
-                              : 'Reset Password'}
+                              : 'Email Reset Link'}
                         </button>
                         <button
                           onClick={() => handleDeleteUser(u)}
@@ -206,6 +215,10 @@ export default function UsersPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {passwordUser && (
+        <SetPasswordModal user={passwordUser} onClose={() => setPasswordUser(null)} />
       )}
     </div>
   );
