@@ -611,13 +611,11 @@ export default function RestaurantDetailPage() {
                 <div className="space-y-4 mb-6">
                   <h3 className="text-sm font-semibold text-gray-700">Stancer Keys</h3>
                   <p className="text-xs text-gray-500 max-w-md">
-                    From the restaurant&apos;s own Stancer account (Developers &rarr; API keys). Both keys
-                    are needed: the secret authenticates the API, and the payment page the guest is sent
-                    to is a URL built from the public key &mdash; Stancer returns no link, so without it a
-                    payment can be created and then never paid. Production keys start <code>sprod_</code> /
-                    <code>pprod_</code>, sandbox ones <code>stest_</code> / <code>ptest_</code> &mdash; a
-                    test key takes no real money. Stancer settles in euros, so set the restaurant&apos;s
-                    currency to EUR as well.
+                    From the restaurant&apos;s own Stancer account (Developers &rarr; API keys). Only the
+                    secret key is needed to take payments; the public key is for Stancer&apos;s embedded
+                    form, which Foody does not use. Production secrets start <code>sprod_</code>, sandbox
+                    ones <code>stest_</code> &mdash; a test key takes no real money. Stancer settles in
+                    euros, so set the restaurant&apos;s currency to EUR as well.
                   </p>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1">
@@ -634,7 +632,7 @@ export default function RestaurantDetailPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1">
-                      Public key <span className="text-gray-400 font-normal">(required)</span>
+                      Public key <span className="text-gray-400 font-normal">(optional)</span>
                     </label>
                     <input
                       type="text"
@@ -645,8 +643,8 @@ export default function RestaurantDetailPage() {
                       className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                     <p className="text-xs text-gray-400 mt-1 max-w-md">
-                      Addresses the hosted payment page:
-                      <code>payment.stancer.com/&lt;public key&gt;/&lt;payment id&gt;</code>.
+                      Stored so the restaurant need not be re-onboarded if Foody ever moves to
+                      Stancer&apos;s embedded form.
                     </p>
                   </div>
                 </div>
