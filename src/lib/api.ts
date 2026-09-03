@@ -173,6 +173,13 @@ export interface OnboardInput {
    * a "translation". Defaults to 'en' server-side when omitted.
    */
   default_locale?: 'en' | 'he' | 'fr';
+  /**
+   * ISO 4217 code the restaurant prices in. Set it here: amounts are never
+   * converted, so changing it later re-labels a catalog that was priced in
+   * something else. A restaurant on Stancer must be EUR. Defaults to ILS
+   * server-side when omitted.
+   */
+  currency?: 'ILS' | 'EUR' | 'USD' | 'GBP';
   owner_id?: number;
   owner_name?: string;
   owner_email?: string;
