@@ -15,6 +15,14 @@ import { planColor, capitalize } from '@/lib/utils';
 type SetupMode = 'invite' | 'manual';
 
 type Locale = NonNullable<OnboardInput['default_locale']>;
+type Currency = NonNullable<OnboardInput['currency']>;
+
+const CURRENCY_OPTIONS: { value: Currency; label: string }[] = [
+  { value: 'ILS', label: 'Shekel (₪)' },
+  { value: 'EUR', label: 'Euro (€)' },
+  { value: 'USD', label: 'US Dollar ($)' },
+  { value: 'GBP', label: 'Pound (£)' },
+];
 
 const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'he', label: 'עברית (Hebrew)' },
@@ -44,6 +52,10 @@ export default function OnboardPage() {
   // flags every restaurant English regardless of the language it actually
   // trades in, and that misfiles the whole catalog on first menu import.
   const [defaultLocale, setDefaultLocale] = useState<Locale | ''>('');
+  // Same reasoning as the locale: no default. Prices are never converted, so a
+  // restaurant provisioned in the wrong currency has to have its whole catalog
+  // re-labelled by hand later.
+  const [currency, setCurrency] = useState<Currency | ''>('');
 
   useEffect(() => {
     getFeatureCatalog().then((data) => setPlans(data.plans));
@@ -59,6 +71,7 @@ export default function OnboardPage() {
       owner_email: ownerEmail,
       plan_tier: planTier,
       default_locale: defaultLocale || undefined,
+      currency: currency || undefined,
     };
     if (setupMode === 'manual') {
       input.owner_password = ownerPassword;
@@ -83,6 +96,7 @@ export default function OnboardPage() {
     loading ||
     !ownerEmail.trim() ||
     !defaultLocale ||
+    !currency ||
     (setupMode === 'manual' && ownerPassword.length < 8);
 
   // ─── Success screen ────────────────────────────────────────────────
@@ -239,6 +253,7 @@ export default function OnboardPage() {
                 setOwnerPassword('');
                 setPlanTier('starter');
                 setDefaultLocale('');
+                setCurrency('');
                 setInviteStatus('idle');
               }}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
@@ -393,6 +408,33 @@ export default function OnboardPage() {
               The language this restaurant writes its menu in. Everything else is translated from it,
               so an Israeli restaurant left on English will have its Hebrew menu filed away as a
               translation. Deliberately not pre-filled.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="currency" className="block text-xs font-medium text-gray-600 mb-1">
+              Currency
+            </label>
+            <select
+              id="currency"
+              required
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as Currency | '')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            >
+              <option value="" disabled>
+                Select a currency
+              </option>
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-gray-500">
+              What this restaurant prices in. Amounts are never converted, so getting it wrong means
+              re-labelling the whole catalog by hand later. A restaurant paying through Stancer must
+              be EUR. Also not pre-filled.
             </p>
           </div>
         </div>
