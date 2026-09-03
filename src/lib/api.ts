@@ -173,6 +173,13 @@ export interface OnboardInput {
    * a "translation". Defaults to 'en' server-side when omitted.
    */
   default_locale?: 'en' | 'he' | 'fr';
+  /**
+   * ISO 4217 code the restaurant prices in. Set it here: amounts are never
+   * converted, so changing it later re-labels a catalog that was priced in
+   * something else. A restaurant on Stancer must be EUR. Defaults to ILS
+   * server-side when omitted.
+   */
+  currency?: 'ILS' | 'EUR' | 'USD' | 'GBP';
   owner_id?: number;
   owner_name?: string;
   owner_email?: string;
@@ -547,7 +554,7 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 
 // ─── Payment Provider Config ────────────────────────────────────────
 
-export type PaymentProvider = 'payplus' | 'sumit' | 'cibus';
+export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'stancer';
 
 export interface PaymentConfigResponse {
   restaurant_id: number;
@@ -561,6 +568,8 @@ export interface PaymentConfigResponse {
   masked_cibus_restaurant_id?: string;
   masked_cibus_pos_id?: string;
   masked_cibus_company_code?: string;
+  masked_stancer_secret_key?: string;
+  masked_stancer_public_key?: string;
 }
 
 export interface UpdatePaymentConfigInput {
@@ -574,6 +583,8 @@ export interface UpdatePaymentConfigInput {
   cibus_restaurant_id?: string;
   cibus_pos_id?: string;
   cibus_company_code?: string;
+  stancer_secret_key?: string;
+  stancer_public_key?: string;
 }
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
