@@ -1061,6 +1061,11 @@ export interface InfraSchedule {
   next_transition?: string;
 }
 
+export interface InfraTranslation {
+  enabled: boolean;
+  available: boolean;
+}
+
 export interface InfraCostLine {
   service: string;
   amount: number;
@@ -1092,10 +1097,21 @@ export async function getSchedule(): Promise<InfraSchedule> {
   return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule');
 }
 
-export async function setScheduleMode(mode: 'auto' | 'always_on'): Promise<InfraSchedule> {
+export async function updateSchedule(input: Pick<InfraSchedule, 'mode' | 'start_hour' | 'end_hour'>): Promise<InfraSchedule> {
   return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule', {
     method: 'PUT',
-    body: JSON.stringify({ mode }),
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getTranslationSetting(): Promise<InfraTranslation> {
+  return apiFetch<InfraTranslation>('/api/v1/admin/infra/translation');
+}
+
+export async function setTranslationEnabled(enabled: boolean): Promise<InfraTranslation> {
+  return apiFetch<InfraTranslation>('/api/v1/admin/infra/translation', {
+    method: 'PUT',
+    body: JSON.stringify({ enabled }),
   });
 }
 
