@@ -173,6 +173,13 @@ export interface OnboardInput {
    * a "translation". Defaults to 'en' server-side when omitted.
    */
   default_locale?: 'en' | 'he' | 'fr';
+  /**
+   * ISO 4217 code the restaurant prices in. Set it here: amounts are never
+   * converted, so changing it later re-labels a catalog that was priced in
+   * something else. A restaurant on Stancer must be EUR. Defaults to ILS
+   * server-side when omitted.
+   */
+  currency?: 'ILS' | 'EUR' | 'USD' | 'GBP';
   owner_id?: number;
   owner_name?: string;
   owner_email?: string;
@@ -547,7 +554,7 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 
 // ─── Payment Provider Config ────────────────────────────────────────
 
-export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone';
+export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone' | 'stancer';
 
 export interface PaymentConfigResponse {
   restaurant_id: number;
@@ -574,6 +581,8 @@ export interface PaymentConfigResponse {
   masked_verifone_threeds_contract_id?: string;
   masked_verifone_token_scope?: string;
   masked_verifone_public_key_alias?: string;
+  masked_stancer_secret_key?: string;
+  masked_stancer_public_key?: string;
 }
 
 export interface UpdatePaymentConfigInput {
@@ -600,6 +609,8 @@ export interface UpdatePaymentConfigInput {
   verifone_public_key_alias?: string;
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
+  stancer_secret_key?: string;
+  stancer_public_key?: string;
 }
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {

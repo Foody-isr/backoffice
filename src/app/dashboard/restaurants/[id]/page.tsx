@@ -301,6 +301,9 @@ export default function RestaurantDetailPage() {
         input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
         input.verifone_token_charging_enabled = paymentCreds.verifone_token_charging_enabled || false;
         input.verifone_invoice4u_enabled = paymentCreds.verifone_invoice4u_enabled || false;
+      } else if (paymentProvider === 'stancer') {
+        input.stancer_secret_key = paymentCreds.stancer_secret_key;
+        input.stancer_public_key = paymentCreds.stancer_public_key;
       } else if (paymentCreds.payplus_api_key) {
         input.payplus_api_key = paymentCreds.payplus_api_key;
         input.payplus_secret_key = paymentCreds.payplus_secret_key;
@@ -541,6 +544,7 @@ export default function RestaurantDetailPage() {
                   <option value="sumit">Summit</option>
                   <option value="cibus">Cibus (Pluxee)</option>
                   <option value="verifone">Verifone Cloud (GreenBox)</option>
+                  <option value="stancer">Stancer (France)</option>
                 </select>
               </div>
 
@@ -695,6 +699,50 @@ export default function RestaurantDetailPage() {
                       onChange={(e) => setPaymentCreds({ ...paymentCreds, cibus_company_code: e.target.value || undefined })}
                       className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
+                  </div>
+                </div>
+              )}
+
+              {/* Stancer credentials */}
+              {paymentProvider === 'stancer' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700">Stancer Keys</h3>
+                  <p className="text-xs text-gray-500 max-w-md">
+                    From the restaurant&apos;s own Stancer account (Developers &rarr; API keys). Only the
+                    secret key is needed to take payments; the public key is for Stancer&apos;s embedded
+                    form, which Foody does not use. Production secrets start <code>sprod_</code>, sandbox
+                    ones <code>stest_</code> &mdash; a test key takes no real money. Stancer settles in
+                    euros, so set the restaurant&apos;s currency to EUR as well.
+                  </p>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      Secret key <span className="text-gray-400 font-normal">(required)</span>
+                    </label>
+                    <input
+                      type="password"
+                      autoComplete="off"
+                      placeholder={paymentConfig?.masked_stancer_secret_key || 'sprod_...'}
+                      value={paymentCreds.stancer_secret_key || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, stancer_secret_key: e.target.value || undefined })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      Public key <span className="text-gray-400 font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      autoComplete="off"
+                      placeholder={paymentConfig?.masked_stancer_public_key || 'pprod_...'}
+                      value={paymentCreds.stancer_public_key || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, stancer_public_key: e.target.value || undefined })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 max-w-md">
+                      Stored so the restaurant need not be re-onboarded if Foody ever moves to
+                      Stancer&apos;s embedded form.
+                    </p>
                   </div>
                 </div>
               )}
