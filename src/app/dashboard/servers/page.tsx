@@ -1,16 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowPathIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, ClockIcon, LanguageIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
 import {
   getInstances,
   startInstance,
   stopInstance,
   getSchedule,
-  setScheduleMode,
+  updateSchedule,
+  getTranslationSetting,
+  setTranslationEnabled,
   getCost,
   type InfraInstance,
   type InfraSchedule,
+  type InfraTranslation,
   type InfraCost,
 } from '@/lib/api';
 
@@ -55,11 +58,16 @@ function hour(h: number): string {
 export default function ServersPage() {
   const [instances, setInstances] = useState<InfraInstance[]>([]);
   const [schedule, setSchedule] = useState<InfraSchedule | null>(null);
+  const [translation, setTranslation] = useState<InfraTranslation | null>(null);
   const [cost, setCost] = useState<InfraCost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actioningId, setActioningId] = useState<string | null>(null);
   const [savingMode, setSavingMode] = useState(false);
+  const [savingHours, setSavingHours] = useState(false);
+  const [savingTranslation, setSavingTranslation] = useState(false);
+  const [startHour, setStartHour] = useState(8);
+  const [endHour, setEndHour] = useState(20);
   const [refreshingCost, setRefreshingCost] = useState(false);
 
   const loadInstances = useCallback(async () => {
@@ -71,11 +79,21 @@ export default function ServersPage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const [inst, sched, c] = await Promise.allSettled([getInstances(), getSchedule(), getCost()]);
+      const [inst, sched, translate, c] = await Promise.allSettled([
+        getInstances(),
+        getSchedule(),
+        getTranslationSetting(),
+        getCost(),
+      ]);
       if (!active) return;
       if (inst.status === 'fulfilled') setInstances(inst.value.instances);
       else setError(inst.reason instanceof Error ? inst.reason.message : 'Could not load instances');
-      if (sched.status === 'fulfilled') setSchedule(sched.value);
+      if (sched.status === 'fulfilled') {
+        setSchedule(sched.value);
+        setStartHour(sched.value.start_hour);
+        setEndHour(sched.value.end_hour);
+      }
+      if (translate.status === 'fulfilled') setTranslation(translate.value);
       if (c.status === 'fulfilled') setCost(c.value);
       setLoading(false);
     })();
@@ -115,13 +133,42 @@ export default function ServersPage() {
     setSavingMode(true);
     setError(null);
     try {
-      const updated = await setScheduleMode(mode);
+      const updated = await updateSchedule({ mode, start_hour: startHour, end_hour: endHour });
       setSchedule(updated);
       await loadInstances(); // always_on brings dev up immediately
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not update schedule');
     } finally {
       setSavingMode(false);
+    }
+  }
+
+  async function saveHours() {
+    if (!schedule || savingHours || startHour >= endHour) return;
+    setSavingHours(true);
+    setError(null);
+    try {
+      const updated = await updateSchedule({ mode: schedule.mode, start_hour: startHour, end_hour: endHour });
+      setSchedule(updated);
+      await loadInstances();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not update working hours');
+    } finally {
+      setSavingHours(false);
+    }
+  }
+
+  async function changeTranslation(enabled: boolean) {
+    if (!translation || savingTranslation || translation.enabled === enabled) return;
+    if (enabled && !window.confirm('Enable Amazon Translate? New translations are billed per character by AWS.')) return;
+    setSavingTranslation(true);
+    setError(null);
+    try {
+      setTranslation(await setTranslationEnabled(enabled));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not update Amazon Translate');
+    } finally {
+      setSavingTranslation(false);
     }
   }
 
@@ -204,26 +251,71 @@ export default function ServersPage() {
         )}
       </div>
 
+      {/* Runtime cost controls */}
+      {translation && (
+        <div className={`bg-white rounded-xl border p-5 ${translation.enabled ? 'border-amber-300' : 'border-emerald-200'}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex gap-3">
+              <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${translation.enabled ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                <LanguageIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-800">Amazon Translate</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {translation.enabled
+                    ? 'Paid machine translation is active for menu and website content.'
+                    : 'Paid translation calls are blocked. Existing saved translations remain available.'}
+                </p>
+                {!translation.available && (
+                  <p className="text-xs text-red-600 mt-1">The AWS translation provider is not available on this server.</p>
+                )}
+              </div>
+            </div>
+            <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 shrink-0" role="group" aria-label="Amazon Translate status">
+              {([false, true] as const).map((enabled) => (
+                <button
+                  key={String(enabled)}
+                  onClick={() => changeTranslation(enabled)}
+                  disabled={savingTranslation || (enabled && !translation.available)}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-md transition disabled:opacity-50 ${
+                    translation.enabled === enabled
+                      ? enabled ? 'bg-amber-100 text-amber-800 shadow-sm' : 'bg-emerald-100 text-emerald-800 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {enabled ? 'Enabled' : 'Disabled'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Dev schedule */}
       {schedule && (
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-semibold text-gray-600">Dev server schedule</h2>
-              {schedule.mode === 'auto' ? (
-                <p className="text-sm text-gray-500 mt-1">
-                  Dev turns off outside working hours to save cost. On {schedule.weekdays.toLowerCase()},{' '}
-                  {hour(schedule.start_hour)} to {hour(schedule.end_hour)} ({schedule.timezone}). Right now it should be{' '}
-                  <span className={schedule.should_be_on_now ? 'text-green-600 font-semibold' : 'text-gray-700 font-semibold'}>
-                    {schedule.should_be_on_now ? 'ON' : 'OFF'}
-                  </span>
-                  {schedule.next_transition && <>, next change {dateTime(schedule.next_transition)}</>}.
-                </p>
-              ) : (
-                <p className="text-sm text-gray-500 mt-1">
-                  Dev stays on around the clock, including weekends. Switch back to Auto to save cost off-hours.
-                </p>
-              )}
+            <div className="flex gap-3">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                <ClockIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-600">Dev server schedule</h2>
+                {schedule.mode === 'auto' ? (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Dev turns off outside working hours to save cost. On {schedule.weekdays.toLowerCase()},{' '}
+                    {hour(schedule.start_hour)} to {hour(schedule.end_hour)} ({schedule.timezone}). Right now it should be{' '}
+                    <span className={schedule.should_be_on_now ? 'text-green-600 font-semibold' : 'text-gray-700 font-semibold'}>
+                      {schedule.should_be_on_now ? 'ON' : 'OFF'}
+                    </span>
+                    {schedule.next_transition && <>, next change {dateTime(schedule.next_transition)}</>}.
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Dev stays on around the clock, including weekends. Switch back to Auto to save cost off-hours.
+                  </p>
+                )}
+              </div>
             </div>
             <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 shrink-0">
               {(['auto', 'always_on'] as const).map((m) => (
@@ -239,6 +331,36 @@ export default function ServersPage() {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="mt-5 border-t border-gray-100 pt-4 flex flex-col sm:flex-row sm:items-end gap-3">
+            <label className="text-xs font-medium text-gray-600">
+              Starts
+              <select
+                value={startHour}
+                onChange={(e) => setStartHour(Number(e.target.value))}
+                className="mt-1 block w-28 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              >
+                {Array.from({ length: 24 }, (_, h) => h).map((h) => <option key={h} value={h}>{hour(h)}</option>)}
+              </select>
+            </label>
+            <label className="text-xs font-medium text-gray-600">
+              Ends
+              <select
+                value={endHour}
+                onChange={(e) => setEndHour(Number(e.target.value))}
+                className="mt-1 block w-28 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              >
+                {Array.from({ length: 24 }, (_, h) => h + 1).map((h) => <option key={h} value={h}>{hour(h)}</option>)}
+              </select>
+            </label>
+            <button
+              onClick={saveHours}
+              disabled={savingHours || startHour >= endHour || (startHour === schedule.start_hour && endHour === schedule.end_hour)}
+              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {savingHours ? 'Saving…' : 'Save working hours'}
+            </button>
+            {startHour >= endHour && <p className="text-xs text-red-600 pb-2">End time must be after start time.</p>}
           </div>
         </div>
       )}

@@ -547,7 +547,7 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 
 // ─── Payment Provider Config ────────────────────────────────────────
 
-export type PaymentProvider = 'payplus' | 'sumit' | 'cibus';
+export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone';
 
 export interface PaymentConfigResponse {
   restaurant_id: number;
@@ -561,6 +561,19 @@ export interface PaymentConfigResponse {
   masked_cibus_restaurant_id?: string;
   masked_cibus_pos_id?: string;
   masked_cibus_company_code?: string;
+  verifone_environment?: 'sandbox' | 'production';
+  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_token_charging_enabled?: boolean;
+  verifone_invoice4u_enabled?: boolean;
+  masked_verifone_user_id?: string;
+  masked_verifone_api_key?: string;
+  masked_verifone_entity_id?: string;
+  masked_verifone_checkout_payment_contract_id?: string;
+  masked_verifone_token_payment_contract_id?: string;
+  masked_verifone_installments_payment_contract_id?: string;
+  masked_verifone_threeds_contract_id?: string;
+  masked_verifone_token_scope?: string;
+  masked_verifone_public_key_alias?: string;
 }
 
 export interface UpdatePaymentConfigInput {
@@ -574,6 +587,19 @@ export interface UpdatePaymentConfigInput {
   cibus_restaurant_id?: string;
   cibus_pos_id?: string;
   cibus_company_code?: string;
+  verifone_environment?: 'sandbox' | 'production';
+  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_user_id?: string;
+  verifone_api_key?: string;
+  verifone_entity_id?: string;
+  verifone_checkout_payment_contract_id?: string;
+  verifone_token_payment_contract_id?: string;
+  verifone_installments_payment_contract_id?: string;
+  verifone_threeds_contract_id?: string;
+  verifone_token_scope?: string;
+  verifone_public_key_alias?: string;
+  verifone_token_charging_enabled?: boolean;
+  verifone_invoice4u_enabled?: boolean;
 }
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
@@ -1050,6 +1076,11 @@ export interface InfraSchedule {
   next_transition?: string;
 }
 
+export interface InfraTranslation {
+  enabled: boolean;
+  available: boolean;
+}
+
 export interface InfraCostLine {
   service: string;
   amount: number;
@@ -1081,10 +1112,21 @@ export async function getSchedule(): Promise<InfraSchedule> {
   return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule');
 }
 
-export async function setScheduleMode(mode: 'auto' | 'always_on'): Promise<InfraSchedule> {
+export async function updateSchedule(input: Pick<InfraSchedule, 'mode' | 'start_hour' | 'end_hour'>): Promise<InfraSchedule> {
   return apiFetch<InfraSchedule>('/api/v1/admin/infra/schedule', {
     method: 'PUT',
-    body: JSON.stringify({ mode }),
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getTranslationSetting(): Promise<InfraTranslation> {
+  return apiFetch<InfraTranslation>('/api/v1/admin/infra/translation');
+}
+
+export async function setTranslationEnabled(enabled: boolean): Promise<InfraTranslation> {
+  return apiFetch<InfraTranslation>('/api/v1/admin/infra/translation', {
+    method: 'PUT',
+    body: JSON.stringify({ enabled }),
   });
 }
 
