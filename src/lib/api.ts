@@ -554,7 +554,7 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 
 // ─── Payment Provider Config ────────────────────────────────────────
 
-export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'stancer';
+export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone' | 'stancer';
 
 export interface PaymentConfigResponse {
   restaurant_id: number;
@@ -568,6 +568,19 @@ export interface PaymentConfigResponse {
   masked_cibus_restaurant_id?: string;
   masked_cibus_pos_id?: string;
   masked_cibus_company_code?: string;
+  verifone_environment?: 'sandbox' | 'production';
+  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_token_charging_enabled?: boolean;
+  verifone_invoice4u_enabled?: boolean;
+  masked_verifone_user_id?: string;
+  masked_verifone_api_key?: string;
+  masked_verifone_entity_id?: string;
+  masked_verifone_checkout_payment_contract_id?: string;
+  masked_verifone_token_payment_contract_id?: string;
+  masked_verifone_installments_payment_contract_id?: string;
+  masked_verifone_threeds_contract_id?: string;
+  masked_verifone_token_scope?: string;
+  masked_verifone_public_key_alias?: string;
   masked_stancer_secret_key?: string;
   masked_stancer_public_key?: string;
 }
@@ -583,6 +596,19 @@ export interface UpdatePaymentConfigInput {
   cibus_restaurant_id?: string;
   cibus_pos_id?: string;
   cibus_company_code?: string;
+  verifone_environment?: 'sandbox' | 'production';
+  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_user_id?: string;
+  verifone_api_key?: string;
+  verifone_entity_id?: string;
+  verifone_checkout_payment_contract_id?: string;
+  verifone_token_payment_contract_id?: string;
+  verifone_installments_payment_contract_id?: string;
+  verifone_threeds_contract_id?: string;
+  verifone_token_scope?: string;
+  verifone_public_key_alias?: string;
+  verifone_token_charging_enabled?: boolean;
+  verifone_invoice4u_enabled?: boolean;
   stancer_secret_key?: string;
   stancer_public_key?: string;
 }
