@@ -126,7 +126,13 @@ export default function RestaurantDetailPage() {
       .then((cfg) => {
         setPaymentConfig(cfg);
         setPaymentProvider(cfg.provider);
-        setPaymentCreds({ provider: cfg.provider });
+        setPaymentCreds({
+          provider: cfg.provider,
+          verifone_environment: cfg.verifone_environment || 'sandbox',
+          verifone_stored_credential_model: cfg.verifone_stored_credential_model,
+          verifone_token_charging_enabled: cfg.verifone_token_charging_enabled || false,
+          verifone_invoice4u_enabled: cfg.verifone_invoice4u_enabled || false,
+        });
       })
       .catch(() => {})
       .finally(() => setPaymentLoading(false));
@@ -281,6 +287,20 @@ export default function RestaurantDetailPage() {
         input.cibus_restaurant_id = paymentCreds.cibus_restaurant_id;
         input.cibus_pos_id = paymentCreds.cibus_pos_id;
         input.cibus_company_code = paymentCreds.cibus_company_code;
+      } else if (paymentProvider === 'verifone') {
+        input.verifone_environment = paymentCreds.verifone_environment || 'sandbox';
+        input.verifone_stored_credential_model = paymentCreds.verifone_stored_credential_model;
+        input.verifone_user_id = paymentCreds.verifone_user_id;
+        input.verifone_api_key = paymentCreds.verifone_api_key;
+        input.verifone_entity_id = paymentCreds.verifone_entity_id;
+        input.verifone_checkout_payment_contract_id = paymentCreds.verifone_checkout_payment_contract_id;
+        input.verifone_token_payment_contract_id = paymentCreds.verifone_token_payment_contract_id;
+        input.verifone_installments_payment_contract_id = paymentCreds.verifone_installments_payment_contract_id;
+        input.verifone_threeds_contract_id = paymentCreds.verifone_threeds_contract_id;
+        input.verifone_token_scope = paymentCreds.verifone_token_scope;
+        input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
+        input.verifone_token_charging_enabled = paymentCreds.verifone_token_charging_enabled || false;
+        input.verifone_invoice4u_enabled = paymentCreds.verifone_invoice4u_enabled || false;
       } else if (paymentProvider === 'stancer') {
         input.stancer_secret_key = paymentCreds.stancer_secret_key;
         input.stancer_public_key = paymentCreds.stancer_public_key;
@@ -491,9 +511,11 @@ export default function RestaurantDetailPage() {
                   <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
                     paymentConfig.provider === 'sumit'
                       ? 'bg-blue-100 text-blue-700'
-                      : 'bg-green-100 text-green-700'
+                      : paymentConfig.provider === 'verifone'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-green-100 text-green-700'
                   }`}>
-                    {paymentConfig.provider === 'sumit' ? 'Summit' : 'PayPlus'}
+                    {paymentConfig.provider === 'sumit' ? 'Summit' : paymentConfig.provider === 'verifone' ? 'Verifone' : paymentConfig.provider === 'cibus' ? 'Cibus' : 'PayPlus'}
                   </span>
                   {paymentConfig.has_custom_credentials && (
                     <span className="text-gray-500 ml-2">
@@ -521,9 +543,84 @@ export default function RestaurantDetailPage() {
                   <option value="payplus">PayPlus (Global Default)</option>
                   <option value="sumit">Summit</option>
                   <option value="cibus">Cibus (Pluxee)</option>
+                  <option value="verifone">Verifone Cloud (GreenBox)</option>
                   <option value="stancer">Stancer (France)</option>
                 </select>
               </div>
+
+              {/* Verifone Cloud credentials */}
+              {paymentProvider === 'verifone' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700">Verifone Cloud / GreenBox</h3>
+                  <p className="text-xs text-gray-500 max-w-2xl">
+                    Initial Checkout uses the CVV contract. Token charges use the separately configured no-CVV contract and remain disabled until explicitly enabled. Configure the signed webhook in Verifone Central as <code>/api/v1/webhooks/verifone/{id}</code>.
+                  </p>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Environment</label>
+                    <select
+                      value={paymentCreds.verifone_environment || 'sandbox'}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_environment: e.target.value as 'sandbox' | 'production' })}
+                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    >
+                      <option value="sandbox">CST Sandbox</option>
+                      <option value="production">EMEA Production</option>
+                    </select>
+                  </div>
+                  {([
+                    ['verifone_user_id', 'User ID', paymentConfig?.masked_verifone_user_id],
+                    ['verifone_api_key', 'API Key', paymentConfig?.masked_verifone_api_key],
+                    ['verifone_entity_id', 'Entity ID', paymentConfig?.masked_verifone_entity_id],
+                    ['verifone_checkout_payment_contract_id', 'Checkout contract (CVV)', paymentConfig?.masked_verifone_checkout_payment_contract_id],
+                    ['verifone_threeds_contract_id', '3DS contract', paymentConfig?.masked_verifone_threeds_contract_id],
+                    ['verifone_token_payment_contract_id', 'Token contract (no CVV)', paymentConfig?.masked_verifone_token_payment_contract_id],
+                    ['verifone_installments_payment_contract_id', 'Installments contract', paymentConfig?.masked_verifone_installments_payment_contract_id],
+                    ['verifone_token_scope', 'Token scope', paymentConfig?.masked_verifone_token_scope],
+                    ['verifone_public_key_alias', 'Public-key alias', paymentConfig?.masked_verifone_public_key_alias],
+                  ] as const).map(([field, label, masked]) => (
+                    <div key={field}>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+                      <input
+                        type="password"
+                        autoComplete="new-password"
+                        placeholder={masked || `Enter ${label.toLowerCase()}`}
+                        value={(paymentCreds[field] as string | undefined) || ''}
+                        onChange={(e) => setPaymentCreds({ ...paymentCreds, [field]: e.target.value || undefined })}
+                        className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Stored credential model</label>
+                    <select
+                      value={paymentCreds.verifone_stored_credential_model || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_stored_credential_model: (e.target.value || undefined) as 'RECURRING' | 'NONE' | undefined })}
+                      className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    >
+                      <option value="">Select before enabling token charges</option>
+                      <option value="RECURRING">Recurring subscription</option>
+                      <option value="NONE">Credential on file / unscheduled</option>
+                    </select>
+                  </div>
+                  <label className="flex items-start gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={paymentCreds.verifone_token_charging_enabled || false}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_token_charging_enabled: e.target.checked })}
+                      className="mt-0.5"
+                    />
+                    <span><strong>Enable token charges</strong><br /><span className="text-xs text-gray-500">Requires the separate no-CVV contract, token scope, and matching stored-credential model.</span></span>
+                  </label>
+                  <label className="flex items-start gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={paymentCreds.verifone_invoice4u_enabled || false}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_invoice4u_enabled: e.target.checked })}
+                      className="mt-0.5"
+                    />
+                    <span><strong>Invoice4U hook</strong><br /><span className="text-xs text-gray-500">Configuration seam only; document creation is not active yet.</span></span>
+                  </label>
+                </div>
+              )}
 
               {/* Summit credentials */}
               {paymentProvider === 'sumit' && (
