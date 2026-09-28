@@ -1,9 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
+  BookOpenIcon,
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
@@ -123,7 +125,14 @@ export default function OperationsPage() {
               One place to detect an outage, open the right evidence and keep customer data out of diagnostics.
             </p>
           </div>
-          <div className="flex flex-col gap-1 text-sm text-gray-300 lg:items-end">
+          <div className="flex flex-col gap-3 text-sm text-gray-300 lg:items-end">
+            <Link
+              href="/dashboard/operations/guide"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-orange-300/40 bg-orange-400/10 px-3 py-2 font-semibold text-orange-100 transition hover:bg-orange-400/20 focus:outline-none focus:ring-2 focus:ring-orange-300"
+            >
+              <BookOpenIcon className="h-4 w-4" />
+              Incident guide
+            </Link>
             <span className="flex items-center gap-2">
               <ClockIcon className="h-4 w-4" />
               {data ? `Checked ${checkedAt(data.checked_at)}` : 'Waiting for first check'}
