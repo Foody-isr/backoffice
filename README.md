@@ -10,6 +10,10 @@ Internal superadmin dashboard for the Foody team. Used to manage the entire plat
 | **Development** | `dev-backoffice.foody-pos.co.il` | `dev-api.foody-pos.co.il` | `develop` |
 | **Local** | `localhost:3002` | `localhost:8080` | any |
 
+Operational status, error monitoring, and the incident workflow are documented
+in [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md). The backoffice exposes the
+operator entry point at **Dashboard → Operations**.
+
 ## Quick Start
 
 ```bash
