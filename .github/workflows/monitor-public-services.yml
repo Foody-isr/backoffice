@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: 'Incident drill: fail safely after the real probes pass'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -20,6 +26,8 @@ jobs:
 
     steps:
       - name: Check public services
+        env:
+          SIMULATE_FAILURE: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate_failure || false }}
         shell: bash
         run: |
           set -u
@@ -110,6 +118,11 @@ jobs:
           Development backoffice|https://dev-backoffice.foody-pos.co.il/login|http
           TARGETS
 
+          if [ "$SIMULATE_FAILURE" = "true" ]; then
+            echo "::error title=Foody monitor incident drill::Intentional failure after all real service checks completed"
+            failures=$((failures + 1))
+          fi
+
           if [ "$failures" -ne 0 ]; then
             echo "::error title=Foody public monitor failed::${failures} service check(s) failed"
             exit 1
@@ -139,7 +152,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          title='[monitor] Public services unavailable'
+          if [ '${{ inputs.simulate_failure }}' = 'true' ]; then
+            title='[monitor drill] Simulated public service outage'
+          else
+            title='[monitor] Public services unavailable'
+          fi
           issue_number=$(gh issue list \
             --state open \
             --limit 100 \
@@ -153,7 +170,7 @@ jobs:
           fi
 
           body=$(printf '%s\n\n%s\n%s\n\n%s\n' \
-            'The five-minute public service monitor detected at least one failed endpoint.' \
+            "$(if [ '${{ inputs.simulate_failure }}' = 'true' ]; then echo 'DRILL: all real probes ran first; this failure was intentionally simulated.'; else echo 'The five-minute public service monitor detected at least one failed endpoint.'; fi)" \
             "Workflow run: ${RUN_URL}" \
             "Started: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
             'Open the workflow logs for the failing service, then follow docs/OBSERVABILITY.md. No customer or payment data is included in this issue.')
@@ -164,6 +181,32 @@ jobs:
           fi
 
           gh issue create "${create_args[@]}"
+
+      - name: Close the simulated incident
+        if: needs.probe.result == 'failure' && inputs.simulate_failure == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title='[monitor drill] Simulated public service outage'
+          issue_number=$(gh issue list \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            | jq -r --arg title "$title" \
+              'first(.[] | select(.title == $title) | .number) // empty')
+
+          if [ -z "$issue_number" ]; then
+            echo 'The drill did not create an incident issue'
+            exit 1
+          fi
+
+          gh issue close "$issue_number" \
+            --comment "Incident drill completed: creation, assignment and recovery closure were verified. Run: ${RUN_URL}"
 
       - name: Close the incident after recovery
         if: needs.probe.result == 'success'

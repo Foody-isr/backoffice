@@ -89,9 +89,9 @@ const observabilityModules = [
   },
   {
     name: 'Monitor GitHub Actions',
-    status: 'Manuel validé',
-    statusClass: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-    role: 'Sonde extérieure prévue toutes les cinq minutes. Les exécutions manuelles passent ; le premier déclenchement automatique reste à confirmer.',
+    status: 'Planifié actif',
+    statusClass: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    role: 'Sonde extérieure exécutée toutes les cinq minutes. Un mode de simulation manuel teste la création, l’assignation et la clôture de l’incident sans couper de service.',
     notFor: 'Il confirme un symptôme réseau/HTTP, pas la cause profonde, et ne doit pas être l’unique alerte.',
     icon: BellAlertIcon,
   },
