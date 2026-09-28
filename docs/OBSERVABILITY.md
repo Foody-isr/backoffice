@@ -119,6 +119,17 @@ prove that the provider account is a sandbox. Never initiate a live transaction
 without the restaurant's explicit approval of the amount, reimbursement method,
 and test window. Never mark an order as paid solely from a customer report.
 
+WhatsApp follows the same tenant boundary. Foody participates in Twilio's
+[WhatsApp Tech Provider program](https://www.twilio.com/docs/whatsapp/isv/tech-provider-program):
+each restaurant completes Meta Embedded Signup, creates or selects its WABA, and
+is mapped to a dedicated Twilio subaccount and sender. The restaurant supports
+its contracted usage cost; Foody orchestrates onboarding and message delivery.
+Production sends must resolve an ONLINE sender for that restaurant and must
+never fall back to a shared global Foody sender. For Twilio error `63007`, verify
+that the WABA, sender, Account SID, and subaccount all belong to the same
+restaurant chain. If onboarding is incomplete, disable WhatsApp only for that
+restaurant and complete the connection instead of testing with a global sender.
+
 ## Rollout order
 
 1. Create the Sentry and Grafana projects and configure development only.
