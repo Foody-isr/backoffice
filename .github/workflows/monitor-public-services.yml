@@ -1,0 +1,118 @@
+name: Monitor Public Services
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-service-monitor
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Probe production and development
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+
+    steps:
+      - name: Check public services
+        shell: bash
+        run: |
+          set -u
+
+          failures=0
+
+          check_target() {
+            local name="$1"
+            local url="$2"
+            local response_type="$3"
+            local metadata
+            local body=""
+
+            if [ "$response_type" = "health" ]; then
+              local response
+              if ! response=$(curl \
+                --silent \
+                --show-error \
+                --location \
+                --retry 2 \
+                --retry-all-errors \
+                --retry-delay 2 \
+                --connect-timeout 5 \
+                --max-time 20 \
+                --user-agent 'Foody-GitHub-Monitor/1.0' \
+                --write-out $'\n%{http_code}|%{time_total}' \
+                "$url"); then
+                echo "::error title=${name} unavailable::Connection failed after retries"
+                failures=$((failures + 1))
+                return
+              fi
+
+              metadata="${response##*$'\n'}"
+              body="${response%$'\n'*}"
+            else
+              if ! metadata=$(curl \
+                --silent \
+                --show-error \
+                --location \
+                --retry 2 \
+                --retry-all-errors \
+                --retry-delay 2 \
+                --connect-timeout 5 \
+                --max-time 20 \
+                --user-agent 'Foody-GitHub-Monitor/1.0' \
+                --output /dev/null \
+                --write-out '%{http_code}|%{time_total}' \
+                "$url"); then
+                echo "::error title=${name} unavailable::Connection failed after retries"
+                failures=$((failures + 1))
+                return
+              fi
+            fi
+
+            local http_code="${metadata%%|*}"
+            local duration="${metadata#*|}"
+
+            if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 400 ]; then
+              echo "::error title=${name} unavailable::HTTP ${http_code} from ${url}"
+              failures=$((failures + 1))
+              return
+            fi
+
+            if [ "$response_type" = "health" ] && ! jq -e '.status == "ok"' >/dev/null <<<"$body"; then
+              echo "::error title=${name} unhealthy::Health response did not contain status=ok"
+              failures=$((failures + 1))
+              return
+            fi
+
+            if awk "BEGIN { exit !(${duration} > 2.0) }"; then
+              echo "::warning title=${name} degraded::HTTP ${http_code} in ${duration}s"
+            else
+              echo "${name}: HTTP ${http_code} in ${duration}s"
+            fi
+          }
+
+          while IFS='|' read -r name url response_type; do
+            check_target "$name" "$url" "$response_type"
+          done <<'TARGETS'
+          Production API|https://api.foody-pos.co.il/health|health
+          Production ordering|https://app.foody-pos.co.il/|http
+          Production admin|https://admin.foody-pos.co.il/login|http
+          Production backoffice|https://backoffice.foody-pos.co.il/login|http
+          Production landing|https://foody-pos.co.il/|http
+          Development API|https://dev-api.foody-pos.co.il/health|health
+          Development ordering|https://dev-app.foody-pos.co.il/|http
+          Development admin|https://dev-admin.foody-pos.co.il/login|http
+          Development backoffice|https://dev-backoffice.foody-pos.co.il/login|http
+          TARGETS
+
+          if [ "$failures" -ne 0 ]; then
+            echo "::error title=Foody public monitor failed::${failures} service check(s) failed"
+            exit 1
+          fi
+
+          echo "All public service checks passed"
