@@ -39,6 +39,13 @@ notification settings should also include failed Actions runs as a fallback.
 This fallback is not an SLA monitor and should remain secondary once an external
 probe provider is active.
 
+To test the alert path without interrupting a service, manually run **Monitor
+Public Services** with **simulate_failure** enabled. The workflow executes every
+real probe first, then deliberately fails, opens and assigns the normal incident
+issue, and closes it with a drill comment. The expected workflow conclusion is
+failure: that is what exercises the same notification channel as a real outage.
+Never test this path by changing a production endpoint or credential.
+
 ## Backoffice configuration
 
 Configure these variables separately in development and production:
