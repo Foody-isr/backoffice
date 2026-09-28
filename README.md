@@ -95,6 +95,15 @@ Wizard to onboard a new restaurant:
 
 List all users across the platform with role, email, and restaurant associations. Useful for support and debugging.
 
+### Operations (`/dashboard/operations`)
+
+Internal incident-response entry point:
+- Live production and development availability checks
+- Links to Sentry, Grafana, and deployment evidence when configured
+- A French incident guide at `/dashboard/operations/guide` covering severity,
+  the role of every observability module and Foody service, safety rules, and
+  concrete runbooks starting from an alert or a customer report
+
 ### Subscriptions (`/dashboard/subscriptions`) *(via API)*
 
 Admin subscription endpoints used by the billing tab and dashboard alert:

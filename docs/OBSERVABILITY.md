@@ -5,6 +5,12 @@ It deliberately separates customer-facing diagnostics from raw telemetry: the
 backoffice shows service status and links to the systems that own errors, logs,
 metrics, and deployments. It must not become a second log store.
 
+The operator-facing runbook is available at **Backoffice → Operations → Incident
+guide**. It is the preferred first response for Foody support: it maps each
+signal to the right evidence, explains every module and service, and provides
+step-by-step scenarios. Keep this document for implementation and configuration
+details; keep the in-product guide focused on decisions during an incident.
+
 ## Recommended starter stack
 
 | Signal | System | Purpose |
@@ -106,6 +112,12 @@ failure cannot fill the production disk.
    feature. Do not edit customer or payment data as the first response.
 5. Re-run the service checks and one safe customer journey.
 6. Write a short incident note with timeline, impact, cause, action, and follow-up.
+
+Payment incidents require additional care. Payment accounts and credentials are
+owned and funded by each restaurant; a non-production Foody environment does not
+prove that the provider account is a sandbox. Never initiate a live transaction
+without the restaurant's explicit approval of the amount, reimbursement method,
+and test window. Never mark an order as paid solely from a customer report.
 
 ## Rollout order
 
