@@ -116,3 +116,77 @@ jobs:
           fi
 
           echo "All public service checks passed"
+
+  incident:
+    name: Maintain outage incident
+    if: always() && (needs.probe.result == 'success' || needs.probe.result == 'failure')
+    needs: probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Open one incident for an outage
+        if: needs.probe.result == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          INCIDENT_ASSIGNEE: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title='[monitor] Public services unavailable'
+          issue_number=$(gh issue list \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            | jq -r --arg title "$title" \
+              'first(.[] | select(.title == $title) | .number) // empty')
+
+          if [ -n "$issue_number" ]; then
+            echo "Incident #${issue_number} is already open; no duplicate created"
+            exit 0
+          fi
+
+          body=$(printf '%s\n\n%s\n%s\n\n%s\n' \
+            'The five-minute public service monitor detected at least one failed endpoint.' \
+            "Workflow run: ${RUN_URL}" \
+            "Started: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            'Open the workflow logs for the failing service, then follow docs/OBSERVABILITY.md. No customer or payment data is included in this issue.')
+
+          create_args=(--title "$title" --body "$body")
+          if gh api "repos/${GH_REPO}/assignees/${INCIDENT_ASSIGNEE}" >/dev/null 2>&1; then
+            create_args+=(--assignee "$INCIDENT_ASSIGNEE")
+          fi
+
+          gh issue create "${create_args[@]}"
+
+      - name: Close the incident after recovery
+        if: needs.probe.result == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title='[monitor] Public services unavailable'
+          issue_number=$(gh issue list \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            | jq -r --arg title "$title" \
+              'first(.[] | select(.title == $title) | .number) // empty')
+
+          if [ -z "$issue_number" ]; then
+            echo 'No open monitoring incident to close'
+            exit 0
+          fi
+
+          gh issue close "$issue_number" \
+            --comment "All public service checks recovered. Verification run: ${RUN_URL}"
