@@ -14,7 +14,7 @@ metrics, and deployments. It must not become a second log store.
 | Metrics and external probes | Grafana Cloud Metrics / Synthetic Monitoring | Alert on availability, latency, saturation, and error rate |
 | Instrumentation contract | OpenTelemetry | Keep traces, metrics, and logs portable between vendors |
 | Operator entry point | Backoffice Operations | Confirm scope and open the relevant evidence quickly |
-| Account-free uptime fallback | GitHub Actions | Probe nine public entry points every five minutes and email on workflow failure |
+| Account-free uptime fallback | GitHub Actions | Probe nine public entry points every five minutes and maintain an assigned incident issue on failure |
 
 Sentry and Grafana Cloud both have free starter tiers. Keep the two tools: they
 solve different problems. Sentry is exception-first; Grafana is service and
@@ -26,7 +26,10 @@ checks the production and development API, ordering, admin, backoffice, and
 landing entry points every five minutes. API checks also require the health JSON
 body to contain `status: ok`. Network errors are retried twice; HTTP failures
 fail the workflow, while responses slower than two seconds produce warnings.
-GitHub notification settings must include failed Actions runs for the repository.
+The workflow opens one assigned issue when an outage begins, avoids duplicate
+issues while it persists, and closes the issue after a successful recovery run.
+The assignee must keep issue notifications enabled for the repository. GitHub
+notification settings should also include failed Actions runs as a fallback.
 This fallback is not an SLA monitor and should remain secondary once an external
 probe provider is active.
 
