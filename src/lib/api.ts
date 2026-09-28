@@ -1,7 +1,11 @@
 // Foody Backoffice API client
 // All calls go through the Go API at /api/v1/admin/* (superadmin only)
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import * as Sentry from '@sentry/nextjs';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production'
+  ? 'https://api.foody-pos.co.il'
+  : 'http://localhost:8080');
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -198,18 +202,44 @@ function getToken(): string | null {
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options?.headers,
-    },
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      signal: options?.signal ?? AbortSignal.timeout(15_000),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options?.headers,
+      },
+    });
+  } catch (error) {
+    Sentry.withScope((scope) => {
+      scope.setTag('foody.area', 'backoffice_api');
+      scope.setTag('http.method', options?.method || 'GET');
+      scope.setContext('request', { path });
+      Sentry.captureException(error);
+    });
+    throw error;
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `API error ${res.status}`);
+    const error = new Error(body.error || `API error ${res.status}`);
+    if (res.status >= 500) {
+      Sentry.withScope((scope) => {
+        scope.setTag('foody.area', 'backoffice_api');
+        scope.setTag('http.method', options?.method || 'GET');
+        scope.setTag('http.status_code', String(res.status));
+        scope.setContext('request', {
+          path,
+          request_id: res.headers.get('x-request-id') || undefined,
+        });
+        Sentry.captureException(error);
+      });
+    }
+    throw error;
   }
   return res.json();
 }
