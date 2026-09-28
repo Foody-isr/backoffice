@@ -102,7 +102,8 @@ Internal incident-response entry point:
 - Links to Sentry, Grafana, and deployment evidence when configured
 - A French incident guide at `/dashboard/operations/guide` covering severity,
   the role of every observability module and Foody service, safety rules, and
-  concrete runbooks starting from an alert or a customer report
+  concrete runbooks starting from an alert or a customer report, including the
+  per-restaurant Sumit and Twilio Tech Provider boundaries
 
 ### Subscriptions (`/dashboard/subscriptions`) *(via API)*
 

@@ -89,10 +89,10 @@ const observabilityModules = [
   },
   {
     name: 'Monitor GitHub Actions',
-    status: 'Actif',
-    statusClass: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-    role: 'Sonde extérieure gratuite toutes les cinq minutes. Ouvre une issue pendant une panne et la ferme au rétablissement.',
-    notFor: 'Il confirme un symptôme réseau/HTTP, pas la cause profonde.',
+    status: 'Manuel validé',
+    statusClass: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+    role: 'Sonde extérieure prévue toutes les cinq minutes. Les exécutions manuelles passent ; le premier déclenchement automatique reste à confirmer.',
+    notFor: 'Il confirme un symptôme réseau/HTTP, pas la cause profonde, et ne doit pas être l’unique alerte.',
     icon: BellAlertIcon,
   },
   {
@@ -147,6 +147,7 @@ const serviceMap = [
   ['Redis', 'État éphémère, cache et coordination selon les flux API.', 'Disponibilité, mémoire, latence et évictions.'],
   ['Chrome headless', 'Rendu serveur de documents ou impressions nécessitant un navigateur.', 'Échecs de rendu, crashs, mémoire et temps de génération.'],
   ['Paiements restaurant', 'Prestataire choisi et financé par chaque restaurateur, par exemple Sumit.', 'Callback, signature, statut interne et configuration du restaurant.'],
+  ['WhatsApp restaurant', 'Foody est Tech Provider : chaque restaurateur connecte son portefeuille Meta, sa WABA et son sender dans un sous-compte Twilio dédié, et supporte sa consommation.', 'État de l’onboarding, sous-compte, WABA, sender ONLINE, callbacks et erreurs Twilio du restaurant.'],
   ['Landing', 'Site public de présentation de Foody.', 'Disponibilité et performance ; impact commercial, pas transactionnel.'],
 ];
 
@@ -209,6 +210,18 @@ const scenarios = [
       'Ne jamais marquer une commande payée manuellement sur la seule base d’un message client.',
       'Un test réel n’est possible qu’avec accord explicite du restaurateur sur le montant, le remboursement et la fenêtre de test.',
       'Réconcilier le statut Foody avec le prestataire, documenter toute action financière et vérifier qu’une commande impayée n’est pas diffusée au POS.',
+    ],
+  },
+  {
+    title: 'Alerte Twilio ou message WhatsApp non envoyé',
+    badge: 'Communication tenant',
+    tone: 'text-sky-700 bg-sky-50 ring-sky-600/20',
+    steps: [
+      'Identifier le restaurant, la notification, l’heure et le code Twilio. Ne jamais copier numéro de téléphone, Auth Token ou contenu client dans le ticket.',
+      'Foody est Tech Provider : confirmer que ce restaurant a terminé Meta Embedded Signup et possède sa WABA, son sous-compte Twilio dédié et un sender ONLINE.',
+      'Pour une erreur 63007, vérifier que le sender et les identifiants utilisés appartiennent au même sous-compte du restaurant. Ne pas réparer ou utiliser un sender global Foody comme fallback.',
+      'Si le restaurant n’est pas connecté ou si son sender n’est pas ONLINE, suspendre uniquement ses envois WhatsApp et lui faire terminer son onboarding ; les autres restaurants ne doivent pas être touchés.',
+      'Un message réel de validation nécessite l’accord du restaurateur et un destinataire consentant. Vérifier ensuite le callback de statut et l’absence de nouvelle erreur.',
     ],
   },
   {
@@ -364,6 +377,7 @@ export default function IncidentGuidePage() {
             <li><strong>Pas d’édition directe en base</strong> comme première réponse.</li>
             <li><strong>Pas de secret dans les tickets :</strong> token, clé API, OTP, carte, cookie ou corps de requête.</li>
             <li><strong>Pas de paiement réel de test</strong> sans accord du restaurateur sur montant et remboursement.</li>
+            <li><strong>Pas de fallback Twilio global :</strong> un restaurant sans sender ONLINE reste désactivé jusqu’à la fin de son onboarding.</li>
             <li><strong>Pas de fermeture</strong> sans parcours vérifié et fenêtre d’observation.</li>
           </ul>
         </aside>
