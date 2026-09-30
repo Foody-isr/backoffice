@@ -602,6 +602,7 @@ export interface PaymentConfigResponse {
   verifone_stored_credential_model?: 'CREDENTIAL_ON_FILE' | 'RECURRING' | 'NONE';
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
+  verifone_invoice4u_receipt_type?: 'FULL_RECEIPT' | 'INVOICE' | 'INVOICE_RECEIPT' | '';
   masked_verifone_user_id?: string;
   masked_verifone_api_key?: string;
   masked_verifone_entity_id?: string;
@@ -637,6 +638,7 @@ export interface UpdatePaymentConfigInput {
   verifone_public_key_alias?: string;
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
+  verifone_invoice4u_receipt_type?: 'FULL_RECEIPT' | 'INVOICE' | 'INVOICE_RECEIPT' | '';
   stancer_secret_key?: string;
   stancer_public_key?: string;
 }
