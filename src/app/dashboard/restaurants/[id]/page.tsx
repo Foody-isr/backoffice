@@ -553,7 +553,7 @@ export default function RestaurantDetailPage() {
                 <div className="space-y-4 mb-6">
                   <h3 className="text-sm font-semibold text-gray-700">Verifone Cloud / GreenBox</h3>
                   <p className="text-xs text-gray-500 max-w-2xl">
-                    Initial Checkout uses the CVV contract. Token charges use the separately configured no-CVV contract and remain disabled until explicitly enabled. Configure the signed webhook in Verifone Central as <code>/api/v1/webhooks/verifone/{id}</code>.
+                    Initial Checkout uses the CVV contract. Customer-present saved-card charges use the separately configured no-CVV contract and remain disabled until explicitly enabled. Configure the signed webhook in Verifone Central as <code>/api/v1/webhooks/verifone/{id}</code>.
                   </p>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1">Environment</label>
@@ -593,12 +593,13 @@ export default function RestaurantDetailPage() {
                     <label className="block text-xs font-medium text-gray-500 mb-1">Stored credential model</label>
                     <select
                       value={paymentCreds.verifone_stored_credential_model || ''}
-                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_stored_credential_model: (e.target.value || undefined) as 'RECURRING' | 'NONE' | undefined })}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_stored_credential_model: (e.target.value || undefined) as 'CREDENTIAL_ON_FILE' | 'RECURRING' | 'NONE' | undefined })}
                       className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
                       <option value="">Select before enabling token charges</option>
-                      <option value="RECURRING">Recurring subscription</option>
-                      <option value="NONE">Credential on file / unscheduled</option>
+                      <option value="CREDENTIAL_ON_FILE">Customer one-click (recommended)</option>
+                      <option value="RECURRING">Recurring subscription (merchant initiated)</option>
+                      <option value="NONE">Legacy configuration (do not use for new setups)</option>
                     </select>
                   </div>
                   <label className="flex items-start gap-2 text-sm text-gray-700">
@@ -608,7 +609,7 @@ export default function RestaurantDetailPage() {
                       onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_token_charging_enabled: e.target.checked })}
                       className="mt-0.5"
                     />
-                    <span><strong>Enable token charges</strong><br /><span className="text-xs text-gray-500">Requires the separate no-CVV contract, token scope, and matching stored-credential model.</span></span>
+                    <span><strong>Enable token charges</strong><br /><span className="text-xs text-gray-500">Requires the separate no-CVV contract, token scope, and CREDENTIAL_ON_FILE for Foody one-click payments.</span></span>
                   </label>
                   <label className="flex items-start gap-2 text-sm text-gray-700">
                     <input

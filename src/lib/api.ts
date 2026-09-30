@@ -599,7 +599,7 @@ export interface PaymentConfigResponse {
   masked_cibus_pos_id?: string;
   masked_cibus_company_code?: string;
   verifone_environment?: 'sandbox' | 'production';
-  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_stored_credential_model?: 'CREDENTIAL_ON_FILE' | 'RECURRING' | 'NONE';
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
   masked_verifone_user_id?: string;
@@ -627,7 +627,7 @@ export interface UpdatePaymentConfigInput {
   cibus_pos_id?: string;
   cibus_company_code?: string;
   verifone_environment?: 'sandbox' | 'production';
-  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_stored_credential_model?: 'CREDENTIAL_ON_FILE' | 'RECURRING' | 'NONE';
   verifone_user_id?: string;
   verifone_api_key?: string;
   verifone_entity_id?: string;
