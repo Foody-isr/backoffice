@@ -296,7 +296,6 @@ export default function RestaurantDetailPage() {
         input.verifone_checkout_payment_contract_id = paymentCreds.verifone_checkout_payment_contract_id;
         input.verifone_token_payment_contract_id = paymentCreds.verifone_token_payment_contract_id;
         input.verifone_installments_payment_contract_id = paymentCreds.verifone_installments_payment_contract_id;
-        input.verifone_threeds_contract_id = paymentCreds.verifone_threeds_contract_id;
         input.verifone_token_scope = paymentCreds.verifone_token_scope;
         input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
         input.verifone_token_charging_enabled = paymentCreds.verifone_token_charging_enabled || false;
@@ -571,7 +570,6 @@ export default function RestaurantDetailPage() {
                     ['verifone_api_key', 'API Key', paymentConfig?.masked_verifone_api_key],
                     ['verifone_entity_id', 'Entity ID', paymentConfig?.masked_verifone_entity_id],
                     ['verifone_checkout_payment_contract_id', 'Checkout contract (CVV)', paymentConfig?.masked_verifone_checkout_payment_contract_id],
-                    ['verifone_threeds_contract_id', '3DS contract', paymentConfig?.masked_verifone_threeds_contract_id],
                     ['verifone_token_payment_contract_id', 'Token contract (no CVV)', paymentConfig?.masked_verifone_token_payment_contract_id],
                     ['verifone_installments_payment_contract_id', 'Installments contract', paymentConfig?.masked_verifone_installments_payment_contract_id],
                     ['verifone_token_scope', 'Token scope', paymentConfig?.masked_verifone_token_scope],

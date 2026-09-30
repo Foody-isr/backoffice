@@ -608,7 +608,6 @@ export interface PaymentConfigResponse {
   masked_verifone_checkout_payment_contract_id?: string;
   masked_verifone_token_payment_contract_id?: string;
   masked_verifone_installments_payment_contract_id?: string;
-  masked_verifone_threeds_contract_id?: string;
   masked_verifone_token_scope?: string;
   masked_verifone_public_key_alias?: string;
   masked_stancer_secret_key?: string;
@@ -634,7 +633,6 @@ export interface UpdatePaymentConfigInput {
   verifone_checkout_payment_contract_id?: string;
   verifone_token_payment_contract_id?: string;
   verifone_installments_payment_contract_id?: string;
-  verifone_threeds_contract_id?: string;
   verifone_token_scope?: string;
   verifone_public_key_alias?: string;
   verifone_token_charging_enabled?: boolean;
