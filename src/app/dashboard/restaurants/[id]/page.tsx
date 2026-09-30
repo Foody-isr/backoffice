@@ -132,6 +132,7 @@ export default function RestaurantDetailPage() {
           verifone_stored_credential_model: cfg.verifone_stored_credential_model,
           verifone_token_charging_enabled: cfg.verifone_token_charging_enabled || false,
           verifone_invoice4u_enabled: cfg.verifone_invoice4u_enabled || false,
+          verifone_invoice4u_receipt_type: cfg.verifone_invoice4u_receipt_type || '',
         });
       })
       .catch(() => {})
@@ -300,6 +301,7 @@ export default function RestaurantDetailPage() {
         input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
         input.verifone_token_charging_enabled = paymentCreds.verifone_token_charging_enabled || false;
         input.verifone_invoice4u_enabled = paymentCreds.verifone_invoice4u_enabled || false;
+        input.verifone_invoice4u_receipt_type = paymentCreds.verifone_invoice4u_receipt_type || '';
       } else if (paymentProvider === 'stancer') {
         input.stancer_secret_key = paymentCreds.stancer_secret_key;
         input.stancer_public_key = paymentCreds.stancer_public_key;
@@ -616,7 +618,20 @@ export default function RestaurantDetailPage() {
                       onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_invoice4u_enabled: e.target.checked })}
                       className="mt-0.5"
                     />
-                    <span><strong>Invoice4U hook</strong><br /><span className="text-xs text-gray-500">Configuration seam only; document creation is not active yet.</span></span>
+                    <span><strong>Invoice4U payment document</strong><br /><span className="text-xs text-gray-500">Enable only after Verifone confirms the restaurant&apos;s Invoice4U receipt contract and organization onboarding. The selected document is requested on eligible payments; verify its ID in Verifone Central.</span></span>
+                  </label>
+                  <label className="block text-sm text-gray-700">
+                    Document type
+                    <select
+                      value={paymentCreds.verifone_invoice4u_receipt_type || ''}
+                      onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_invoice4u_receipt_type: e.target.value as UpdatePaymentConfigInput['verifone_invoice4u_receipt_type'] })}
+                      className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                    >
+                      <option value="">Select before enabling</option>
+                      <option value="FULL_RECEIPT">Receipt</option>
+                      <option value="INVOICE_RECEIPT">Tax invoice and receipt</option>
+                      <option value="INVOICE">Tax invoice</option>
+                    </select>
                   </label>
                 </div>
               )}
