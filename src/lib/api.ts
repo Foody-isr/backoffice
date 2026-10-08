@@ -1148,8 +1148,8 @@ export async function getCost(refresh = false): Promise<InfraCost> {
 // ─── Environment clone ──────────────────────────────────────────────
 //
 // Moves one restaurant's whole dataset between environments so a production bug
-// can be reproduced with the real data. The bundle travels through this browser:
-// export it from one environment, then upload it to the other. Each half is
+// can be reproduced with the real data. The bundle travels through this browser,
+// either directly or through a downloaded file. Each half is
 // authenticated by the normal superadmin login on that environment, so there is
 // no shared secret and production needs no configuration at all.
 //
@@ -1206,12 +1206,88 @@ export interface CloneReport {
   committed: boolean;
 }
 
-export async function getCloneStatus(): Promise<CloneStatus> {
+export type CloneEnvironment = 'production' | 'development';
+
+export interface CloneSession {
+  environment: CloneEnvironment;
+  token: string;
+}
+
+const CLONE_API_URLS: Record<CloneEnvironment, string> = {
+  production: 'https://api.foody-pos.co.il',
+  development: 'https://dev-api.foody-pos.co.il',
+};
+
+/** Reuses a login only for the exact API that issued it. */
+export function getCurrentCloneSession(): CloneSession | null {
+  const token = getToken();
+  if (!token) return null;
+  const environment = (Object.keys(CLONE_API_URLS) as CloneEnvironment[]).find(
+    (env) => CLONE_API_URLS[env] === API_URL.replace(/\/$/, ''),
+  );
+  return environment ? { environment, token } : null;
+}
+
+async function cloneFetch(session: CloneSession, path: string, options?: RequestInit): Promise<Response> {
+  const res = await fetch(`${CLONE_API_URLS[session.environment]}${path}`, {
+    ...options,
+    signal: options?.signal ?? AbortSignal.timeout(240_000),
+    headers: { Authorization: `Bearer ${session.token}`, ...options?.headers },
+    credentials: 'omit',
+    redirect: 'error',
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(`${session.environment}: ${body.error || `API error ${res.status}`}`);
+  }
+  return res;
+}
+
+/** Signs in separately without storing the other environment's credentials. */
+export async function loginCloneEnvironment(
+  environment: CloneEnvironment, email: string, password: string,
+): Promise<CloneSession> {
+  const res = await fetch(`${CLONE_API_URLS[environment]}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+    signal: AbortSignal.timeout(15_000),
+    credentials: 'omit',
+    redirect: 'error',
+  });
+  if (!res.ok) throw new Error(`${environment}: sign-in failed`);
+  const data: { token: string; user: User } = await res.json();
+  if (data.user.role !== 'superadmin') throw new Error(`${environment}: superadmin access required`);
+  return { environment, token: data.token };
+}
+
+export async function getCloneStatus(session?: CloneSession): Promise<CloneStatus> {
+  if (session) return (await cloneFetch(session, '/api/v1/admin/env-clone/status')).json();
   return apiFetch<CloneStatus>('/api/v1/admin/env-clone/status');
 }
 
-export async function getCloneRestaurants(): Promise<{ restaurants: CloneRestaurant[] }> {
+export async function getCloneRestaurants(session?: CloneSession): Promise<{ restaurants: CloneRestaurant[] }> {
+  if (session) return (await cloneFetch(session, '/api/v1/admin/env-clone/restaurants')).json();
   return apiFetch<{ restaurants: CloneRestaurant[] }>('/api/v1/admin/env-clone/restaurants');
+}
+
+/** Keeps the exported bundle in memory for a direct transfer. */
+export async function fetchCloneBundle(
+  session: CloneSession, restaurantId: number, clusters: CloneCluster[],
+): Promise<File> {
+  const query = new URLSearchParams({ restaurant_id: String(restaurantId) });
+  if (clusters.length) query.set('clusters', clusters.join(','));
+  const res = await cloneFetch(session, `/api/v1/admin/env-clone/export?${query}`);
+  const bundle = await res.json();
+  if (bundle.restaurant_id !== restaurantId || bundle.source_env !== session.environment) {
+    throw new Error('The exported bundle does not match the requested restaurant and environment.');
+  }
+  if (bundle.unclassified?.length) {
+    throw new Error('The source API has tables without a copy rule. Update the API before copying this restaurant.');
+  }
+  return new File([JSON.stringify(bundle)], `foody-${session.environment}-restaurant-${restaurantId}.json`, {
+    type: 'application/json',
+  });
 }
 
 // downloadCloneBundle exports a restaurant from the current environment as a
@@ -1248,10 +1324,16 @@ export async function downloadCloneBundle(restaurantId: number, clusters: CloneC
 
 // applyCloneBundle uploads a bundle to the current environment. It previews
 // unless confirm is true, so a mis-picked file cannot destroy anything.
-export async function applyCloneBundle(file: File, confirm: boolean): Promise<CloneReport> {
+export async function applyCloneBundle(file: File, confirm: boolean, session?: CloneSession): Promise<CloneReport> {
   const token = getToken();
   const form = new FormData();
   form.append('bundle', file);
+
+  if (session) {
+    return (await cloneFetch(session, `/api/v1/admin/env-clone/apply${confirm ? '?confirm=1' : ''}`, {
+      method: 'POST', body: form,
+    })).json();
+  }
 
   const res = await fetch(`${API_URL}/api/v1/admin/env-clone/apply${confirm ? '?confirm=1' : ''}`, {
     method: 'POST',
