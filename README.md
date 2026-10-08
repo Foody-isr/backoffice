@@ -71,6 +71,12 @@ Two tabs:
 **Features tab**
 - Restaurant info (address, phone, timezone, pickup/delivery flags)
 - Owner details
+- **Copy prod → dev** — connect as superadmin to both environments, preview
+  the selected production restaurant, then confirm replacing its dev data.
+  The same action is available under **Clone Data**. Stock is included by
+  default. Payment credentials, staff identities, push registrations and live
+  integrations are excluded. A conflicting restaurant ID blocks the copy.
+  Credentials for the other environment stay in memory until the dialog closes.
 - Plan selector — change plan tier (resets feature flags to plan defaults)
 - Feature flag matrix — per-restaurant on/off toggles grouped by category (Core, Ordering, Operations, Intelligence, Notifications)
 
