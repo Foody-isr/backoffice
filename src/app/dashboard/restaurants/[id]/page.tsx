@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import CopyRestaurantToDev from '@/components/CopyRestaurantToDev';
 import {
   getRestaurant,
   getFeatureCatalog,
@@ -363,6 +364,7 @@ export default function RestaurantDetailPage() {
               ID #{restaurant.id} · {restaurant.slug || 'no slug'} · Created {formatDate(restaurant.created_at)}
             </p>
           </div>
+          <CopyRestaurantToDev restaurant={restaurant} />
           {restaurant.plan ? (
             <span className={`px-3 py-1 rounded-full text-sm font-bold ${planColor(restaurant.plan.plan_tier)}`}>
               {capitalize(restaurant.plan.plan_tier)}

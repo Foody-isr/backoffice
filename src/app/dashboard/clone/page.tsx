@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import CopyRestaurantToDev from '@/components/CopyRestaurantToDev';
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
@@ -162,6 +163,12 @@ export default function ClonePage() {
           at <span className="font-medium text-gray-700">{status?.env || 'an unknown environment'}</span>.
         </p>
       </header>
+
+      <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="font-medium text-gray-900">Copy directly from production to dev</h2>
+        <p className="text-sm text-gray-500">Sign in to both environments, select a production restaurant, then preview and confirm the replacement.</p>
+        <CopyRestaurantToDev />
+      </section>
 
       {error && (
         <Banner tone="danger" icon={<ExclamationTriangleIcon className="h-5 w-5 shrink-0" />}>
