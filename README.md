@@ -14,6 +14,11 @@ Operational status, error monitoring, and the incident workflow are documented
 in [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md). The backoffice exposes the
 operator entry point at **Dashboard → Operations**.
 
+Operations also offers **Verifone JSON diagnostics**: superadmins can enable or
+disable filtered request/response bodies immediately in the development API.
+The setting persists until disabled; production is blocked server-side. See the
+observability guide for filtering, auditing and CloudWatch access.
+
 ## Quick Start
 
 ```bash

@@ -1175,6 +1175,28 @@ export async function getCost(refresh = false): Promise<InfraCost> {
   return apiFetch<InfraCost>(`/api/v1/admin/infra/cost${refresh ? '?refresh=1' : ''}`);
 }
 
+// ─── Development diagnostics ────────────────────────────────────────
+
+export interface VerifoneDiagnosticStatus {
+  available: boolean;
+  enabled: boolean;
+  environment: 'development' | 'production' | 'unconfigured';
+  updated_at: string | null;
+}
+
+/** Read the authoritative API-side filtered JSON policy (superadmin only). */
+export async function getVerifoneDiagnostics(): Promise<VerifoneDiagnosticStatus> {
+  return apiFetch<VerifoneDiagnosticStatus>('/api/v1/admin/observability/verifone', { cache: 'no-store' });
+}
+
+/** Persist filtered sandbox JSON logging without restarting the API. */
+export async function setVerifoneDiagnostics(enabled: boolean): Promise<VerifoneDiagnosticStatus> {
+  return apiFetch<VerifoneDiagnosticStatus>('/api/v1/admin/observability/verifone', {
+    method: 'PUT',
+    body: JSON.stringify({ enabled }),
+  });
+}
+
 // ─── Environment clone ──────────────────────────────────────────────
 //
 // Moves one restaurant's whole dataset between environments so a production bug
