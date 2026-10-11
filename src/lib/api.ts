@@ -1,7 +1,11 @@
 // Foody Backoffice API client
 // All calls go through the Go API at /api/v1/admin/* (superadmin only)
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import * as Sentry from '@sentry/nextjs';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production'
+  ? 'https://api.foody-pos.co.il'
+  : 'http://localhost:8080');
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -198,18 +202,44 @@ function getToken(): string | null {
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options?.headers,
-    },
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      signal: options?.signal ?? AbortSignal.timeout(15_000),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options?.headers,
+      },
+    });
+  } catch (error) {
+    Sentry.withScope((scope) => {
+      scope.setTag('foody.area', 'backoffice_api');
+      scope.setTag('http.method', options?.method || 'GET');
+      scope.setContext('request', { path });
+      Sentry.captureException(error);
+    });
+    throw error;
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `API error ${res.status}`);
+    const error = new Error(body.error || `API error ${res.status}`);
+    if (res.status >= 500) {
+      Sentry.withScope((scope) => {
+        scope.setTag('foody.area', 'backoffice_api');
+        scope.setTag('http.method', options?.method || 'GET');
+        scope.setTag('http.status_code', String(res.status));
+        scope.setContext('request', {
+          path,
+          request_id: res.headers.get('x-request-id') || undefined,
+        });
+        Sentry.captureException(error);
+      });
+    }
+    throw error;
   }
   return res.json();
 }
@@ -569,16 +599,16 @@ export interface PaymentConfigResponse {
   masked_cibus_pos_id?: string;
   masked_cibus_company_code?: string;
   verifone_environment?: 'sandbox' | 'production';
-  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_stored_credential_model?: 'CREDENTIAL_ON_FILE' | 'RECURRING' | 'NONE';
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
+  verifone_invoice4u_receipt_type?: 'FULL_RECEIPT' | 'INVOICE' | 'INVOICE_RECEIPT' | '';
   masked_verifone_user_id?: string;
   masked_verifone_api_key?: string;
   masked_verifone_entity_id?: string;
   masked_verifone_checkout_payment_contract_id?: string;
   masked_verifone_token_payment_contract_id?: string;
   masked_verifone_installments_payment_contract_id?: string;
-  masked_verifone_threeds_contract_id?: string;
   masked_verifone_token_scope?: string;
   masked_verifone_public_key_alias?: string;
   masked_stancer_secret_key?: string;
@@ -597,18 +627,18 @@ export interface UpdatePaymentConfigInput {
   cibus_pos_id?: string;
   cibus_company_code?: string;
   verifone_environment?: 'sandbox' | 'production';
-  verifone_stored_credential_model?: 'RECURRING' | 'NONE';
+  verifone_stored_credential_model?: 'CREDENTIAL_ON_FILE' | 'RECURRING' | 'NONE';
   verifone_user_id?: string;
   verifone_api_key?: string;
   verifone_entity_id?: string;
   verifone_checkout_payment_contract_id?: string;
   verifone_token_payment_contract_id?: string;
   verifone_installments_payment_contract_id?: string;
-  verifone_threeds_contract_id?: string;
   verifone_token_scope?: string;
   verifone_public_key_alias?: string;
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
+  verifone_invoice4u_receipt_type?: 'FULL_RECEIPT' | 'INVOICE' | 'INVOICE_RECEIPT' | '';
   stancer_secret_key?: string;
   stancer_public_key?: string;
 }

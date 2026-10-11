@@ -10,6 +10,10 @@ Internal superadmin dashboard for the Foody team. Used to manage the entire plat
 | **Development** | `dev-backoffice.foody-pos.co.il` | `dev-api.foody-pos.co.il` | `develop` |
 | **Local** | `localhost:3002` | `localhost:8080` | any |
 
+Operational status, error monitoring, and the incident workflow are documented
+in [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md). The backoffice exposes the
+operator entry point at **Dashboard → Operations**.
+
 ## Quick Start
 
 ```bash
@@ -96,6 +100,16 @@ Wizard to onboard a new restaurant:
 ### Users (`/dashboard/users`)
 
 List all users across the platform with role, email, and restaurant associations. Useful for support and debugging.
+
+### Operations (`/dashboard/operations`)
+
+Internal incident-response entry point:
+- Live production and development availability checks
+- Links to Sentry, Grafana, and deployment evidence when configured
+- A French incident guide at `/dashboard/operations/guide` covering severity,
+  the role of every observability module and Foody service, safety rules, and
+  concrete runbooks starting from an alert or a customer report, including the
+  per-restaurant Sumit and Twilio Tech Provider boundaries
 
 ### Subscriptions (`/dashboard/subscriptions`) *(via API)*
 

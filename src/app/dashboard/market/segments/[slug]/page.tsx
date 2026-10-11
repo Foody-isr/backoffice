@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import {
   getSegment,
@@ -27,12 +28,9 @@ import SegmentFormModal from '../../SegmentFormModal';
 import ProspectFormModal from '../../ProspectFormModal';
 import ProspectStatusChip, { statusLabel } from '@/components/ProspectStatusChip';
 
-interface PageProps {
-  params: { slug: string };
-}
-
-export default function SegmentDetailPage({ params }: PageProps) {
-  const { slug } = params;
+export default function SegmentDetailPage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
 
   const [segment, setSegment] = useState<LeadSegment | null>(null);
   const [segments, setSegments] = useState<LeadSegmentWithCount[]>([]);

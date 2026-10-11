@@ -1,0 +1,235 @@
+name: Monitor Public Services
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: 'Incident drill: fail safely after the real probes pass'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-service-monitor
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Probe production and development
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+
+    steps:
+      - name: Check public services
+        env:
+          SIMULATE_FAILURE: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate_failure || false }}
+        shell: bash
+        run: |
+          set -u
+
+          failures=0
+
+          check_target() {
+            local name="$1"
+            local url="$2"
+            local response_type="$3"
+            local metadata
+            local body=""
+
+            if [ "$response_type" = "health" ]; then
+              local response
+              if ! response=$(curl \
+                --silent \
+                --show-error \
+                --location \
+                --retry 2 \
+                --retry-all-errors \
+                --retry-delay 2 \
+                --connect-timeout 5 \
+                --max-time 20 \
+                --user-agent 'Foody-GitHub-Monitor/1.0' \
+                --write-out $'\n%{http_code}|%{time_total}' \
+                "$url"); then
+                echo "::error title=${name} unavailable::Connection failed after retries"
+                failures=$((failures + 1))
+                return
+              fi
+
+              metadata="${response##*$'\n'}"
+              body="${response%$'\n'*}"
+            else
+              if ! metadata=$(curl \
+                --silent \
+                --show-error \
+                --location \
+                --retry 2 \
+                --retry-all-errors \
+                --retry-delay 2 \
+                --connect-timeout 5 \
+                --max-time 20 \
+                --user-agent 'Foody-GitHub-Monitor/1.0' \
+                --output /dev/null \
+                --write-out '%{http_code}|%{time_total}' \
+                "$url"); then
+                echo "::error title=${name} unavailable::Connection failed after retries"
+                failures=$((failures + 1))
+                return
+              fi
+            fi
+
+            local http_code="${metadata%%|*}"
+            local duration="${metadata#*|}"
+
+            if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 400 ]; then
+              echo "::error title=${name} unavailable::HTTP ${http_code} from ${url}"
+              failures=$((failures + 1))
+              return
+            fi
+
+            if [ "$response_type" = "health" ] && ! jq -e '.status == "ok"' >/dev/null <<<"$body"; then
+              echo "::error title=${name} unhealthy::Health response did not contain status=ok"
+              failures=$((failures + 1))
+              return
+            fi
+
+            if awk "BEGIN { exit !(${duration} > 2.0) }"; then
+              echo "::warning title=${name} degraded::HTTP ${http_code} in ${duration}s"
+            else
+              echo "${name}: HTTP ${http_code} in ${duration}s"
+            fi
+          }
+
+          while IFS='|' read -r name url response_type; do
+            check_target "$name" "$url" "$response_type"
+          done <<'TARGETS'
+          Production API|https://api.foody-pos.co.il/health|health
+          Production ordering|https://app.foody-pos.co.il/|http
+          Production admin|https://admin.foody-pos.co.il/login|http
+          Production backoffice|https://backoffice.foody-pos.co.il/login|http
+          Production landing|https://foody-pos.co.il/|http
+          Development API|https://dev-api.foody-pos.co.il/health|health
+          Development ordering|https://dev-app.foody-pos.co.il/|http
+          Development admin|https://dev-admin.foody-pos.co.il/login|http
+          Development backoffice|https://dev-backoffice.foody-pos.co.il/login|http
+          TARGETS
+
+          if [ "$SIMULATE_FAILURE" = "true" ]; then
+            echo "::error title=Foody monitor incident drill::Intentional failure after all real service checks completed"
+            failures=$((failures + 1))
+          fi
+
+          if [ "$failures" -ne 0 ]; then
+            echo "::error title=Foody public monitor failed::${failures} service check(s) failed"
+            exit 1
+          fi
+
+          echo "All public service checks passed"
+
+  incident:
+    name: Maintain outage incident
+    if: always() && (needs.probe.result == 'success' || needs.probe.result == 'failure')
+    needs: probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Open one incident for an outage
+        if: needs.probe.result == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          INCIDENT_ASSIGNEE: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ '${{ inputs.simulate_failure }}' = 'true' ]; then
+            title='[monitor drill] Simulated public service outage'
+          else
+            title='[monitor] Public services unavailable'
+          fi
+          issue_number=$(gh issue list \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            | jq -r --arg title "$title" \
+              'first(.[] | select(.title == $title) | .number) // empty')
+
+          if [ -n "$issue_number" ]; then
+            echo "Incident #${issue_number} is already open; no duplicate created"
+            exit 0
+          fi
+
+          body=$(printf '%s\n\n%s\n%s\n\n%s\n' \
+            "$(if [ '${{ inputs.simulate_failure }}' = 'true' ]; then echo 'DRILL: all real probes ran first; this failure was intentionally simulated.'; else echo 'The five-minute public service monitor detected at least one failed endpoint.'; fi)" \
+            "Workflow run: ${RUN_URL}" \
+            "Started: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            'Open the workflow logs for the failing service, then follow docs/OBSERVABILITY.md. No customer or payment data is included in this issue.')
+
+          create_args=(--title "$title" --body "$body")
+          if gh api "repos/${GH_REPO}/assignees/${INCIDENT_ASSIGNEE}" >/dev/null 2>&1; then
+            create_args+=(--assignee "$INCIDENT_ASSIGNEE")
+          fi
+
+          gh issue create "${create_args[@]}"
+
+      - name: Close the simulated incident
+        if: needs.probe.result == 'failure' && inputs.simulate_failure == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title='[monitor drill] Simulated public service outage'
+          issue_number=$(gh issue list \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            | jq -r --arg title "$title" \
+              'first(.[] | select(.title == $title) | .number) // empty')
+
+          if [ -z "$issue_number" ]; then
+            echo 'The drill did not create an incident issue'
+            exit 1
+          fi
+
+          gh issue close "$issue_number" \
+            --comment "Incident drill completed: creation, assignment and recovery closure were verified. Run: ${RUN_URL}"
+
+      - name: Close the incident after recovery
+        if: needs.probe.result == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title='[monitor] Public services unavailable'
+          issue_number=$(gh issue list \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            | jq -r --arg title "$title" \
+              'first(.[] | select(.title == $title) | .number) // empty')
+
+          if [ -z "$issue_number" ]; then
+            echo 'No open monitoring incident to close'
+            exit 0
+          fi
+
+          gh issue close "$issue_number" \
+            --comment "All public service checks recovered. Verification run: ${RUN_URL}"
