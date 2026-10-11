@@ -46,6 +46,34 @@ issue, and closes it with a drill comment. The expected workflow conclusion is
 failure: that is what exercises the same notification channel as a real outage.
 Never test this path by changing a production endpoint or credential.
 
+## Verifone JSON runtime control (development only)
+
+In **Development Backoffice → Operations → Verifone JSON diagnostics**, use
+**Enable JSON** / **Disable JSON**. This calls the authenticated superadmin API:
+`GET` / `PUT /api/v1/admin/observability/verifone`; PUT accepts `{ "enabled": true }`
+or `{ "enabled": false }`. The API and Backoffice must both include this feature
+on the first deployment. Afterwards, toggling requires no deployment or restart.
+
+The API owns a default-off database setting. It persists across deployments until
+explicitly disabled, with no one-hour expiry. Every effective change is audited.
+Only `APP_ENV=development` and Verifone sandbox exchanges can include bodies;
+production and unknown environments reject changes server-side. The panel shows
+the queried API's environment and refreshes every 30 seconds/on window focus.
+Failed reads or ambiguous writes show an unknown state and require a status
+refresh before another mutation; no optimistic success is displayed.
+
+The JSON is **filtered**, never a raw archive. Credentials, payment tokens,
+card/identity ciphertext, personal data and free-form messages remain masked;
+unknown fields are omitted. A failed settings lookup omits bodies without failing
+payment. Safe metadata and validated provider Checkout/transaction UUIDs remain
+available even while JSON is disabled. No guest web/POS contract changes.
+
+**Open dev CloudWatch** opens `/foody/dev/api` in `eu-north-1`; AWS login and log
+read permissions are separate from Foody access. Filter `event = "verifone.http"`
+and inspect `phase`, `request_body`, `response_body`, `body_logging`,
+`provider_checkout_id` and `provider_transaction_id`. Disabling stops new bodies,
+not existing logs (14-day retention), and cannot reconstruct earlier bodies.
+
 ## Backoffice configuration
 
 Configure these variables separately in development and production:

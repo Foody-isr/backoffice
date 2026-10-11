@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import VerifoneDiagnostics from '@/components/VerifoneDiagnostics';
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
@@ -172,6 +173,8 @@ export default function OperationsPage() {
           Status checks could not run: {error}. Retry once, then open the deployment history.
         </div>
       )}
+
+      <VerifoneDiagnostics />
 
       <section aria-labelledby="service-status-heading" className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
