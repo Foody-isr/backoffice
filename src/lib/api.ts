@@ -587,6 +587,7 @@ export async function deleteModifier(restaurantId: number, modifierId: number) {
 export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone' | 'stancer';
 
 export interface PaymentConfigResponse {
+  verifone_checkout_theme?: VerifoneCheckoutThemeStatus;
   restaurant_id: number;
   provider: PaymentProvider;
   has_custom_credentials: boolean;
@@ -609,6 +610,10 @@ export interface PaymentConfigResponse {
   masked_verifone_checkout_payment_contract_id?: string;
   masked_verifone_token_payment_contract_id?: string;
   masked_verifone_installments_payment_contract_id?: string;
+  verifone_apple_pay_enabled?: boolean;
+  verifone_google_pay_enabled?: boolean;
+  masked_verifone_apple_pay_payment_contract_id?: string;
+  masked_verifone_google_pay_payment_contract_id?: string;
   masked_verifone_token_scope?: string;
   masked_verifone_public_key_alias?: string;
   masked_stancer_secret_key?: string;
@@ -616,6 +621,7 @@ export interface PaymentConfigResponse {
 }
 
 export interface UpdatePaymentConfigInput {
+  verifone_checkout_theme_enabled?: boolean;
   provider: PaymentProvider;
   payplus_api_key?: string;
   payplus_secret_key?: string;
@@ -634,6 +640,10 @@ export interface UpdatePaymentConfigInput {
   verifone_checkout_payment_contract_id?: string;
   verifone_token_payment_contract_id?: string;
   verifone_installments_payment_contract_id?: string;
+  verifone_apple_pay_enabled?: boolean;
+  verifone_google_pay_enabled?: boolean;
+  verifone_apple_pay_payment_contract_id?: string;
+  verifone_google_pay_payment_contract_id?: string;
   verifone_token_scope?: string;
   verifone_public_key_alias?: string;
   verifone_token_charging_enabled?: boolean;
@@ -645,6 +655,19 @@ export interface UpdatePaymentConfigInput {
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
   return apiFetch<PaymentConfigResponse>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`);
+}
+
+export interface VerifoneCheckoutThemeStatus {
+  enabled: boolean;
+  ready: boolean;
+  outdated: boolean;
+  theme_id?: string;
+  synced_at?: string;
+}
+
+/** Synchronize the restaurant's published branding, without starting a payment. */
+export async function syncVerifoneCheckoutTheme(restaurantId: number): Promise<VerifoneCheckoutThemeStatus> {
+  return apiFetch<VerifoneCheckoutThemeStatus>(`/api/v1/admin/restaurants/${restaurantId}/payment-config/verifone-theme/sync`, { method: 'POST' });
 }
 
 export async function updatePaymentConfig(restaurantId: number, config: UpdatePaymentConfigInput): Promise<{ message: string }> {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CopyRestaurantToDev from '@/components/CopyRestaurantToDev';
@@ -14,6 +14,7 @@ import {
   toggleFeature,
   setRestaurantPlan,
   getPaymentConfig,
+  syncVerifoneCheckoutTheme,
   updatePaymentConfig,
   getCustomDomain,
   updateCustomDomain,
@@ -66,7 +67,11 @@ export default function RestaurantDetailPage() {
   // Payment config state
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfigResponse | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentLoadError, setPaymentLoadError] = useState('');
   const [paymentSaving, setPaymentSaving] = useState(false);
+  const [themeSyncing, setThemeSyncing] = useState(false);
+  const [themeSyncError, setThemeSyncError] = useState('');
+  const savedPaymentCreds = useRef('');
   const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('payplus');
   const [paymentCreds, setPaymentCreds] = useState<UpdatePaymentConfigInput>({ provider: 'payplus' });
 
@@ -122,21 +127,27 @@ export default function RestaurantDetailPage() {
 
   useEffect(() => {
     if (tab !== 'payment' || paymentConfig !== null) return;
+    setPaymentLoadError('');
     setPaymentLoading(true);
     getPaymentConfig(id)
       .then((cfg) => {
         setPaymentConfig(cfg);
         setPaymentProvider(cfg.provider);
-        setPaymentCreds({
+        const loadedCreds: UpdatePaymentConfigInput = {
           provider: cfg.provider,
           verifone_environment: cfg.verifone_environment || 'sandbox',
           verifone_stored_credential_model: cfg.verifone_stored_credential_model,
           verifone_token_charging_enabled: cfg.verifone_token_charging_enabled || false,
           verifone_invoice4u_enabled: cfg.verifone_invoice4u_enabled || false,
           verifone_invoice4u_receipt_type: cfg.verifone_invoice4u_receipt_type || '',
-        });
+          verifone_apple_pay_enabled: cfg.verifone_apple_pay_enabled || false,
+          verifone_google_pay_enabled: cfg.verifone_google_pay_enabled || false,
+          verifone_checkout_theme_enabled: cfg.verifone_checkout_theme?.enabled || false,
+        };
+        savedPaymentCreds.current = JSON.stringify(loadedCreds);
+        setPaymentCreds(loadedCreds);
       })
-      .catch(() => {})
+      .catch((error: unknown) => setPaymentLoadError(error instanceof Error ? error.message : 'Payment settings could not be loaded. Reload before making changes.'))
       .finally(() => setPaymentLoading(false));
   }, [tab, id, paymentConfig]);
 
@@ -298,6 +309,11 @@ export default function RestaurantDetailPage() {
         input.verifone_checkout_payment_contract_id = paymentCreds.verifone_checkout_payment_contract_id;
         input.verifone_token_payment_contract_id = paymentCreds.verifone_token_payment_contract_id;
         input.verifone_installments_payment_contract_id = paymentCreds.verifone_installments_payment_contract_id;
+        input.verifone_apple_pay_payment_contract_id = paymentCreds.verifone_apple_pay_payment_contract_id;
+        input.verifone_google_pay_payment_contract_id = paymentCreds.verifone_google_pay_payment_contract_id;
+        input.verifone_apple_pay_enabled = paymentCreds.verifone_apple_pay_enabled || false;
+        input.verifone_google_pay_enabled = paymentCreds.verifone_google_pay_enabled || false;
+        input.verifone_checkout_theme_enabled = paymentCreds.verifone_checkout_theme_enabled || false;
         input.verifone_token_scope = paymentCreds.verifone_token_scope;
         input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
         input.verifone_token_charging_enabled = paymentCreds.verifone_token_charging_enabled || false;
@@ -324,6 +340,19 @@ export default function RestaurantDetailPage() {
   function isFeatureEnabled(key: FeatureKey): boolean {
     const f = features.find((f) => f.feature_key === key);
     return f?.enabled ?? false;
+  }
+
+  async function handleThemeSync() {
+    setThemeSyncError('');
+    setThemeSyncing(true);
+    try {
+      await syncVerifoneCheckoutTheme(id);
+      setPaymentConfig(null);
+    } catch (error: unknown) {
+      setThemeSyncError(error instanceof Error ? error.message : 'Theme synchronization failed');
+    } finally {
+      setThemeSyncing(false);
+    }
   }
 
   if (loading) {
@@ -496,6 +525,7 @@ export default function RestaurantDetailPage() {
 
       {tab === 'payment' && (
         <div className="space-y-6">
+          {paymentLoadError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{paymentLoadError} Reload this page before making changes.</p>}
           {paymentLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
@@ -591,6 +621,65 @@ export default function RestaurantDetailPage() {
                       />
                     </div>
                   ))}
+                  <fieldset disabled={themeSyncing} className="space-y-3 border-t border-gray-200 pt-4">
+                    <legend className="text-sm font-semibold text-gray-700">Hosted payment page appearance</legend>
+                    <p className="max-w-2xl text-xs leading-5 text-gray-500">
+                      Checkout follows the customer&apos;s ordering language, with English as fallback and a language selector. Synchronize the restaurant&apos;s published logo and colors to brand Verifone&apos;s page. Draft website changes are not included.
+                    </p>
+                    <label className="flex items-start gap-2 text-sm text-gray-700">
+                      <input type="checkbox" className="mt-0.5" disabled={!paymentConfig?.verifone_checkout_theme?.ready}
+                        checked={paymentCreds.verifone_checkout_theme_enabled || false}
+                        onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_checkout_theme_enabled: e.target.checked })} />
+                      <span>Use the restaurant&apos;s synchronized theme</span>
+                    </label>
+                    <p role="status" className="text-xs leading-5 text-gray-500">
+                      {!paymentConfig?.verifone_checkout_theme?.ready ? 'No theme synchronized for this organization and environment. The Verifone account default is used.' :
+                        paymentConfig.verifone_checkout_theme.outdated ? 'Published branding has changed. Synchronize again to update future payment pages.' :
+                          `Theme synchronized${paymentConfig.verifone_checkout_theme.synced_at ? ` on ${formatDate(paymentConfig.verifone_checkout_theme.synced_at)}` : ''}.`}
+                    </p>
+                    <button type="button" onClick={handleThemeSync}
+                      disabled={themeSyncing || paymentSaving || paymentLoading || paymentConfig?.provider !== paymentProvider || JSON.stringify(paymentCreds) !== savedPaymentCreds.current}
+                      className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50">
+                      {themeSyncing ? 'Synchronizing logo and colors...' : 'Synchronize published logo and colors'}
+                    </button>
+                    <p className="max-w-2xl text-xs leading-5 text-gray-500">
+                      Save payment settings first. Synchronization activates a restaurant-specific theme for new Checkout links only; existing links are retained. Logos must be public HTTPS PNG, JPEG or WebP images. Re-synchronize after publishing branding changes. Disable the theme before changing organization or environment. Apple Pay and Google Pay&apos;s native sheets keep their own appearance.
+                    </p>
+                    {themeSyncError && <p role="alert" className="text-sm text-red-700">{themeSyncError}</p>}
+                  </fieldset>
+                  <fieldset className="space-y-4 border-t border-gray-200 pt-4">
+                    <legend className="text-sm font-semibold text-gray-700">Wallets on the hosted payment page</legend>
+                    <p className="max-w-2xl text-xs leading-5 text-gray-500">
+                      Enable only after Verifone confirms ABS support, activates the wallet in the same organization as its contract, and approves SCA compliance NONE. These choices appear on Verifone&apos;s page, not as native Foody buttons.
+                    </p>
+                    {([
+                      ['Apple Pay', 'verifone_apple_pay_enabled', 'verifone_apple_pay_payment_contract_id', paymentConfig?.masked_verifone_apple_pay_payment_contract_id],
+                      ['Google Pay', 'verifone_google_pay_enabled', 'verifone_google_pay_payment_contract_id', paymentConfig?.masked_verifone_google_pay_payment_contract_id],
+                    ] as const).map(([name, enabledField, contractField, masked]) => (
+                      <div key={enabledField} className="space-y-2">
+                        <label className="flex items-start gap-2 text-sm text-gray-700">
+                          <input type="checkbox" checked={paymentCreds[enabledField] || false}
+                            onChange={(e) => setPaymentCreds({ ...paymentCreds, [enabledField]: e.target.checked })}
+                            aria-describedby={contractField + '-help'} className="mt-0.5" />
+                          <span>Enable {name} in hosted Checkout</span>
+                        </label>
+                        <div className="max-w-md">
+                          <label htmlFor={contractField} className="mb-1 block text-xs font-medium text-gray-500">{name} payment contract</label>
+                          <input id={contractField} type="password" autoComplete="new-password"
+                            placeholder={masked || 'Confirmed payment contract UUID'}
+                            value={paymentCreds[contractField] || ''}
+                            onChange={(e) => setPaymentCreds({ ...paymentCreds, [contractField]: e.target.value.trim() || undefined })}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                          <p id={contractField + '-help'} className="mt-1 text-xs leading-5 text-gray-500">
+                            Required when enabled. Never inferred from the CVV or No-CVV contract. Leave blank to retain the saved value.
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <p className="max-w-2xl text-xs leading-5 text-gray-500">
+                      Fixed-amount, immediate payments only. Card saving, installments, weighted holds and catering guarantees stay card-only. Disable wallets before changing environment; confirm that environment&apos;s contracts before re-enabling. Verify Invoice4U issuance separately during acceptance tests.
+                    </p>
+                  </fieldset>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1">Stored credential model</label>
                     <select
@@ -803,7 +892,7 @@ export default function RestaurantDetailPage() {
               {/* Save button */}
               <button
                 onClick={handlePaymentSave}
-                disabled={paymentSaving}
+                disabled={paymentSaving || themeSyncing || paymentLoading || !paymentConfig || !!paymentLoadError}
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
               >
                 {paymentSaving ? 'Saving...' : 'Save Payment Config'}
