@@ -215,6 +215,40 @@ All calls go to `NEXT_PUBLIC_API_URL/api/v1/...` with `Authorization: Bearer <to
 
 ## Validation & Pre-push
 
+### Verifone hosted wallets
+
+Restaurant → Payment → Verifone offers separate Apple Pay / Google Pay switches
+and write-only payment contract UUIDs. Apply API migration
+`257_verifone_hosted_wallets.sql` and deploy API first. Both default off; this
+form does not activate wallets in Verifone Central. Enable only after Verifone
+confirms ABS support, the environment's contracts and SCA NONE, and activates the
+wallet on the PPC's organization. Contract IDs remain encrypted server-side and
+masked on reload; blank inputs retain saved values. Disable wallets before
+changing environment.
+
+The choices appear on Verifone HPP, not as native Foody buttons. They apply to
+ordinary immediate fixed-amount payments only, not saved-card registration,
+installments or authorization holds. Invoice4U issuance must be verified separately
+in acceptance. No new environment variable or guest Web change is required.
+
+### Verifone hosted-page branding
+
+The Verifone Payment tab shows customer-language behavior and a restaurant theme
+status. Save payment settings, then choose **Synchronize published logo and colors**.
+This superadmin action uploads the published PNG/JPEG/WebP logo when present and
+creates a versioned theme; it never initiates a charge or changes the account's
+default theme. Unsaved payment edits block synchronization. Draft branding is not
+included. Changed published branding is marked outdated until synchronized again.
+
+Migration `258_verifone_checkout_theme.sql` and API support must deploy first.
+The enabled switch can revert future links to the account default without deleting
+the saved theme. Disable it before changing organization/environment and synchronize
+again afterwards. Existing links keep their previous presentation. Private/logo
+redirect URLs and SVG are rejected; use a public HTTPS PNG/JPEG/WebP asset.
+Synchronization failures remain visible and do not overwrite the working theme.
+
+### Commands
+
 ```bash
 cd foodybackoffice
 npm run lint          # ESLint
