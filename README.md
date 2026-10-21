@@ -306,3 +306,5 @@ counts. Tracking starts at activation; UTC monthly renewal is displayed. Existin
 shared Google protection remains independent. Deploy API migration 268 first.
 Canonical production/development backoffice hosts select their matching API at
 runtime so the exact verified development artifact can be promoted to production.
+The build's Content Security Policy explicitly permits both canonical API origins
+so the browser can use that runtime selection in either environment.

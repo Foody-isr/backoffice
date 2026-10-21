@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "path": "next.config.mjs",
+      "sha256": "72b2775590793cbfd3f3f6fb98a7c8152c94662428597075f32382a4f9c2cb83",
+      "disposition": "no-user-impact",
+      "reason": "Permit the two existing canonical Foody API origins in the browser connection policy so a single immutable backoffice artifact can use its documented runtime development/production API selection. No workflow, permission, quota, or user-facing text changes."
+    }
+  ]
+}

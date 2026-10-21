@@ -11,13 +11,15 @@ const apiOrigin = (() => {
 })();
 
 const isProduction = process.env.NODE_ENV === 'production';
+// The same immutable build serves the canonical development and production hosts.
+const apiOrigins = [...new Set([apiOrigin, 'https://api.foody-pos.co.il', 'https://dev-api.foody-pos.co.il'])];
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' blob: data: https:",
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin} https://*.ingest.sentry.io`,
+  `connect-src 'self' ${apiOrigins.join(' ')} https://*.ingest.sentry.io`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
