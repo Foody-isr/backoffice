@@ -393,6 +393,7 @@ export default function RestaurantDetailPage() {
               ID #{restaurant.id} · {restaurant.slug || 'no slug'} · Created {formatDate(restaurant.created_at)}
             </p>
           </div>
+          <Link className="text-sm underline" href={`/dashboard/restaurants/${id}/usage`}>Usage and quotas</Link>
           <CopyRestaurantToDev restaurant={restaurant} />
           {restaurant.plan ? (
             <span className={`px-3 py-1 rounded-full text-sm font-bold ${planColor(restaurant.plan.plan_tier)}`}>

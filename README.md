@@ -6,7 +6,7 @@ Internal superadmin dashboard for the Foody team. Used to manage the entire plat
 
 | Environment | Domain | API | Branch |
 |-------------|--------|-----|--------|
-| **Production** | `backoffice.foody-pos.co.il` | `api.foody-pos.co.il` | `main` |
+| **Production** | `backoffice.foody-pos.co.il` | `api.foody-pos.co.il` | Manually promoted `develop` artifact |
 | **Development** | `dev-backoffice.foody-pos.co.il` | `dev-api.foody-pos.co.il` | `develop` |
 | **Local** | `localhost:3002` | `localhost:8080` | any |
 
@@ -292,3 +292,17 @@ checks local preparation. Remote CI uses a pinned immutable Landing commit and
 checks all French, Hebrew and English procedures. New source and behavior changes
 require an updated inventory/guide release or an exact reviewed no-user-impact
 explanation. See Landing’s `docs/help/MAINTENANCE.md` for the complete workflow.
+
+## External-service usage and allowances
+
+**Usage and quotas** compares restaurant consumption by service in the current
+environment and links to each restaurant allocation. The restaurant detail page
+also links there. Complete monthly overrides require a reason and explicit save;
+zero pauses new calls, restoring defaults only edits the form, and concurrent
+edits require reloading the current revision. Saves are audited and never reset
+usage. These controls currently cover Google location APIs and all Geoapify
+categories, with optimization shipments and estimated credits distinct from request
+counts. Tracking starts at activation; UTC monthly renewal is displayed. Existing
+shared Google protection remains independent. Deploy API migration 268 first.
+Canonical production/development backoffice hosts select their matching API at
+runtime so the exact verified development artifact can be promoted to production.

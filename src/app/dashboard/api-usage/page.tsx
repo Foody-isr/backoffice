@@ -1,0 +1,17 @@
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { externalApiLabels, listExternalApiUsage } from '@/lib/api';
+
+/** Platform view retains separate service units and links to explicit allocation edits. */
+export default function PlatformUsagePage() {
+ const [data, setData] = useState<Awaited<ReturnType<typeof listExternalApiUsage>> | null>(null);
+ const [page, setPage] = useState(1), [attempt, setAttempt] = useState(0), [busy, setBusy] = useState(true), [error, setError] = useState(false);
+ const [service, setService] = useState('google_optimization_single');
+ useEffect(() => { let active = true; setBusy(true); setError(false); setData(null); listExternalApiUsage(page).then(value => { if (active) setData(value); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setBusy(false); }); return () => { active = false; }; }, [page, attempt]);
+ return <div className="mx-auto max-w-6xl"><h1 className="text-2xl font-bold">Usage and quotas</h1><p className="mt-2 text-gray-600">Restaurant allowances across the current environment. Provider-wide protection remains additional.</p>
+  <div className="my-7 flex flex-wrap justify-between gap-4"><label className="flex items-center gap-3">Service<select className="rounded-lg border border-gray-300 bg-white p-3" value={service} onChange={e => setService(e.target.value)}>{Object.entries(externalApiLabels).map(([id,label]) => <option key={id} value={id}>{label}</option>)}</select></label><button disabled={busy} className="rounded-full border border-gray-300 px-5 py-2" onClick={() => setAttempt(n => n + 1)}>Reload</button></div>
+  {error && <p role="alert">Usage could not be loaded. <button className="underline" onClick={() => setAttempt(n => n + 1)}>Retry</button></p>}{busy && <p role="status">Loading…</p>}
+  {data && <><div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white"><table className="w-full text-left text-sm"><thead><tr className="border-b"><th className="p-4">Restaurant</th><th className="p-4">Used</th><th className="p-4">Monthly limit</th><th className="p-4">Status</th><th className="p-4"><span className="sr-only">Actions</span></th></tr></thead><tbody>{data.restaurants.map(row => { const c = row.usage.counters.find(counter => counter.id === service); return <tr key={row.id} className="border-b last:border-0"><td className="p-4 font-medium">{row.name}<span className="block text-gray-500">#{row.id} · {row.usage.month}</span></td><td className="p-4 tabular-nums">{c?.used.toLocaleString() ?? '—'}</td><td className="p-4 tabular-nums">{c?.limit.toLocaleString() ?? '—'}</td><td className="p-4">{c?.status === 'exhausted' ? 'Limit reached' : c?.status === 'warning' ? 'Over 80%' : 'Available'}</td><td className="p-4"><Link className="underline" href={`/dashboard/restaurants/${row.id}/usage`}>Review allocation</Link></td></tr>; })}</tbody></table>{!data.restaurants.length && <p className="p-6">No restaurants.</p>}</div><div className="mt-5 flex items-center justify-between"><button disabled={busy || page === 1} className="rounded-full border px-4 py-2 disabled:opacity-40" onClick={() => setPage(n => n - 1)}>Previous</button><p>Page {page} · {data.total} restaurants</p><button disabled={busy || page * data.page_size >= data.total} className="rounded-full border px-4 py-2 disabled:opacity-40" onClick={() => setPage(n => n + 1)}>Next</button></div></>}
+ </div>;
+}
