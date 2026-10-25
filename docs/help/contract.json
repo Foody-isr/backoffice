@@ -1,0 +1,2758 @@
+{
+  "schemaVersion": 1,
+  "service": "foodybackoffice",
+  "documentationRepository": "Foody-isr/landing",
+  "documentationRef": "WORKSPACE",
+  "documentationRevision": "c0c1f426faba33a94847a9e92bd5c43f468baea6aa6f4af8b837cff571cbced4",
+  "articles": {
+    "getting-started/first-login": {
+      "feature": "account-access",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/getting-started/first-login.mdx",
+          "sha256": "b571d2f3ec51a723b280833a6c3698021edbbe707f35dc703e3e6d439d220055"
+        },
+        "fr": {
+          "path": "src/content/help/fr/getting-started/first-login.mdx",
+          "sha256": "20ed8bd5419d466903d92805f58ea557912c9135a1b444f68bf2a8b9a346e461"
+        },
+        "he": {
+          "path": "src/content/help/he/getting-started/first-login.mdx",
+          "sha256": "dc5a4776548fef240cbe6d7b6cd4deff8862bb3799b12c4014d65576cd33d656"
+        }
+      }
+    },
+    "account/security": {
+      "feature": "account-security",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/account/security.mdx",
+          "sha256": "770b7a397c1589b7ec7ce6e9f5976fd737a57c4ea59b6e27e392a9c9f305baaf"
+        },
+        "fr": {
+          "path": "src/content/help/fr/account/security.mdx",
+          "sha256": "4da1a6c1e8d97204284cda9278196327bdf5cacd1942a7d53dd0298d6b298023"
+        },
+        "he": {
+          "path": "src/content/help/he/account/security.mdx",
+          "sha256": "6f2342d8d5dcd411324391b01f1987ae09061c42b5523f401a786d75ec3e10e5"
+        }
+      }
+    },
+    "staff/invite-staff": {
+      "feature": "staff-invitations",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/staff/invite-staff.mdx",
+          "sha256": "61a47336208acf372cad6cb708ddd24d8dcd3b7ae680efe09786250c489291b3"
+        },
+        "fr": {
+          "path": "src/content/help/fr/staff/invite-staff.mdx",
+          "sha256": "0d1a94f34396c52f3bb57313b7a005bf8e08cd94bedfec42793d56a63d1f32bd"
+        },
+        "he": {
+          "path": "src/content/help/he/staff/invite-staff.mdx",
+          "sha256": "659b731914d1ee17850634e654124066d60f16106fb09ab629984cef22098c9c"
+        }
+      }
+    },
+    "staff/roles-and-permissions": {
+      "feature": "staff-roles",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/staff/roles-and-permissions.mdx",
+          "sha256": "bdcf933095fc903655762ffac4b8bbbc1389b3b5064da4db34d56820631001d0"
+        },
+        "fr": {
+          "path": "src/content/help/fr/staff/roles-and-permissions.mdx",
+          "sha256": "d60cdd606b9124e60792f7838d5c933be3123ab95dc8432187b9e310aec7dd00"
+        },
+        "he": {
+          "path": "src/content/help/he/staff/roles-and-permissions.mdx",
+          "sha256": "692f0ad9c2383704fc14d22ba0657d31740d4c69b509fec5e589fd6bf85a740c"
+        }
+      }
+    },
+    "staff/devices-and-shifts": {
+      "feature": "staff-devices-shifts",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/staff/devices-and-shifts.mdx",
+          "sha256": "3a087c1e716c8e7b246f793ffe4d277513294db4ae50e3c9ae94aaca6b75a1e0"
+        },
+        "fr": {
+          "path": "src/content/help/fr/staff/devices-and-shifts.mdx",
+          "sha256": "5eb697a0ec63e0997c4ff9d8b06b6065788d11b9a686360464d4f7d1d9df6b04"
+        },
+        "he": {
+          "path": "src/content/help/he/staff/devices-and-shifts.mdx",
+          "sha256": "114c8126623996008e8d6f1b15aab4a3c9befed684d21a92665c60abb00f747a"
+        }
+      }
+    },
+    "customers/managing-customers": {
+      "feature": "customers-profiles",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/customers/managing-customers.mdx",
+          "sha256": "803e8f355d12842304258e952bad57cf6fbd178a50a4984cf7fa41adac00febe"
+        },
+        "fr": {
+          "path": "src/content/help/fr/customers/managing-customers.mdx",
+          "sha256": "c1c816b7fd5467f92129ef1d303fc962b0418ad35928f212c7c0a7a03829c2f7"
+        },
+        "he": {
+          "path": "src/content/help/he/customers/managing-customers.mdx",
+          "sha256": "66b0d506b0ee9592c6e4fbfd31df132c5482fb23219495b158dfb53440cec628"
+        }
+      }
+    },
+    "marketing/promotions": {
+      "feature": "promotions",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/marketing/promotions.mdx",
+          "sha256": "20267066afa50d9dcb991f00b6745bbafa95f84a3805620f61f1fe030a352f7f"
+        },
+        "fr": {
+          "path": "src/content/help/fr/marketing/promotions.mdx",
+          "sha256": "a9761a99888403d2d2fc3ee21a115762f1ef7e456acba4457b3aa1e5f8adfa1f"
+        },
+        "he": {
+          "path": "src/content/help/he/marketing/promotions.mdx",
+          "sha256": "5563211d05890f90b728ca3b4d3f2324eab239c25302d5933b3d8259691d7c11"
+        }
+      }
+    },
+    "account/subscription": {
+      "feature": "billing",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/account/subscription.mdx",
+          "sha256": "8f22d12811bd359196cc4ebdb63dc545570b13f11efdf81ff4d8e3c55ade08fe"
+        },
+        "fr": {
+          "path": "src/content/help/fr/account/subscription.mdx",
+          "sha256": "6f916f569e6755a90b5512aa78c25ac354846a7936fc9c6b68af1c22f5518fc2"
+        },
+        "he": {
+          "path": "src/content/help/he/account/subscription.mdx",
+          "sha256": "416a7e634010644ba476deecd0f8f0188de58ac62be5c2fee010837b4e530544"
+        }
+      }
+    },
+    "analytics/dashboard": {
+      "feature": "analytics-dashboard",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/analytics/dashboard.mdx",
+          "sha256": "247c0378157af70eaa19233752138d234f59988074b6807ada179f297cd1944c"
+        },
+        "fr": {
+          "path": "src/content/help/fr/analytics/dashboard.mdx",
+          "sha256": "154027995c21fe2cc9f37fbfd0350e32b59cc2502867a97e164842ee581d7f2e"
+        },
+        "he": {
+          "path": "src/content/help/he/analytics/dashboard.mdx",
+          "sha256": "a165afe3d7a9b1f8ebe08246b6cd5f0b9b59b81d2795ad0669431bed2a352b63"
+        }
+      }
+    },
+    "getting-started/complete-setup-guide": {
+      "feature": "getting-started-complete-setup-guide",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/getting-started/complete-setup-guide.mdx",
+          "sha256": "4f1d7fd361b1dd330c18aad884ddbc2971dad2e02a88d440c6ccd203992cf910"
+        },
+        "fr": {
+          "path": "src/content/help/fr/getting-started/complete-setup-guide.mdx",
+          "sha256": "53ab931e268808a81159981655c8cd0b0381b66c242df688d0ecdb6f8a4b764c"
+        },
+        "he": {
+          "path": "src/content/help/he/getting-started/complete-setup-guide.mdx",
+          "sha256": "3e3e5d12f54595796952137b721e43a14e046e681e7ec5768f9edd1a5de50c11"
+        }
+      }
+    },
+    "getting-started/how-it-all-connects": {
+      "feature": "getting-started-how-it-all-connects",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/getting-started/how-it-all-connects.mdx",
+          "sha256": "306bf16822b404c81873e227afb2fd62e6f3007eed6a4a05eb19779b64bc6af3"
+        },
+        "fr": {
+          "path": "src/content/help/fr/getting-started/how-it-all-connects.mdx",
+          "sha256": "530fe83d4f2190e99365ff7d3526e4131c96a9232a995478d0aaea127c95acc7"
+        },
+        "he": {
+          "path": "src/content/help/he/getting-started/how-it-all-connects.mdx",
+          "sha256": "de92c416dc956ba4ef9d15ea7547f45af24f7de39d773bbfd40762e0a039dcb8"
+        }
+      }
+    },
+    "getting-started/using-support": {
+      "feature": "getting-started-using-support",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/getting-started/using-support.mdx",
+          "sha256": "5d0d10030f6d8dcd8df19e23ae02229c0d935dd5dcea2f7ac26868f2fc3f1bf0"
+        },
+        "fr": {
+          "path": "src/content/help/fr/getting-started/using-support.mdx",
+          "sha256": "06f7d5d2353e021b43360200ce626ab9bcfe4a2e654c2c3e2674f1d5c6308bde"
+        },
+        "he": {
+          "path": "src/content/help/he/getting-started/using-support.mdx",
+          "sha256": "9574f1bff1e11be676ec4538ff748f69a849ddb90ab98658b05831ccc5e106df"
+        }
+      }
+    },
+    "kitchen/availability": {
+      "feature": "kitchen-availability",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/availability.mdx",
+          "sha256": "a1f7d7fb72462426d2cb35e184f30ed5707bdaf7368f220a2996ca723bb53a1e"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/availability.mdx",
+          "sha256": "9aa2867457ed9e435f4cd94cbb9f0958e4c5cf9382e68eb14dbd149787e5b169"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/availability.mdx",
+          "sha256": "bdeff30983d441b7331261de2fde13c48574c0ae9dbca0555a7dc5b1bb3967ad"
+        }
+      }
+    },
+    "kitchen/daily-operations": {
+      "feature": "kitchen-daily-operations",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/daily-operations.mdx",
+          "sha256": "547ffc21d6cdf55f5f77a838b19a44a552d52990dc3ceca963254787e5d00983"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/daily-operations.mdx",
+          "sha256": "c7a0a241671a229e5354ec814bf0dffed3ab20f503d08602e58ae6bf92ed2435"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/daily-operations.mdx",
+          "sha256": "236aa92b376c3e6464332fa2b30bf6df586e5f959a6eb98c3f29ad91efbefb68"
+        }
+      }
+    },
+    "kitchen/food-cost": {
+      "feature": "kitchen-food-cost",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/food-cost.mdx",
+          "sha256": "fd3bdf63004267f2e229d1d48bbfe4d71bde53885621c14b2e96cb80cb66eb9c"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/food-cost.mdx",
+          "sha256": "0e0a9b5085d331a077bab9d4f21d29168c63e6a522ffad8b2235e0afdba600a6"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/food-cost.mdx",
+          "sha256": "6ccde25b0b32ac6151b62b658bde55788ee5aa3e036b95d55de7bb2e4e9b2a3b"
+        }
+      }
+    },
+    "kitchen/preparations": {
+      "feature": "kitchen-preparations",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/preparations.mdx",
+          "sha256": "f9d59c869af996231fbc16c4b395938d24d1556142348962d2be3d308505dd4e"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/preparations.mdx",
+          "sha256": "afbd80552e2565fdede4a94e792d24a88be1d1a456e3fcfacf3491c997cbad92"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/preparations.mdx",
+          "sha256": "e120cb3f6c94fe225337e10f6a1d8c4e23f2bfb248e04e7d6798e57b1162d147"
+        }
+      }
+    },
+    "kitchen/stock-management": {
+      "feature": "kitchen-stock-management",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/stock-management.mdx",
+          "sha256": "82a4e6ba04ca7dd1073c9d4f814de6b9d5f37a74422038907907a94d0acdfda1"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/stock-management.mdx",
+          "sha256": "318b3d85951ec20a45595cec775e18c29893f498cc7fe5077ff5151fa84365c8"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/stock-management.mdx",
+          "sha256": "0d7f892e79575d0ba2161eec566415d425e89f5b80afa2754a94ca4373b99486"
+        }
+      }
+    },
+    "menu/categories-and-items": {
+      "feature": "menu-categories-and-items",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/categories-and-items.mdx",
+          "sha256": "08a27b8bf84de43cd6ed59aa55e466e7bc79d3e0c93315986434669fc686dfdb"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/categories-and-items.mdx",
+          "sha256": "57485bd854488f885c87c6ffadc1616027b2258971c3a281b62a64db47e73d9d"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/categories-and-items.mdx",
+          "sha256": "8005602cf02b115a0f0a463c0cca23ee8c19d4ed91b8c44a6f093564a656560c"
+        }
+      }
+    },
+    "menu/creating-a-menu-item": {
+      "feature": "menu-creating-a-menu-item",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/creating-a-menu-item.mdx",
+          "sha256": "6053f700cf974bf4fbb716e2aadd86072af1a9d7f9545f6bb1ad52d383a22f29"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/creating-a-menu-item.mdx",
+          "sha256": "7cdcb4287790b0035234fd316cc86546c193e85f611d9ec28691b0afb5a03e1a"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/creating-a-menu-item.mdx",
+          "sha256": "c4cbb2463a1e886f31c7aab8415c8e887504afa604c1036e45749905633d32b1"
+        }
+      }
+    },
+    "menu/ingredients-and-portions": {
+      "feature": "menu-ingredients-and-portions",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/ingredients-and-portions.mdx",
+          "sha256": "d5fa751c29274a420f07ea7455c41d7fc4363305a6e1eccec87e07e0cd30cbe2"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/ingredients-and-portions.mdx",
+          "sha256": "427dafadcf5a99f0e3dd06561c35595a67b328f1604578099f50452731bad448"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/ingredients-and-portions.mdx",
+          "sha256": "3b39fa51b1c4a90b859d96444859fd2f3468e93feac67600e05553e9950a74f2"
+        }
+      }
+    },
+    "menu/menus-and-groups": {
+      "feature": "menu-menus-and-groups",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/menus-and-groups.mdx",
+          "sha256": "fd6f25fc110429a507edb70f8f4527632a21f0880f87c4e14b1d4a2fb55f3226"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/menus-and-groups.mdx",
+          "sha256": "1db2d949914464697dc7aed154fb1d8153f6025576d0dbfdd1502eb69a9829e4"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/menus-and-groups.mdx",
+          "sha256": "5396ab9637e90c189c7e73c9775a3813a155978d5003e627c4968fe2bd4837de"
+        }
+      }
+    },
+    "menu/variants-and-sizes": {
+      "feature": "menu-variants-and-sizes",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/variants-and-sizes.mdx",
+          "sha256": "ce1150f170e5f3998bde04ebca3fbc2e67d8d1c9b3bd44a73c2e56160ba59455"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/variants-and-sizes.mdx",
+          "sha256": "cadb006fda5ba33bb695922415ed0a5bb86227b3a9415dafbf78ec27ea62805f"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/variants-and-sizes.mdx",
+          "sha256": "afca6e0ddeaa8fc9fa10837abebb9a6c8a5cf9c108665d43899bb8961ba8c00c"
+        }
+      }
+    },
+    "orders/managing-orders": {
+      "feature": "orders-managing-orders",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/managing-orders.mdx",
+          "sha256": "6b3dfb7b8015372e515d430b9616a3ed070c6c23329e8b555ded4f1e29eb3d16"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/managing-orders.mdx",
+          "sha256": "75a8872357faf11c3ce410e5a50c650b9cda403bbc204490a17a0ae1c2ee7da5"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/managing-orders.mdx",
+          "sha256": "c6bebff5ec6880ddbfdf201e524ec28884b57b6578ca4c51c7952fffc18eee54"
+        }
+      }
+    },
+    "payments/how-payments-work": {
+      "feature": "payments-how-payments-work",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/payments/how-payments-work.mdx",
+          "sha256": "8522b4baca4258284a978d3d5ff3ad3bb69d791301cbed72c28900fcca737e85"
+        },
+        "fr": {
+          "path": "src/content/help/fr/payments/how-payments-work.mdx",
+          "sha256": "72cb2a24edc66240b47fba36cdbccf9ad1563708e3b52ab69c35caf776917d1e"
+        },
+        "he": {
+          "path": "src/content/help/he/payments/how-payments-work.mdx",
+          "sha256": "43f4a0ce87a947a70cb94b9c7f3969e9a1661a31282aad98737ec7fa9cdb4347"
+        }
+      }
+    },
+    "printers/epson-tm-u220iib": {
+      "feature": "printers-epson-tm-u220iib",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/printers/epson-tm-u220iib.mdx",
+          "sha256": "773f3a11d1a798357374e92da8e317ae9a8a751eae3e843ab8d093827351cbff"
+        },
+        "fr": {
+          "path": "src/content/help/fr/printers/epson-tm-u220iib.mdx",
+          "sha256": "588c801eb49af21b881589929cebc1d5264fa5692ac9632ec3e42e68789eb5a8"
+        },
+        "he": {
+          "path": "src/content/help/he/printers/epson-tm-u220iib.mdx",
+          "sha256": "0ab971abea24b973e9fa933a404fa88e678581f5d8a24c5ff8a030bc1aa4662e"
+        }
+      }
+    },
+    "website-qr/customize-your-site": {
+      "feature": "website-qr-customize-your-site",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/customize-your-site.mdx",
+          "sha256": "6a08879887c2b7b3c6f24e5d4199b2246108367b1a252b158a70e5efc291ea55"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/customize-your-site.mdx",
+          "sha256": "f245510fa52513c6566b7c80d7d3a571a09ef3bd8e0ea2e5d43d747378a2baf6"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/customize-your-site.mdx",
+          "sha256": "b14640f528f4e9376fb795eac07adcdf21eac8c1433537b21b3f56cb4013b9f7"
+        }
+      }
+    },
+    "menu/modifiers": {
+      "feature": "menu-modifiers",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/modifiers.mdx",
+          "sha256": "f93ec02f5c5fbfca8d57d3c36f85c11e8a9d4eb2eeaf8365f664c40cd729d410"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/modifiers.mdx",
+          "sha256": "44e8cdbc62162b75ce46a7fa6d9c60a896cb561fdd21f029a85aff46d510c1f0"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/modifiers.mdx",
+          "sha256": "6d78af0b34711d1c9b4a498ba866b8db85f1dfb9923b0418a0c5bf51a6a9f9c4"
+        }
+      }
+    },
+    "orders/order-types": {
+      "feature": "order-types",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/order-types.mdx",
+          "sha256": "3af6c72ba1a34ca349530e76bf9721a0177a7eb5c2a45ff2c950f8618e6ae7ef"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/order-types.mdx",
+          "sha256": "4dd0f5125d9d7f5ba71204cffbdd80cefd61c1ded825fd2032768b6b8ac3977d"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/order-types.mdx",
+          "sha256": "a903636fc954e0e14e715bae2e6714c538ec92637926a44ab87bbeedcd1cfdd8"
+        }
+      }
+    },
+    "orders/taking-an-order-pos": {
+      "feature": "pos-order-entry",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/taking-an-order-pos.mdx",
+          "sha256": "d48c9d1a9722ef6d5effac32fcd14e6050bfaa281b3cd3456e4c243e0d2c780f"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/taking-an-order-pos.mdx",
+          "sha256": "03866427d71c9ed09c5e5de2a38b93cd001c730aac89d3ece9cc771af882ae63"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/taking-an-order-pos.mdx",
+          "sha256": "8330e958f11d2dbf3ae3bfdb9fec65502b38ff015d4c3bcfc0246cf29b03badc"
+        }
+      }
+    },
+    "settings/service-mode": {
+      "feature": "pos-service-modes",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/service-mode.mdx",
+          "sha256": "25e975f233cf8cab76ddadaea712ffcec2ff03ba522cd5abedd9f17148c292c9"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/service-mode.mdx",
+          "sha256": "3665b94c4e7727fe4f72710367ded408b9ef200b3f232eddcb34e871895c171f"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/service-mode.mdx",
+          "sha256": "2fe6d27749a3747467f4316d325e12cb13c38900fe90cca48daaadd22c995b44"
+        }
+      }
+    },
+    "settings/workflow-settings": {
+      "feature": "order-workflow",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/workflow-settings.mdx",
+          "sha256": "23f73c8300e4c272bbaea49fc81b87913475296f6529716a1a483d51fe40edb1"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/workflow-settings.mdx",
+          "sha256": "e4b523d9cd93ca1b93e540b4365251bfb382af8fa423a551bae39c218629511a"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/workflow-settings.mdx",
+          "sha256": "e96e74178cb6d242b8fea06ac80baf363b1b967748c80e0c1fc686fc4daab260"
+        }
+      }
+    },
+    "tables-floors/floor-plans": {
+      "feature": "floor-plans",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/tables-floors/floor-plans.mdx",
+          "sha256": "cc3da0600c5d18cd854cf6cc16a725e4cc881be51e3ec092f628b94ced51aa35"
+        },
+        "fr": {
+          "path": "src/content/help/fr/tables-floors/floor-plans.mdx",
+          "sha256": "13a46d789e17c286031124f7c04f4ad9d816c71f847f146f9e0951ba1f1dd04d"
+        },
+        "he": {
+          "path": "src/content/help/he/tables-floors/floor-plans.mdx",
+          "sha256": "c29f1b57ecc36ec7bafc9d9a6243f71123af0c499483bc3ed20d5ddc90f63d67"
+        }
+      }
+    },
+    "orders/order-details": {
+      "feature": "order-detail",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/order-details.mdx",
+          "sha256": "4c61f98a8e993e208d44ecd2a769cce44065b48917c1e52f8c480e0148cc21bd"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/order-details.mdx",
+          "sha256": "9f27cdd4823c3460ddc4fb6156e22d66967ee0c4aa97c3a7368cee993eaf9e3e"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/order-details.mdx",
+          "sha256": "a9069314ad8ffe7da2bd2833b8fd12437c2ed590bb6c2ab1384a611f192cb862"
+        }
+      }
+    },
+    "orders/calendar": {
+      "feature": "calendar",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/calendar.mdx",
+          "sha256": "6ebdee53664da3cdc3dd66156636e6b21c18aadb15b483e1e1b8037560062c88"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/calendar.mdx",
+          "sha256": "9af6d82fe3a2e453ed5ded814ba749b6ae64862bc404d484de62942ff880cb99"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/calendar.mdx",
+          "sha256": "26ccd310d9df307434780bf5073672b277bda6376ee2f68ba6b6e1629fa30d86"
+        }
+      }
+    },
+    "orders/preorders-and-batches": {
+      "feature": "preorders",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/preorders-and-batches.mdx",
+          "sha256": "a4a7a26a0366c576b468f45cead44940ceea7f37b41288d15f497552e51d210a"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/preorders-and-batches.mdx",
+          "sha256": "aee4dcc3a93c9005351fe057ff9a31cfaf4f54cdfc69834b86fab5ab84ebc2b0"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/preorders-and-batches.mdx",
+          "sha256": "af2e72674a0e862451ac9bcafbf36ee8825e341bb290da335e9da8a4683ab9b6"
+        }
+      }
+    },
+    "orders/production-planning": {
+      "feature": "production",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/production-planning.mdx",
+          "sha256": "431ac6095eda15a88717582208edb5553b45db6351c7e3900a6ef602daf8d9d0"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/production-planning.mdx",
+          "sha256": "73e097bf747ac23da6c3fd42162699b3531a028d6256275e4f946bca68db0ca1"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/production-planning.mdx",
+          "sha256": "01a5ce994fd64086f0a5248943e52c90f7f50a2cc553496c7190e5ffa287ddb9"
+        }
+      }
+    },
+    "delivery/zones-and-schedules": {
+      "feature": "delivery-zones",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/delivery/zones-and-schedules.mdx",
+          "sha256": "a540f2cb19be6fab724df3d21a61c5aaad4c1bf600a0b656165f1ba1ca7449d3"
+        },
+        "fr": {
+          "path": "src/content/help/fr/delivery/zones-and-schedules.mdx",
+          "sha256": "4c15f2656897ed24f6402b61e25caa3ddcbb01c4a930d8c8ba5a34262e9108d3"
+        },
+        "he": {
+          "path": "src/content/help/he/delivery/zones-and-schedules.mdx",
+          "sha256": "6950d43538f2a690fb50f7929e39b959ec9ca8faf85baa0c4583cc865b23d303"
+        }
+      }
+    },
+    "delivery/dispatch-and-routes": {
+      "feature": "delivery-dispatch",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/delivery/dispatch-and-routes.mdx",
+          "sha256": "0c8c971e4b01514eb48bbcbc083525b1debbf94a3db99f62b83553789d3488de"
+        },
+        "fr": {
+          "path": "src/content/help/fr/delivery/dispatch-and-routes.mdx",
+          "sha256": "59ef7343b57ed9b106f3e71b65059eabf336595c3af12ae09553f7f77c7d0d67"
+        },
+        "he": {
+          "path": "src/content/help/he/delivery/dispatch-and-routes.mdx",
+          "sha256": "590f24dc11398361b24ce43a2b4a446735fe513b2b9e81ca9c0b8a5409468486"
+        }
+      }
+    },
+    "delivery/courier-workspace": {
+      "feature": "courier",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/delivery/courier-workspace.mdx",
+          "sha256": "634643f51e1dbf21ee25a4fca17a2d60edbf4c8a5eaf3f9a4386ad88cd61a289"
+        },
+        "fr": {
+          "path": "src/content/help/fr/delivery/courier-workspace.mdx",
+          "sha256": "2ace2000958e5f03bec98fd82ea1a26d2bd2bab9d578605a36137b4e6417e6be"
+        },
+        "he": {
+          "path": "src/content/help/he/delivery/courier-workspace.mdx",
+          "sha256": "6ebde1ad35498037d3499430440d20cfb0f31089fd9e647bfecf8d2069a2be9b"
+        }
+      }
+    },
+    "delivery/maps-and-usage": {
+      "feature": "maps-usage",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/delivery/maps-and-usage.mdx",
+          "sha256": "83e9ff229b2ed0968b862fa854e78cd56cb3922b9b65394354ffdbd74f02bac6"
+        },
+        "fr": {
+          "path": "src/content/help/fr/delivery/maps-and-usage.mdx",
+          "sha256": "6dbaf7adab434ef0bb2fdb5d770fa3e321386b05705198fbd31399899038bb44"
+        },
+        "he": {
+          "path": "src/content/help/he/delivery/maps-and-usage.mdx",
+          "sha256": "77008c68e5bf448aef3a7bf7327e5177033e16efaaab9f0ae3d46374889afad7"
+        }
+      }
+    },
+    "menu/import-and-images": {
+      "feature": "catalog-import",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/import-and-images.mdx",
+          "sha256": "0c95629a57396dd9095e31f154725ac445cbec71f0f1e8fd47151ca14bc069c4"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/import-and-images.mdx",
+          "sha256": "78de934df81b9b840befc52aa433eba48821ce477b229bcf7d29d2e5e06d9376"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/import-and-images.mdx",
+          "sha256": "8baeaa2d9809a27d3e1db07e1be7ed15dd8ca2213c4e211d09935a835539bf14"
+        }
+      }
+    },
+    "menu/combos": {
+      "feature": "combos",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/combos.mdx",
+          "sha256": "83d139ad6e96a1bdb51fed0317a974708495554fd82d3de99496d4f7ff05c1b1"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/combos.mdx",
+          "sha256": "b69dafddd82395f3c2e7edb231022559af9befdc85747cc80b97bdc87a7b50ed"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/combos.mdx",
+          "sha256": "4777cc86f1d9196fd1a0caf744f417e8ab6bd30ee321b265142e32cbf1eb0b29"
+        }
+      }
+    },
+    "menu/pos-discounts": {
+      "feature": "pos-discount-library",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/menu/pos-discounts.mdx",
+          "sha256": "e37e371e817bdf0cf8427de1d82c37a9bb58baf893ea2299bfeb745c07e73707"
+        },
+        "fr": {
+          "path": "src/content/help/fr/menu/pos-discounts.mdx",
+          "sha256": "06572f722338e159e8289b7410e80c9e404f4255781487079b7b720c81af7c1d"
+        },
+        "he": {
+          "path": "src/content/help/he/menu/pos-discounts.mdx",
+          "sha256": "46282cd7b2707d4592087f956eb7a30324a6517eb0a8a6a459b6c34cf57b8785"
+        }
+      }
+    },
+    "kitchen/suppliers-and-purchases": {
+      "feature": "suppliers-purchasing",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/suppliers-and-purchases.mdx",
+          "sha256": "2f72fe624ec12d622c625947a3dbc5542a3a42483a8419584102892d710e27be"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/suppliers-and-purchases.mdx",
+          "sha256": "788b1c187bf939adb2d5a9aa68744ae0c18d9aa80ffeb67892d102dd8beeab23"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/suppliers-and-purchases.mdx",
+          "sha256": "8ab054ec1c6631e00bed741971dbc158d5adb34731e14f82261a7f55b166ee2b"
+        }
+      }
+    },
+    "kitchen/delivery-note-import": {
+      "feature": "delivery-import",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/delivery-note-import.mdx",
+          "sha256": "64fce26a4c58144cf78a63f84e8284068343d3eca7a5fa827d56149f59f6f2a5"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/delivery-note-import.mdx",
+          "sha256": "63b9875c5c595033670e66fe92289ac5e5d3eb20775563b5cc97ef7305daeab0"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/delivery-note-import.mdx",
+          "sha256": "36b12fcee28fd6da23e8c80cb9e15cd2f765be909c6975c04d106852257a0ab2"
+        }
+      }
+    },
+    "kitchen/recipe-lab": {
+      "feature": "recipe-lab",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/recipe-lab.mdx",
+          "sha256": "996c691c2af76b6f2561c68c4aaaa70cb140f1eb69f4971cbe68e448c8015d9a"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/recipe-lab.mdx",
+          "sha256": "1f0976a4f26109a1e1308a28b9557ec64e91ef3030776417f712b6ae1cdbca69"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/recipe-lab.mdx",
+          "sha256": "00f1acebb2002319891f19f7a03e9c5ab042cb52c6e1868dd370a8d187036f51"
+        }
+      }
+    },
+    "kitchen/companion": {
+      "feature": "kitchen-companion",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/companion.mdx",
+          "sha256": "6b1dfe230f87bbf3b5cdbeebca3c942be64426761ab5ce2ff1a6d49d04813fc5"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/companion.mdx",
+          "sha256": "587496e8dac5392038ecb39f6242cff3176e8707e3a37420096674bfebbeedf8"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/companion.mdx",
+          "sha256": "79524f1f5987e49fd4fc78d2b81f400dc259c7f06e2bd81b3bf9d5963e156576"
+        }
+      }
+    },
+    "kitchen/data-and-sales-links": {
+      "feature": "kitchen-data",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/data-and-sales-links.mdx",
+          "sha256": "ac99b5ec5134e956817bdbce28c0dad6f1f7ecd4598c6e90359f6f3df322c2f1"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/data-and-sales-links.mdx",
+          "sha256": "ad677d959359fd981f8503d99e24ec06a537a898716c3e940d180e75fd60831e"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/data-and-sales-links.mdx",
+          "sha256": "cfa02d5b2c540ad2eeefa4b82dc791398b4e75a0e020c804ee23b85c9ee69349"
+        }
+      }
+    },
+    "website-qr/design-and-branding": {
+      "feature": "website-design",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/design-and-branding.mdx",
+          "sha256": "53f3b91b16c00e2a450aa4b997243bbd88f709984fab3c0c0557f060275c09d4"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/design-and-branding.mdx",
+          "sha256": "181a77fc6066b04450c0eaf39512fadc167eca3012002e1b7431b4f90508016d"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/design-and-branding.mdx",
+          "sha256": "2251a56756cf1c6744f2d31f300713e91aabd3e034e54863166afdbd945c1332"
+        }
+      }
+    },
+    "website-qr/navigation-and-footer": {
+      "feature": "website-navigation",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/navigation-and-footer.mdx",
+          "sha256": "7d186007b2ed6a2c114fbe85ebe5f883c6f4e76b48a990feece90ee1088e9593"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/navigation-and-footer.mdx",
+          "sha256": "1a1f40095e97c6ddc273640b4e330b027f9cb3cb6375facd6cc75be288d8515f"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/navigation-and-footer.mdx",
+          "sha256": "c2de052efebc9f31b3ab11f71ede25d8e0cb1229aeb0d1fd18d36fbd0883d9a5"
+        }
+      }
+    },
+    "website-qr/sections-and-media": {
+      "feature": "website-sections",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/sections-and-media.mdx",
+          "sha256": "2d19261970c0dcbb3d25ea4155bd2800490696bc336869d8c5aadc575a92badf"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/sections-and-media.mdx",
+          "sha256": "2a2745f10c6ac6923e8fda98349decb4b13f3ab8db76184d81fe16882de8d5fb"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/sections-and-media.mdx",
+          "sha256": "3f98e6cf7e61b065f054a9a15a974e7afab783f527cde1d5de18dc4a95c15042"
+        }
+      }
+    },
+    "website-qr/order-page": {
+      "feature": "website-order-design",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/order-page.mdx",
+          "sha256": "3bd80144e84299a6129c6cba116d23ed0aa1d8a1fba060a3a836632993c00b70"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/order-page.mdx",
+          "sha256": "78118ebba303a9ec95c8af11a91bf486ee8ef2018d06249e091aaef91c9a8d37"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/order-page.mdx",
+          "sha256": "4baaa04a9fadb1b1281c73b004611236225abf6fe021e418a3e87be2a4c231b1"
+        }
+      }
+    },
+    "website-qr/checkout-and-receipt": {
+      "feature": "website-journey",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/checkout-and-receipt.mdx",
+          "sha256": "fe07ae071e47d3e303dfb790baf3e5fbc9238506055f25cea3dfc1a4bbf4bbb4"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/checkout-and-receipt.mdx",
+          "sha256": "0116e864ef95783f56bff7e4dd64ef00009102998821bb6ab7de806756336865"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/checkout-and-receipt.mdx",
+          "sha256": "449bec135e5e33d15218c83a014f5902b5b5dee43a535b9a065f2171af5390c1"
+        }
+      }
+    },
+    "website-qr/catering-and-chain-pages": {
+      "feature": "website-commerce-pages",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/catering-and-chain-pages.mdx",
+          "sha256": "759905637a103f6306acc9bd9e54068f432365a4023e5b3a1af249acfca61829"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/catering-and-chain-pages.mdx",
+          "sha256": "49d15e8ae1ecf2a62505c42b1ae8a1b9a479f5b91121ee10aa5ca58e396ba2fd"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/catering-and-chain-pages.mdx",
+          "sha256": "cb03555e4ed638b39a05f381a9383179afac024f444538869a6a1aa97dc131d7"
+        }
+      }
+    },
+    "settings/restaurant-profile": {
+      "feature": "restaurant-profile",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/restaurant-profile.mdx",
+          "sha256": "2419826eaa370b84144973caeabb914cbd04f99757d0a709adc3dc09225ef68e"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/restaurant-profile.mdx",
+          "sha256": "f1a6161aa46e4adb05045eb8b85e284329a3f2350eadc92fd659405bd914ee48"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/restaurant-profile.mdx",
+          "sha256": "cdfe4c985f0e8617148a0ad9f2798483624eabebd063bd7e7aacc61100f1aa9c"
+        }
+      }
+    },
+    "settings/fulfillment-and-ordering": {
+      "feature": "fulfillment-policy",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/fulfillment-and-ordering.mdx",
+          "sha256": "b39ba453e0c172e5f178151927c35c2b8f7628bfadc7f82e5df2aaaaccca0097"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/fulfillment-and-ordering.mdx",
+          "sha256": "d05b76b300a384ce20a2233e019bfae3d893a57037440bb1939a13504babad8b"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/fulfillment-and-ordering.mdx",
+          "sha256": "fb76ed60635bd1eb7856e3a3b0fb5b6e83295d6f7c1a8370e49b3b45e8e67506"
+        }
+      }
+    },
+    "settings/pos-behavior": {
+      "feature": "pos-behavior",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/pos-behavior.mdx",
+          "sha256": "9b76c7261798c720cd5911cefd536ae0f4e017bd5ef4138763fb1efbf5ca166a"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/pos-behavior.mdx",
+          "sha256": "ac9b2910d4fbd4521258da5d9a5ed817c73c38c5de49d42149649fc0a8c2916a"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/pos-behavior.mdx",
+          "sha256": "7adc32dc1b12cb826d36593be984f53f4312b21e7f49c5d38bc36790798c6f37"
+        }
+      }
+    },
+    "tables-floors/staff-and-assistance": {
+      "feature": "table-service-policy",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/tables-floors/staff-and-assistance.mdx",
+          "sha256": "636c3cbb0d92f54ee383c86197c3fd4b2ac62323938d31d085e4f353fe889a8e"
+        },
+        "fr": {
+          "path": "src/content/help/fr/tables-floors/staff-and-assistance.mdx",
+          "sha256": "01047c24d9247c646ab9ffa2104b7aa36481d9920e2bd97ee00663386b50c055"
+        },
+        "he": {
+          "path": "src/content/help/he/tables-floors/staff-and-assistance.mdx",
+          "sha256": "ddbe298e10bef67103b5692aa3ae59e5047c3ddbfd98816087a3e27ac8fedb95"
+        }
+      }
+    },
+    "settings/devices-and-kitchen-displays": {
+      "feature": "device-kds",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/devices-and-kitchen-displays.mdx",
+          "sha256": "14f4403a2a81e52e0f22bff28b373c84aced10752ad9191c3317a1b6e8ea7ffe"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/devices-and-kitchen-displays.mdx",
+          "sha256": "68a62e5c5ef4e7df53f7c841a8afcd22e76084fa0f1b8300bb74e34088585bf8"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/devices-and-kitchen-displays.mdx",
+          "sha256": "6fc4fa5cae934b238f64f533c3c1a9d806d20fea659a649ad8b1c1e110613407"
+        }
+      }
+    },
+    "kitchen/units-and-stock-settings": {
+      "feature": "stock-units-policy",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/kitchen/units-and-stock-settings.mdx",
+          "sha256": "d14de45726e64420477ff59dad6440d80a7a7126534d9060bc0e82220086a511"
+        },
+        "fr": {
+          "path": "src/content/help/fr/kitchen/units-and-stock-settings.mdx",
+          "sha256": "3fb10f9a15b0cd6743c1cb77e17031650f307a2d5f19118304a1726eeaa33dea"
+        },
+        "he": {
+          "path": "src/content/help/he/kitchen/units-and-stock-settings.mdx",
+          "sha256": "0a98389c17079c23913728facea812389e4596a59d36b06b7a83a41c3cc8806e"
+        }
+      }
+    },
+    "settings/guest-order-assistant": {
+      "feature": "guest-ai-settings",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/guest-order-assistant.mdx",
+          "sha256": "4766b34edf8c5fd765b6306b83048e43bc44e64960a7e253705456b262c716b4"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/guest-order-assistant.mdx",
+          "sha256": "b29664b17df193dff0c9ad983521cf2dcc29bd2b5893c6ea5b8a430800b23753"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/guest-order-assistant.mdx",
+          "sha256": "58a67ed3adb789bae3c86b9c7a1b5e1599e8a5f941cb5eb349810b23843827ea"
+        }
+      }
+    },
+    "settings/notifications-and-team": {
+      "feature": "notifications-team",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/notifications-and-team.mdx",
+          "sha256": "b30e51edafcb056bef2c75cdec8def262ba92ae58763491fd9b250a1f3cc2ff6"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/notifications-and-team.mdx",
+          "sha256": "7288569a7ffe8ee8d367b359a3767af069a7051f6a032cede588fa14f142a97e"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/notifications-and-team.mdx",
+          "sha256": "f3d918d5708db8005edf094a91609bb02e83f2ea4284c83bd8def10926936b21"
+        }
+      }
+    },
+    "orders/split-bills": {
+      "feature": "pos-check-split",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/split-bills.mdx",
+          "sha256": "9ee4ba66f8227b35a3bd36ec4549558c7e9ff1b957ab805f7a15e257547d84a7"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/split-bills.mdx",
+          "sha256": "df2b86dd1db56d75d5778abcf89b4afd31e96dc4f91d06893421ae45085eb748"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/split-bills.mdx",
+          "sha256": "958aa558e74c270519383d878afeb93e63ff091bb9f7ef4873c114f48a8d0fac"
+        }
+      }
+    },
+    "orders/move-and-merge-bills": {
+      "feature": "pos-check-move",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/move-and-merge-bills.mdx",
+          "sha256": "4da676788cdbc95edd67f9d0e898d507faa2967bf19b146647cce4e6a4d8b3c3"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/move-and-merge-bills.mdx",
+          "sha256": "ccab1e8771aaece9d842b06e1b300ffbf1fb8e5aea5a5e2bd0db9e1703d17966"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/move-and-merge-bills.mdx",
+          "sha256": "e1f1cb6d301b0e496bf71cbbc809eb1e080da03723526ce5bf0093caa665115f"
+        }
+      }
+    },
+    "orders/courses-and-kitchen-release": {
+      "feature": "pos-courses",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/courses-and-kitchen-release.mdx",
+          "sha256": "2fe41ef41e1e607900e933935ac2b35c75b8f2e09717707899d4d4415e470135"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/courses-and-kitchen-release.mdx",
+          "sha256": "b0768179e066624b333f11112357b919189d908787108493a0b267299a3a7644"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/courses-and-kitchen-release.mdx",
+          "sha256": "88a3ec8cb48bd79192f7b9f0d5b6d3e15de6d48b01dfe99de1a9b94b892a03e3"
+        }
+      }
+    },
+    "orders/discount-comp-void": {
+      "feature": "pos-comp-void",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/orders/discount-comp-void.mdx",
+          "sha256": "1bbb973132814f5babd73667ea85ed5d8eb0609d091da2943ac1a07482b6db12"
+        },
+        "fr": {
+          "path": "src/content/help/fr/orders/discount-comp-void.mdx",
+          "sha256": "061fcc8c12e3aef96f756915abf2ecbad55a1809fca9d51d59105a097c47dab9"
+        },
+        "he": {
+          "path": "src/content/help/he/orders/discount-comp-void.mdx",
+          "sha256": "2dff1b650cad5607a07121f7755d5866201f367e4e80b75d15e22eb651820f9a"
+        }
+      }
+    },
+    "payments/pos-checkout": {
+      "feature": "pos-payments",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/payments/pos-checkout.mdx",
+          "sha256": "57aedbad6d973715cb1d8de78ddebabf24884aa49cdb7d03f1846c902c8da916"
+        },
+        "fr": {
+          "path": "src/content/help/fr/payments/pos-checkout.mdx",
+          "sha256": "ecfd11b3be45e5ac7ce0034a7ad28e15aa7e40bf0184ef8c9ce91e2e4a3baf5f"
+        },
+        "he": {
+          "path": "src/content/help/he/payments/pos-checkout.mdx",
+          "sha256": "5b524970fc4541609b9b4b8374ced6df8d63ac5f0ede0e99927684434229a72c"
+        }
+      }
+    },
+    "settings/pos-workspace": {
+      "feature": "pos-workspace",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/settings/pos-workspace.mdx",
+          "sha256": "e28fe4cd00ecb34e364231cdda7834e5f53df775b9c800f63c580b0df1f171ce"
+        },
+        "fr": {
+          "path": "src/content/help/fr/settings/pos-workspace.mdx",
+          "sha256": "2dbc6eb44b6c127a5e89434041edc8664031b3aecc7a0c4d99c79db1523dbf82"
+        },
+        "he": {
+          "path": "src/content/help/he/settings/pos-workspace.mdx",
+          "sha256": "1928507e6803fd8f1e1cd9e03be6d36474d92e382e29a12e43a7a701b9e6902c"
+        }
+      }
+    },
+    "printers/profiles-and-routing": {
+      "feature": "printer-profiles",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/printers/profiles-and-routing.mdx",
+          "sha256": "da67e9a9ef0df7bda3574a9d53686dc27b5c42d6febdac360b58ee6700420547"
+        },
+        "fr": {
+          "path": "src/content/help/fr/printers/profiles-and-routing.mdx",
+          "sha256": "e32d668c1b8190eea3f5d46fc640b71940a2c461defbe93742d5846947d5a83f"
+        },
+        "he": {
+          "path": "src/content/help/he/printers/profiles-and-routing.mdx",
+          "sha256": "5c52414907d2f641c3064344af5d8dea283c189b4aa74dad12934ce85dd657f2"
+        }
+      }
+    },
+    "printers/status-and-history": {
+      "feature": "printer-diagnostics",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/printers/status-and-history.mdx",
+          "sha256": "3a5f957a3e07619263d566cd5ae7e7f3a73da09792781633490b393dfd6379f5"
+        },
+        "fr": {
+          "path": "src/content/help/fr/printers/status-and-history.mdx",
+          "sha256": "c128ef780dce2754bba064c096df2e8793c92a4aa7f62c1f2c91f988ed88110c"
+        },
+        "he": {
+          "path": "src/content/help/he/printers/status-and-history.mdx",
+          "sha256": "bc6de18551f96da166f6e3080d527773767e5165ffd2b4059cc4e46deec9914a"
+        }
+      }
+    },
+    "catering/services-and-catalog": {
+      "feature": "catering-catalog",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/catering/services-and-catalog.mdx",
+          "sha256": "eb12cd29cca9caae9849452da37b5c5b404f1192eb27da31226ee4cce5e0a80b"
+        },
+        "fr": {
+          "path": "src/content/help/fr/catering/services-and-catalog.mdx",
+          "sha256": "574ec663472ed4fa0d4e2a854a81a1e947a278200f7c09956bf8a08c0601da98"
+        },
+        "he": {
+          "path": "src/content/help/he/catering/services-and-catalog.mdx",
+          "sha256": "ce4dde57e069bed58d92c862d2188ffe63168d336f4ca0403f7e9e9f0dd77c6f"
+        }
+      }
+    },
+    "catering/flow-and-pricing": {
+      "feature": "catering-flow",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/catering/flow-and-pricing.mdx",
+          "sha256": "534a3e350081a76d3e11e16198658a9466bd6358d55abed78ccf006c942093f5"
+        },
+        "fr": {
+          "path": "src/content/help/fr/catering/flow-and-pricing.mdx",
+          "sha256": "d4f370736a3f58a250cd04cbaf3342e1b2ff0ed0924722420a4bbf1227a1ee21"
+        },
+        "he": {
+          "path": "src/content/help/he/catering/flow-and-pricing.mdx",
+          "sha256": "697a6d756f6b9de1fcde47527d912191daf38bd9728e9c5da4278880d7961332"
+        }
+      }
+    },
+    "catering/review-quotes": {
+      "feature": "catering-quotes",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/catering/review-quotes.mdx",
+          "sha256": "eb00b2c59afb0d1cc5bc8875f90ff0ef890637037113e197a432f1fe7bf7cd5b"
+        },
+        "fr": {
+          "path": "src/content/help/fr/catering/review-quotes.mdx",
+          "sha256": "358b947320aaacd496f157139d44c30419a9852a889017a868a03ba0e66d2769"
+        },
+        "he": {
+          "path": "src/content/help/he/catering/review-quotes.mdx",
+          "sha256": "641e321cdebb012d9e3b6c1d6097085aa18213518cd52e400ce082bad18ec233"
+        }
+      }
+    },
+    "catering/events-and-balance": {
+      "feature": "catering-events",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/catering/events-and-balance.mdx",
+          "sha256": "e19144dc83ebefafe2d0453265795c8ed05434e31a169b48d068382678b0e93d"
+        },
+        "fr": {
+          "path": "src/content/help/fr/catering/events-and-balance.mdx",
+          "sha256": "9b6c8e73f28f0a5a5dadc7a88be0f781268991b5799529977828993e098baf06"
+        },
+        "he": {
+          "path": "src/content/help/he/catering/events-and-balance.mdx",
+          "sha256": "e618471a708a4905111671530537b2ff9be9c8fbb01de3c80f8701b01d954d7e"
+        }
+      }
+    },
+    "catering/branches-and-routing": {
+      "feature": "catering-routing",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/catering/branches-and-routing.mdx",
+          "sha256": "39d14150e314adaa495f0e399b0e1bd78dc478bbb0ad335f3ac9687561918387"
+        },
+        "fr": {
+          "path": "src/content/help/fr/catering/branches-and-routing.mdx",
+          "sha256": "20e18e2504ba84a73cf097fa20633829d7c98e2c1b47ddedd2a813c9f94aa71d"
+        },
+        "he": {
+          "path": "src/content/help/he/catering/branches-and-routing.mdx",
+          "sha256": "887ded8e64a622971b99594d7b165c06260e3e1e77f75987a78c1dfe8ed94815"
+        }
+      }
+    },
+    "chains/branches-and-dashboard": {
+      "feature": "chains",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/chains/branches-and-dashboard.mdx",
+          "sha256": "14e6239540321a6670613274cf12589cb51fa681da72de3a765152f2ef71a4e5"
+        },
+        "fr": {
+          "path": "src/content/help/fr/chains/branches-and-dashboard.mdx",
+          "sha256": "1f746e7e5e83e9d0ee0a5a424c19658a221b9e9f0a8d6059b831a2580d290093"
+        },
+        "he": {
+          "path": "src/content/help/he/chains/branches-and-dashboard.mdx",
+          "sha256": "83c718f208ca7c878f058ead3f96a361345e5a2f690cc4a4e0eacf7df28a3242"
+        }
+      }
+    },
+    "payments/providers-and-cibus": {
+      "feature": "payment-configuration",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/payments/providers-and-cibus.mdx",
+          "sha256": "cf16312f8ea22f1d39aa9342b1e06753efc170ee5d9db181b4b1b460103dd00a"
+        },
+        "fr": {
+          "path": "src/content/help/fr/payments/providers-and-cibus.mdx",
+          "sha256": "50cdbe318c117017224d8527ddeb131a24fc9f68cd7c43e9eae24d11849904eb"
+        },
+        "he": {
+          "path": "src/content/help/he/payments/providers-and-cibus.mdx",
+          "sha256": "9cc92c84e33763af7eb78684a7a76b3785f6c3f3cb727790afd07abfca5bb653"
+        }
+      }
+    },
+    "communications/whatsapp": {
+      "feature": "whatsapp",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/communications/whatsapp.mdx",
+          "sha256": "7ad2fbf15baf764da8e05ac1467e46092077eb655b72af3d3449b2e9f38fb5b0"
+        },
+        "fr": {
+          "path": "src/content/help/fr/communications/whatsapp.mdx",
+          "sha256": "071c8ff0bda8bbc773be438afdaaed152029a6857a51277850f6207d30743b0c"
+        },
+        "he": {
+          "path": "src/content/help/he/communications/whatsapp.mdx",
+          "sha256": "e82a9ac18e8c987a0d0680c21546b969b756e3c1c1f3eea1edaad90a7f947a68"
+        }
+      }
+    },
+    "communications/templates-and-automation": {
+      "feature": "message-templates",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/communications/templates-and-automation.mdx",
+          "sha256": "b4b95526878a0bd8d1c869c05b29701049ea006ac5c3cd769b78e0ddc1189aee"
+        },
+        "fr": {
+          "path": "src/content/help/fr/communications/templates-and-automation.mdx",
+          "sha256": "2fdf19e321f1b67a4e0c3aba9a9ef0c9a5469612fa84a425f6596ae3d9d64800"
+        },
+        "he": {
+          "path": "src/content/help/he/communications/templates-and-automation.mdx",
+          "sha256": "c7e12d8fd6c1ea41a356076ea1665bcb49b85a6eb18a99108f3d29b45a2e843c"
+        }
+      }
+    },
+    "marketing/stories-and-instagram": {
+      "feature": "social-stories",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/marketing/stories-and-instagram.mdx",
+          "sha256": "eba4f2ebf628c1a65dcde34d4d8d88522d39c728fde26c554f2542e0560278b3"
+        },
+        "fr": {
+          "path": "src/content/help/fr/marketing/stories-and-instagram.mdx",
+          "sha256": "aa324ce5d43ae6a601831590886016bbc85dabb2ca3338a61db6990ecd8192f8"
+        },
+        "he": {
+          "path": "src/content/help/he/marketing/stories-and-instagram.mdx",
+          "sha256": "86135f3bd36cea9372a6172ac677bf1ef3377492e4784bd2a28a14658df903d2"
+        }
+      }
+    },
+    "guest/online-ordering": {
+      "feature": "guest-ordering",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/guest/online-ordering.mdx",
+          "sha256": "73a0b4ba00d3d361b142a42f0a3daf553a1c8a3fe2e670c98d0c6384a9fab3dc"
+        },
+        "fr": {
+          "path": "src/content/help/fr/guest/online-ordering.mdx",
+          "sha256": "a5e7a580e66e647cb07b0d16e1ed1bc4598fd933f0287e413b6813092e2235fd"
+        },
+        "he": {
+          "path": "src/content/help/he/guest/online-ordering.mdx",
+          "sha256": "4a9ceaffa0659523e25dac7449879ee5eaf0c945bf38160904dce0ac345c0d4e"
+        }
+      }
+    },
+    "guest/tracking-and-account": {
+      "feature": "guest-account-tracking",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/guest/tracking-and-account.mdx",
+          "sha256": "63552b63b0972852f84652cd142a7a39b75ae888227936466fffc7ef2c6cc238"
+        },
+        "fr": {
+          "path": "src/content/help/fr/guest/tracking-and-account.mdx",
+          "sha256": "c0764feff09f90c5a6d6d17bbaddc37c097047860afed5f4671d46ec600a5f1b"
+        },
+        "he": {
+          "path": "src/content/help/he/guest/tracking-and-account.mdx",
+          "sha256": "6112bc9583d3f08a184f9a3295bac8a55eda87e662384ebde933cb3578d57de0"
+        }
+      }
+    },
+    "guest/table-qr": {
+      "feature": "guest-table",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/guest/table-qr.mdx",
+          "sha256": "d2acf466b8403b8edeb27e271a0bb7a283183463a3f84942a3f6e08d15d18de4"
+        },
+        "fr": {
+          "path": "src/content/help/fr/guest/table-qr.mdx",
+          "sha256": "cb2582cf4229d1b99be1fc5b8898ca6a23adc47282e0cd09fe944899e0273f27"
+        },
+        "he": {
+          "path": "src/content/help/he/guest/table-qr.mdx",
+          "sha256": "11774c594cfea8e57b2340bc93010d41fa19944d1cd3efd3a7a7cbd9e083a73c"
+        }
+      }
+    },
+    "guest/catering-request": {
+      "feature": "guest-catering",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/guest/catering-request.mdx",
+          "sha256": "de0a006747c7fc971a6f7a50bff9400f0ed11df075517474c93e147023e93c79"
+        },
+        "fr": {
+          "path": "src/content/help/fr/guest/catering-request.mdx",
+          "sha256": "83e82f0c9f6fa7b2c159f23a7d3bf0d4cf60a03074bd03e2966e721147203af9"
+        },
+        "he": {
+          "path": "src/content/help/he/guest/catering-request.mdx",
+          "sha256": "7a81d412148bd31fabbd1f99353119c41b4ba3645812e76c4ffe00f1868df098"
+        }
+      }
+    },
+    "getting-started/offers-and-contact": {
+      "feature": "landing-offers",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/getting-started/offers-and-contact.mdx",
+          "sha256": "170e738ac6589bc513c9025bcc461cc92ab906ad7d82f9d9d56c984b5501861f"
+        },
+        "fr": {
+          "path": "src/content/help/fr/getting-started/offers-and-contact.mdx",
+          "sha256": "b6141831524a4568bc5ce998b37d097aaa962e8b8bd380be6c05644c2fcf6c29"
+        },
+        "he": {
+          "path": "src/content/help/he/getting-started/offers-and-contact.mdx",
+          "sha256": "e39176445b77f8b2144249b9d6a344509702e0eaedc34959260aacf920e54e0f"
+        }
+      }
+    },
+    "internal/access-and-dashboard": {
+      "feature": "backoffice-access",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/access-and-dashboard.md",
+          "sha256": "1719005fc7df0622e117d853a77bf20e73bec2fec810f50dbca7a5c9e1346586"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/access-and-dashboard.md",
+          "sha256": "7514a032395a8b47f681c1ef13c6681db69cacf8521e0497b5e874b47862e52a"
+        },
+        "he": {
+          "path": "docs/help/internal/he/access-and-dashboard.md",
+          "sha256": "987da75dbb40957a7d17a01ff78a850f0c56f47ef612f0adc3e278034f13dd75"
+        }
+      }
+    },
+    "internal/restaurant-onboarding": {
+      "feature": "backoffice-onboarding",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/restaurant-onboarding.md",
+          "sha256": "193050b090b7136f2ca3341abf502a356bb2051c6edaaba2b1e67006053a876e"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/restaurant-onboarding.md",
+          "sha256": "ec3cf607f696b91b3ad6548c785cf556c7d26a66917f49d9055367c43dc463fd"
+        },
+        "he": {
+          "path": "docs/help/internal/he/restaurant-onboarding.md",
+          "sha256": "36e908262d3fdea9baf8fd93ace0939ee75caad9a35af2dfe29b79b1165bf48d"
+        }
+      }
+    },
+    "internal/features-and-payments": {
+      "feature": "backoffice-entitlements",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/features-and-payments.md",
+          "sha256": "d504939f85f0a1bdd25fa8fb2f87038fcfeb8ef0267556c8a99663f2bd4c012c"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/features-and-payments.md",
+          "sha256": "6796fbbc95512f8e4d37bc302b344b50625cb1c5e7cdfc4abeb5aad4784fc182"
+        },
+        "he": {
+          "path": "docs/help/internal/he/features-and-payments.md",
+          "sha256": "7e7b8da6549e74f878a26e8c1575df9da749d18e08c82e46bacfea334be9e4a9"
+        }
+      }
+    },
+    "internal/market-and-prospects": {
+      "feature": "backoffice-market",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/market-and-prospects.md",
+          "sha256": "906fb51804f51ad4d6c15d313216aa0040a30efc012a314e619addb2cf1c25ae"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/market-and-prospects.md",
+          "sha256": "b083bba955048c74f3c86861794daff7c805f4da4937083858cc4a9d74534428"
+        },
+        "he": {
+          "path": "docs/help/internal/he/market-and-prospects.md",
+          "sha256": "9a302492ab484cdd7c88247a659f86865e8fb83107c9c2c1518e43aebf89c292"
+        }
+      }
+    },
+    "internal/catalog-and-assets": {
+      "feature": "backoffice-assets",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/catalog-and-assets.md",
+          "sha256": "cc60c23dc4eae920f0e6079f8cbee4d456ab89b0c547a1811641c80c4c75135c"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/catalog-and-assets.md",
+          "sha256": "20641a32e5192576c7c5d94b629230a2c4ca8079a50d6d4d2a1171930dbedb96"
+        },
+        "he": {
+          "path": "docs/help/internal/he/catalog-and-assets.md",
+          "sha256": "e84b3022bc28bd152eb098e94ad924866115f92088701a2901dcf1fd88b46131"
+        }
+      }
+    },
+    "internal/operations-and-cloning": {
+      "feature": "backoffice-operations",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/operations-and-cloning.md",
+          "sha256": "6110f1dfee175d3bdd846366a50afbb547bf88635a880f0d7fcfdb96140eac80"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/operations-and-cloning.md",
+          "sha256": "363cb01330940477d7d78e78cc8584dca09236ac8ba6cce2f33a9096cee054a5"
+        },
+        "he": {
+          "path": "docs/help/internal/he/operations-and-cloning.md",
+          "sha256": "4632c1ddaf84602ce1fc63e5d12f5b371b3386331e7b878d9656eaac6d458f09"
+        }
+      }
+    },
+    "internal/api-and-release": {
+      "feature": "platform-api",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/api-and-release.md",
+          "sha256": "13b1fa568ff5f479f128e398e1c5150a8a135e9529a49b562195e6ecccda014b"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/api-and-release.md",
+          "sha256": "7a5e16b81bafa1c355f7eaeca887c2e6a2c3af2a43c52523e9b7b8992619a9af"
+        },
+        "he": {
+          "path": "docs/help/internal/he/api-and-release.md",
+          "sha256": "30cebc4c3f884499a277790949befa0aa3d32184045ef120bdc8909b1b30a1e5"
+        }
+      }
+    },
+    "internal/design-previews": {
+      "feature": "design-sandboxes",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/design-previews.md",
+          "sha256": "d6fa6c33cbd6294105a5d92ea34c226090490da2fb0297a0b5d179ae64f1c765"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/design-previews.md",
+          "sha256": "66daeff40f8078776b03f9c596c4dfa568eff7ce083577610053f4cdf902dec7"
+        },
+        "he": {
+          "path": "docs/help/internal/he/design-previews.md",
+          "sha256": "c2a7a87023b542cb8437655483618b9b4f0ff1a3bc9f2cda937ebd1269252036"
+        }
+      }
+    },
+    "internal/shared-runtime": {
+      "feature": "shared-runtime",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/shared-runtime.md",
+          "sha256": "b87047f457aba031e58e59f7c268c6de9e451921a1abba8d60dee7faac5dd525"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/shared-runtime.md",
+          "sha256": "48e04a2ccc1374db0058245a6c71a8f8b72f30609dd24bb381b15f74ae388a59"
+        },
+        "he": {
+          "path": "docs/help/internal/he/shared-runtime.md",
+          "sha256": "5ace60500507d8c633ec93a2ba7d95c59c53dbe8d3373e00023b2a6af0c921f8"
+        }
+      }
+    },
+    "getting-started/search-and-navigation": {
+      "feature": "global-search",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/getting-started/search-and-navigation.mdx",
+          "sha256": "f84036f20e1f8734410e008ca7e7daee535613049115ec3932d61cdff91b395d"
+        },
+        "fr": {
+          "path": "src/content/help/fr/getting-started/search-and-navigation.mdx",
+          "sha256": "f259ad46271ed8c9c2b5d6ee0ad393720f22180d02186784edd2e0f611a42788"
+        },
+        "he": {
+          "path": "src/content/help/he/getting-started/search-and-navigation.mdx",
+          "sha256": "bf6464ba44af74848788a18a8e4a5e938422c980fcc052d833caa5b9cb5d8611"
+        }
+      }
+    },
+    "analytics/business-assistant": {
+      "feature": "business-ai",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/analytics/business-assistant.mdx",
+          "sha256": "c18ae9a412729b681087e4cc86ee9227aba5ef48a6ae40103448c43bc1bdd37b"
+        },
+        "fr": {
+          "path": "src/content/help/fr/analytics/business-assistant.mdx",
+          "sha256": "d9284a13a608267fc9e5297fdd2de0015e2388d9f30b8e897b13301cbbe326de"
+        },
+        "he": {
+          "path": "src/content/help/he/analytics/business-assistant.mdx",
+          "sha256": "dccb92221a3ea0e19309fff8df9d617a757d155c44ba1ae1c88e9356906b376b"
+        }
+      }
+    },
+    "tables-floors/qr-design-and-print": {
+      "feature": "table-qr-design",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/tables-floors/qr-design-and-print.mdx",
+          "sha256": "8e8aff1a5e92fd0b26ef6e15ceee0670643bd6f97c116101e4b6e6212f561605"
+        },
+        "fr": {
+          "path": "src/content/help/fr/tables-floors/qr-design-and-print.mdx",
+          "sha256": "21957002d39832285094518d2a4c438a62f61c686baa67ab2b2d35fb7c7d0507"
+        },
+        "he": {
+          "path": "src/content/help/he/tables-floors/qr-design-and-print.mdx",
+          "sha256": "ab9bd230f6fbc5858bf71e8caf3fb23b9d4ddc4ba7ba25ef1c586a16c652789a"
+        }
+      }
+    },
+    "website-qr/pages-and-publication": {
+      "feature": "website-pages",
+      "audience": "public",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "src/content/help/en/website-qr/pages-and-publication.mdx",
+          "sha256": "7640fe74bd1875180f624c974907da6ee63f70308a7b125c23e406c185fe12dd"
+        },
+        "fr": {
+          "path": "src/content/help/fr/website-qr/pages-and-publication.mdx",
+          "sha256": "c4125dd934f4e963a66e9a19c1924392ef99ab099a8605971ed8c1efddb8a82b"
+        },
+        "he": {
+          "path": "src/content/help/he/website-qr/pages-and-publication.mdx",
+          "sha256": "f8f7f962b32d48bae8c2e5ba509c60f3e47d7033861c9b816393fd6f25585e12"
+        }
+      }
+    }
+  },
+  "sources": {
+    "src/app/api/operations/status/route.ts": {
+      "sha256": "fdc2921e2c97a4271e461aa265dc26e61a8726c88b534025a558a15957420118",
+      "features": [
+        "backoffice-operations"
+      ]
+    },
+    "src/app/dashboard/clone/page.tsx": {
+      "sha256": "3ad86ea4f9d74707c7829a80786e64b5ea17a9dc85afbe4648ff2c9c9b403ea2",
+      "features": [
+        "backoffice-operations"
+      ]
+    },
+    "src/app/dashboard/combos/ComboFormModal.tsx": {
+      "sha256": "b7be4ed7eab49da19bdb65f720d3d1157f5b5b611c6abbd5492e947807ff3927",
+      "features": [
+        "backoffice-assets"
+      ]
+    },
+    "src/app/dashboard/combos/page.tsx": {
+      "sha256": "0912a1d9454b9db49ebf97e9453151baa9db50cb9fede0acbcd5706fa17d86af",
+      "features": [
+        "backoffice-assets"
+      ]
+    },
+    "src/app/dashboard/features/page.tsx": {
+      "sha256": "f5ae642bdf1552502d974150a32f013954b4f57c0ff7b0697f10068be57b391a",
+      "features": [
+        "backoffice-entitlements"
+      ]
+    },
+    "src/app/dashboard/ingredient-icons/page.tsx": {
+      "sha256": "54366ba25b3d47c6d684019158856e52964d3c1c2d63274f1c6bc0bf0cabfc35",
+      "features": [
+        "backoffice-assets"
+      ]
+    },
+    "src/app/dashboard/layout.tsx": {
+      "sha256": "3352f955ac6d93bb05329ef1f1d28208c86e8cf49afe7a0e2e1caa633a208c77",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/app/dashboard/market/ProspectFormModal.tsx": {
+      "sha256": "f5b57035ed1da70d79d869594ebd8e37acba88e68100f9ff95f00e18e0eb013a",
+      "features": [
+        "backoffice-market"
+      ]
+    },
+    "src/app/dashboard/market/SegmentFormModal.tsx": {
+      "sha256": "13815b49ea75c7a13ef60c7d0eea74bb4fd7ccc8a8a5a7594ea3ffb9b7c63ec4",
+      "features": [
+        "backoffice-market"
+      ]
+    },
+    "src/app/dashboard/market/page.tsx": {
+      "sha256": "d34e16adba32aef396244b24b1c8a87359337d1d8fb2358fc019c4363cbf29ed",
+      "features": [
+        "backoffice-market"
+      ]
+    },
+    "src/app/dashboard/market/prospects/page.tsx": {
+      "sha256": "27e2e6635001d49c4d27bbb110f11a9e95c71dd176cc4cbaf71814c788d9c83c",
+      "features": [
+        "backoffice-market"
+      ]
+    },
+    "src/app/dashboard/market/segments/[slug]/page.tsx": {
+      "sha256": "b698d8e92587324717261055a51bb231165ca25cc04ca1e1cfac1b78b70dd5e3",
+      "features": [
+        "backoffice-market"
+      ]
+    },
+    "src/app/dashboard/menu/page.tsx": {
+      "sha256": "a5edd7659c930c2a2c63f971abdf6f4d4fc5aa72e40f6a6461406dd49022eaa6",
+      "features": [
+        "backoffice-assets"
+      ]
+    },
+    "src/app/dashboard/onboard/page.tsx": {
+      "sha256": "73f8b99361769d3fd6914a21380472026dcab36bcaa9593f87afd76d175ba942",
+      "features": [
+        "backoffice-onboarding"
+      ]
+    },
+    "src/app/dashboard/operations/guide/page.tsx": {
+      "sha256": "9f861925f2893085a012515f24f6ec694d832645ff2d4a0eb69cdbce4628966a",
+      "features": [
+        "backoffice-operations"
+      ]
+    },
+    "src/app/dashboard/operations/page.tsx": {
+      "sha256": "18b99c190fd932cbeab848fa4887ba83b68eada84e7cb31967e7dc28b05481d5",
+      "features": [
+        "backoffice-operations"
+      ]
+    },
+    "src/app/dashboard/page.tsx": {
+      "sha256": "6351b00740bc75be448572b58f352bf094c621836f57f1d445c20e2d5e879c1f",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/app/dashboard/payments/page.tsx": {
+      "sha256": "24cdd56416e5fc3ed502e5a7442c16eef52d847b99f85baee6bc910cdd217ef6",
+      "features": [
+        "backoffice-entitlements"
+      ]
+    },
+    "src/app/dashboard/pos-login-screen/page.tsx": {
+      "sha256": "9b6b6e1007f3e6525b96e7ca7121f564bc5f804c561445c8f92a804ce8f0654e",
+      "features": [
+        "backoffice-assets"
+      ]
+    },
+    "src/app/dashboard/restaurants/[id]/page.tsx": {
+      "sha256": "5ffed8c79b52c8990d2bb1c777af30d92302338d9ae2df77c086ef5c3df2e255",
+      "features": [
+        "backoffice-onboarding"
+      ]
+    },
+    "src/app/dashboard/restaurants/page.tsx": {
+      "sha256": "5ccf726cf524a064508bb77fed311a25b2c19ccf5d90d3c7cc898b1284bf88ee",
+      "features": [
+        "backoffice-onboarding"
+      ]
+    },
+    "src/app/dashboard/servers/page.tsx": {
+      "sha256": "0992aaa11793b7ed041ca258f0eccf585f920760d7d8735d0a0236bf5067437e",
+      "features": [
+        "backoffice-operations"
+      ]
+    },
+    "src/app/dashboard/users/SetPasswordModal.tsx": {
+      "sha256": "5a406fedbb8b8f6380125ba00b2436cd681d66edef9ada8ad659581fc5376680",
+      "features": [
+        "backoffice-onboarding"
+      ]
+    },
+    "src/app/dashboard/users/page.tsx": {
+      "sha256": "9f8eb4e974eec20a060dc9f88455a04d6f092010ebb9ac8aab8226c9d7a44a14",
+      "features": [
+        "backoffice-onboarding"
+      ]
+    },
+    "src/app/global-error.tsx": {
+      "sha256": "145609369d2cdcbbaa2b25f7db1bfde8d3ac4c92b0443e40dfb2c38bc47e796d",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/app/globals.css": {
+      "sha256": "8d0d088f06f3ae6aa7f743780e37f262f08a6b51ed3fcaa8f36cd7cd44b584b5",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/app/layout.tsx": {
+      "sha256": "d2c6ef015a0b5a50fa8223af9e73c52d07f1ac3408730320e2ddcab4ce7a6ac1",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/app/login/page.tsx": {
+      "sha256": "c0352aad1d89ae2cae0fa79cfd5287ba89ae89636aed54723dc9140fdfc185db",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/app/page.tsx": {
+      "sha256": "084ea4905f7bc2dc323226d6f7038865fab5530e64e02c21b0b97f109bffe511",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/components/CopyRestaurantToDev.tsx": {
+      "sha256": "5398103df87c7d2dca52f5d32550acec07cee7133975356a04f3d99f5c56fa7b",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/components/ProspectStatusChip.tsx": {
+      "sha256": "324b1e2137077fe4e5a8b6da5f4518b02799c34f8c2dae80b5b3633cd1ca8ef7",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/components/Sidebar.tsx": {
+      "sha256": "63ad75c9ece49ae662ee55f85d04b24afdb77ccb1bd3cc515a1562c48f2e42dd",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/components/StringListField.tsx": {
+      "sha256": "194bf6af642da2a44c1523ed6dacad9e0f9943f962e0881e23b4d2fbf46b99c5",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/components/VerifoneDiagnostics.tsx": {
+      "sha256": "2fa36ba1187be5cd91eaae0ea7a2bd4df785b8147af5b769a5ee89273d7915ca",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/instrumentation-client.ts": {
+      "sha256": "cf97dea0e8fe1ce211d0c58e2ed17c76066e90af2ddeb28e11c7b0d49fbf9f12",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/instrumentation.ts": {
+      "sha256": "f75c8e413039b811562dc7600cccb19c2ca988fd0147defabff45ac622af29a7",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/lib/api.ts": {
+      "sha256": "048ad0eae618be9c906d4525170572eeb4a1406c3c90921e307e65698c2e18ce",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ]
+    },
+    "src/lib/auth-context.tsx": {
+      "sha256": "15911aa4bc7e2472a12b29d4584dad3d5269e20e23ab039a5c2950a4749ef851",
+      "features": [
+        "backoffice-access",
+        "shared-runtime"
+      ]
+    },
+    "src/lib/sentry-options.ts": {
+      "sha256": "627d62aba8deead841a79f8575469777b989f10eae7c8bd2336d15db3d77dbd5",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/lib/utils.ts": {
+      "sha256": "fc4fd1239401d6ff274ed483fcaae4cf23f87299ad5a79bf892d28518f695247",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/sentry.edge.config.ts": {
+      "sha256": "0b00f06c376b0edd23a88162504eb7646b825a7d7973af20fb3b3e9cdb656062",
+      "features": [
+        "shared-runtime"
+      ]
+    },
+    "src/sentry.server.config.ts": {
+      "sha256": "0b00f06c376b0edd23a88162504eb7646b825a7d7973af20fb3b3e9cdb656062",
+      "features": [
+        "shared-runtime"
+      ]
+    }
+  },
+  "surfaces": [
+    {
+      "id": "foodybackoffice:src/app/api/operations/status/route.ts:next-api-route:1",
+      "kind": "next-api-route",
+      "source": "src/app/api/operations/status/route.ts",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "route": "/api/operations/status"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/clone/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/clone/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "route": "/dashboard/clone"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/clone/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/clone/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "labels": [],
+      "actions": [
+        "confirmed"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/combos/ComboFormModal.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/combos/ComboFormModal.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "labels": [],
+      "actions": [
+        "handleSubmit",
+        "removeItemFromStep",
+        "removeStep",
+        "updateItemDelta",
+        "updateStep"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/combos/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/combos/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "route": "/dashboard/combos"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/combos/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/combos/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDelete",
+        "handleSaved",
+        "loadCombos",
+        "openCreate",
+        "openEdit"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/features/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/features/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-entitlements"
+      ],
+      "route": "/dashboard/features"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/ingredient-icons/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/ingredient-icons/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "route": "/dashboard/ingredient-icons"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/ingredient-icons/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/ingredient-icons/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDelete",
+        "handleGenerate",
+        "handleSave",
+        "load",
+        "updated"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/ProspectFormModal.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/market/ProspectFormModal.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "labels": [],
+      "actions": [
+        "closeReasonHeading",
+        "closed",
+        "handleSubmit"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/SegmentFormModal.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/market/SegmentFormModal.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "labels": [],
+      "actions": [
+        "handleNameChange",
+        "handleSubmit",
+        "remove",
+        "update"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/market/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "route": "/dashboard/market"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/market/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDelete",
+        "load"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/prospects/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/market/prospects/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "route": "/dashboard/market/prospects"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/prospects/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/market/prospects/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDelete",
+        "load"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/segments/[slug]/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/market/segments/[slug]/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "route": "/dashboard/market/segments/[slug]"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/market/segments/[slug]/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/market/segments/[slug]/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-market"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDeleteProspect",
+        "loadAll",
+        "loadSegment"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/menu/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/menu/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "route": "/dashboard/menu"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/menu/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/menu/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDeleteModifier",
+        "loadMenu"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/onboard/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/onboard/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "route": "/dashboard/onboard"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/onboard/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/onboard/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "labels": [],
+      "actions": [
+        "handleSubmit",
+        "submitDisabled"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/operations/guide/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/operations/guide/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "route": "/dashboard/operations/guide"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/operations/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/operations/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "route": "/dashboard/operations"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/operations/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/operations/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "labels": [],
+      "actions": [
+        "refresh"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "route": "/dashboard"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/payments/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/payments/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-entitlements"
+      ],
+      "route": "/dashboard/payments"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/payments/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/payments/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-entitlements"
+      ],
+      "labels": [],
+      "actions": [
+        "handleSave"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/pos-login-screen/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/pos-login-screen/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "route": "/dashboard/pos-login-screen"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/pos-login-screen/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/pos-login-screen/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-assets"
+      ],
+      "labels": [],
+      "actions": [
+        "handleDelete",
+        "handleSave",
+        "handleSaveEyebrow",
+        "handleUpload",
+        "load",
+        "onSaved",
+        "saved",
+        "updated"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/restaurants/[id]/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "route": "/dashboard/restaurants/[id]"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/restaurants/[id]/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "labels": [],
+      "actions": [
+        "handleActivate",
+        "handleDeactivate",
+        "handleDomainSave",
+        "handleOwnerEmailUpdate",
+        "handlePaymentSave",
+        "handlePlanChange",
+        "handleSpokeSave",
+        "handleToggle",
+        "loadData"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/restaurants/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/restaurants/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "route": "/dashboard/restaurants"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/restaurants/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/restaurants/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "labels": [],
+      "actions": [
+        "confirmed",
+        "handleDelete",
+        "handleSearch",
+        "loadRestaurants"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/servers/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/servers/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "route": "/dashboard/servers"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/servers/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/servers/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-operations"
+      ],
+      "labels": [],
+      "actions": [
+        "loadInstances",
+        "refreshCost",
+        "saveHours",
+        "updated"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/users/SetPasswordModal.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/users/SetPasswordModal.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "labels": [],
+      "actions": [
+        "handleCopy",
+        "handleGenerate",
+        "handleSubmit"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/users/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/users/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "route": "/dashboard/users"
+    },
+    {
+      "id": "foodybackoffice:src/app/dashboard/users/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/users/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "labels": [],
+      "actions": [
+        "confirmed",
+        "handleDeleteUser",
+        "handleFilter",
+        "handleResetPassword",
+        "loadUsers"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/app/login/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/login/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "route": "/login"
+    },
+    {
+      "id": "foodybackoffice:src/app/login/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/login/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [],
+      "actions": [
+        "handleSubmit"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/components/CopyRestaurantToDev.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/CopyRestaurantToDev.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [],
+      "actions": [
+        "loadRestaurants"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/components/ProspectStatusChip.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/ProspectStatusChip.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [],
+      "actions": [
+        "closeReasonLabel"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/components/StringListField.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/StringListField.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [],
+      "actions": [
+        "remove",
+        "update"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/components/VerifoneDiagnostics.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/VerifoneDiagnostics.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [],
+      "actions": [
+        "refresh"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/instrumentation-client.ts:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/instrumentation-client.ts",
+      "line": 1,
+      "features": [
+        "shared-runtime"
+      ],
+      "labels": [],
+      "actions": [
+        "onRouterTransitionStart"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/instrumentation.ts:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/instrumentation.ts",
+      "line": 1,
+      "features": [
+        "shared-runtime"
+      ],
+      "labels": [],
+      "actions": [
+        "onRequestError"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/lib/api.ts:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/lib/api.ts",
+      "line": 1,
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "labels": [],
+      "actions": [
+        "createCombo",
+        "createPOSLoginSlide",
+        "createProspect",
+        "createSegment",
+        "deleteCombo",
+        "deleteIngredientIcon",
+        "deleteModifier",
+        "deletePOSLoginSlide",
+        "deleteProspect",
+        "deleteRestaurant",
+        "deleteSegment",
+        "deleteUser",
+        "onboardRestaurant",
+        "sendInviteEmail",
+        "sendResetPassword",
+        "updateCibusConfig",
+        "updateCombo",
+        "updateCustomDomain",
+        "updateIngredientIcon",
+        "updatePOSLoginConfig",
+        "updatePOSLoginSlide",
+        "updatePaymentConfig",
+        "updateProspect",
+        "updateSchedule",
+        "updateSegment",
+        "updateSpokeConfig",
+        "updateUserEmail"
+      ]
+    }
+  ]
+}
