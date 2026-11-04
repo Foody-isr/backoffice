@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { checkContract, hash } from './check-help-contract.mjs';
+import { checkContract, hash, isSource } from './check-help-contract.mjs';
 function fixture(t) {
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'foody-contract-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const write=(file,value)=>{fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true});fs.writeFileSync(path.join(root,file),typeof value==='string'?value:JSON.stringify(value));};
@@ -42,6 +42,41 @@ test('exact no-user-impact explanations are accepted and later edits invalidate 
 test('invalid comparison refs fail closed',t=>{const f=fixture(t);assert.ok(checkContract(f.root,f.root,'does-not-exist').some(e=>e.includes('base does not exist')));});
 
 test('local-only applications can validate without a Git repository',t=>{const f=fixture(t);fs.rmSync(path.join(f.root,'.git'),{recursive:true,force:true});assert.deepEqual(checkContract(f.root,f.root),[]);});
+
+function migrationFixture(t) {
+ const f=fixture(t);
+ f.contract.service='foodyserver';
+ f.write('internal/support/corpus.json','{}');
+ f.write('docs/help/catalog/public-corpus.json','{}');
+ f.contract.sources['internal/support/corpus.json']={sha256:hash('{}'),features:['example']};
+ f.write('docs/help/catalog/features.json',[{id:'example',selectors:{foodyserver:['migrations/280_example.sql']}}]);
+ f.save();
+ return f;
+}
+test('selected SQL migration hashes, additions and deletions are checked without admitting other SQL',t=>{
+ const f=migrationFixture(t), file='migrations/280_example.sql', text='CREATE TABLE synthetic_scope (id bigint);\n';
+ f.write(file,text);f.contract.sources[file]={sha256:hash(text),features:['example']};
+ f.write('migrations/001_unselected.sql','CREATE TABLE synthetic_other (id bigint);\n');
+ f.write('migrations/280_example.sql.gz','Not source SQL.\n');
+ f.save();assert.deepEqual(checkContract(f.root,f.root),[]);
+ f.write(file,'ALTER TABLE synthetic_scope ADD COLUMN reviewed boolean;\n');
+ assert.ok(checkContract(f.root,f.root).some(error=>error.includes(file+': source changed')));
+ f.write(file,text);delete f.contract.sources[file];f.save();
+ assert.ok(checkContract(f.root,f.root).some(error=>error.includes(file+': new source')));
+ f.contract.sources[file]={sha256:hash(text),features:['example']};f.save();fs.unlinkSync(path.join(f.root,file));
+ assert.ok(checkContract(f.root,f.root).some(error=>error.includes(file+': deleted source')));
+});
+test('a newly selected SQL migration still requires all translated behavior updates',t=>{
+ const f=migrationFixture(t), file='migrations/280_example.sql', text='CREATE TABLE synthetic_scope (id bigint);\n';
+ f.git('add','.');f.git('commit','-qm','migration footprint baseline');f.base=f.git('rev-parse','HEAD');
+ f.write(file,text);f.contract.sources[file]={sha256:hash(text),features:['example']};f.save();
+ assert.equal(checkContract(f.root,f.root,f.base).filter(error=>error.includes('guide update')).length,3);
+ for(const lang of ['en','fr','he']) {
+  const translation=f.release.articles['example/guide'].translations[lang], body='migration guide '+lang;
+  f.write(translation.path,body);translation.sha256=hash(body);
+ }
+ f.save();assert.deepEqual(checkContract(f.root,f.root,f.base),[]);
+});
 
 function sharedFixture(t) {
  const f=fixture(t), source='src/app/example/page.tsx';
@@ -124,4 +159,10 @@ test('a scoped review cannot exempt a newly inventoried source without a baselin
   disposition:'no-user-impact',reason:'A new screen has no reviewed baseline, so copying another file baseline must not waive its translated procedure updates.',
  }]});
  assert.equal(checkContract(f.root,f.root,f.base).filter(e=>e.startsWith(source+':')&&e.includes('guide update')).length,3);
+});
+
+test('owned native Objective-C implementation and headers remain in reviewed source evidence',()=>{
+ assert.equal(isSource('ios/Runner/VerifonePaymentBridge.m'),true);
+ assert.equal(isSource('ios/Runner/VerifonePaymentBridge.h'),true);
+ assert.equal(isSource('ios/Pods/Vendor/Terminal.m'),false);
 });
