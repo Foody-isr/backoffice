@@ -59,6 +59,14 @@ Superadmins use the backoffice to:
 
 ## Pages & Features
 
+### Verifone terminal inventory (`/dashboard/terminals`)
+
+Superadmins can inspect terminals across restaurants and maintain revision-checked
+declarations for serial number, DID, SHVA terminal number, supplier, acquirer and
+repair/return lifecycle. Saving is audited and explicitly marked **declared, not
+applied**. It does not reassign a device, change its live bank configuration or
+send a terminal command. Deploy the matching API and migration 290 first.
+
 ### Dashboard (`/dashboard`)
 
 Platform-wide KPIs shown at a glance:

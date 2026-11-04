@@ -1436,3 +1436,30 @@ export const listExternalApiUsage = (page: number) => apiFetch<{ restaurants: { 
 export const externalApiLabels: Record<string, string> = {
  google_autocomplete: 'Address suggestions', google_details: 'Address details', google_geocoding: 'Google geocoding', google_routes: 'Google route calculations', google_optimization_single: 'Single-courier optimization', google_optimization_fleet: 'Fleet optimization', google_tiles: 'Google map tiles', geoapify_credits: 'Geoapify estimated credits',
 };
+
+/** Declared fleet metadata; never proof that bank parameters were applied. */
+export interface TerminalFleetMetadata {
+  id: string; device_id: string; restaurant_id: number; revision: number;
+  serial_number: string; did: string; shva_terminal_id: string; supplier_id: string;
+  acquirer: string; lifecycle: 'in_service' | 'repair' | 'returned' | 'quarantine';
+  configuration_state: 'declared_not_applied'; updated_at: string;
+}
+
+/** Non-secret physical inventory, restricted to the superadmin control plane. */
+export interface TerminalFleetEntry {
+  device_id: string; restaurant_id: number; restaurant_name: string; name: string;
+  manufacturer: string; model: string; status: string; last_seen_at?: string;
+  forgotten_at?: string; metadata?: TerminalFleetMetadata;
+}
+
+/** Lists a bounded page of payment-capable devices across restaurants. */
+export async function listTerminalFleet(options: { q?: string; restaurant_id?: string; offset?: number } = {}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(options)) if (value !== undefined && value !== '') query.set(key, String(value));
+  return apiFetch<{ terminals: TerminalFleetEntry[]; has_more: boolean }>(`/api/v1/admin/terminals?${query}`);
+}
+
+/** Saves declarations only; no bank command or reassignment occurs. */
+export async function updateTerminalFleet(deviceId: string, input: Pick<TerminalFleetMetadata, 'revision' | 'serial_number' | 'did' | 'shva_terminal_id' | 'supplier_id' | 'acquirer' | 'lifecycle'>) {
+  return apiFetch<TerminalFleetMetadata>(`/api/v1/admin/terminals/${encodeURIComponent(deviceId)}`, { method: 'PUT', body: JSON.stringify(input) });
+}

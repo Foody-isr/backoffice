@@ -1,0 +1,15 @@
+{
+  "reviewedAt": "2026-11-04",
+  "files": [
+    {
+      "path": "src/components/Sidebar.tsx",
+      "sha256": "ea2fa18f6ea6b739e6136a7f1cdf0f03a286a38fb1cb4e68b041727bff9860c4",
+      "baseSha256": "7fdac2cd08405a9d5fbe5140a2e3472adf73effef1ec0245324c281d3b0002e8",
+      "disposition": "no-user-impact",
+      "features": [
+        "backoffice-access"
+      ],
+      "reason": "The sole change is one Terminal fleet navigation entry using an existing icon. Existing superadmin authentication, staff/restaurant access checks, all prior links and the Backoffice access procedure remain unchanged. The new internal platform-api guide documents the inventory destination and its declaration-only scope."
+    }
+  ]
+}
