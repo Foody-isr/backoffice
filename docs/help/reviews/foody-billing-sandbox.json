@@ -1,0 +1,37 @@
+{
+  "files": [
+    {
+      "path": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "sha256": "f3e93a2588c253bbbaf2e76bea15d2bfd90ef79ffc2258223157c87877b0d34c",
+      "baseSha256": "b3bead4e89129e1bc8a509a9555562f2173c2a00b3ca051ca87646249a69fe86",
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "A dedicated sandbox offer panel is appended in Billing. The current onboarding, feature, merchant and restaurant administration forms retain their original behavior."
+    },
+    {
+      "path": "src/components/Sidebar.tsx",
+      "sha256": "8ad00b7ba08edb5d7f7a6ee2a4475deb4294d6295d9997b50a29dee533a6954c",
+      "baseSha256": "ea2fa18f6ea6b739e6136a7f1cdf0f03a286a38fb1cb4e68b041727bff9860c4",
+      "features": [
+        "backoffice-access",
+        "platform-api"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The only navigation addition opens the standalone sandbox merchant settings. Existing Backoffice roles, sign-in and navigation destinations are unchanged."
+    },
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "9866974b55c06c4e99cedc3cc372143baf491cc9b26fff7d1e4a11a317bd8628",
+      "baseSha256": "daadff12dd75f5437c4c8b1b5892f4158e9f84b67a348fdc07b10f53a9589c2d",
+      "features": [
+        "backoffice-entitlements",
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "Only sandbox billing client functions are appended. The existing shared HTTP helpers and restaurant payment and entitlement contracts keep their behavior."
+    }
+  ]
+}

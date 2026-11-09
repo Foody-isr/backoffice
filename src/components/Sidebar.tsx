@@ -33,6 +33,7 @@ const nav = [
   { href: '/dashboard/ingredient-icons', label: 'Ingredient Icons', icon: SparklesIcon },
   { href: '/dashboard/pos-login-screen', label: 'POS Login Screen', icon: DevicePhoneMobileIcon },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCardIcon },
+  { href: '/dashboard/foody-billing', label: 'Foody billing · sandbox', icon: ClipboardDocumentListIcon },
   { href: '/dashboard/terminals', label: 'Terminal fleet', icon: DevicePhoneMobileIcon },
   { href: '/dashboard/api-usage', label: 'Usage and quotas', icon: SignalIcon },
   { href: '/dashboard/operations', label: 'Operations', icon: SignalIcon },
