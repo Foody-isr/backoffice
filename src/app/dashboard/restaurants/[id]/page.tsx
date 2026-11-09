@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CopyRestaurantToDev from '@/components/CopyRestaurantToDev';
+import FoodyPrivateOffer from '@/components/FoodyPrivateOffer';
 import {
   getRestaurant,
   getFeatureCatalog,
@@ -426,6 +427,7 @@ export default function RestaurantDetailPage() {
 
       {tab === 'billing' && (
         <div className="space-y-6">
+          <FoodyPrivateOffer key={id} restaurantId={id} />
           {subLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />

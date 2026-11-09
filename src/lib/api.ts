@@ -1463,3 +1463,74 @@ export async function listTerminalFleet(options: { q?: string; restaurant_id?: s
 export async function updateTerminalFleet(deviceId: string, input: Pick<TerminalFleetMetadata, 'revision' | 'serial_number' | 'did' | 'shva_terminal_id' | 'supplier_id' | 'acquirer' | 'lifecycle'>) {
   return apiFetch<TerminalFleetMetadata>(`/api/v1/admin/terminals/${encodeURIComponent(deviceId)}`, { method: 'PUT', body: JSON.stringify(input) });
 }
+
+// ─── Foody software billing (sandbox) ───────────────────────────────
+
+export type FoodyMerchantField = 'user_id' | 'api_key' | 'entity_id' | 'checkout_contract_id' | 'token_contract_id' | 'token_scope';
+export type FoodyMerchant = {
+  environment: 'sandbox';
+  revision: number;
+  enabled: boolean;
+  recurring_enabled: boolean;
+  configured: Record<FoodyMerchantField, boolean>;
+};
+type FoodyOfferTerms = {
+  title: string; includes: string; terms: string;
+  monthly_minor: number; annual_minor: number; tax_mode: 'ht' | 'ttc'; start_date: string;
+};
+type FoodyPrice = { net_minor: number; vat_minor: number; total_minor: number };
+export type FoodyPrivateBilling = {
+  offer: (FoodyOfferTerms & { id: number; version: number; monthly: FoodyPrice; annual: FoodyPrice }) | null;
+  accepted_offer: { id: number; version: number } | null;
+  agreement: { offer_id: number; cycle: 'monthly' | 'annual'; period_end: string; renews: boolean } | null;
+  payment: { status: string; kind: string; amount_minor: number; reference: string } | null;
+  checkout_enabled: boolean;
+  monthly_enabled: boolean;
+  can_simulate_renewal: boolean;
+  owner_url?: string;
+};
+export type FoodyObservedUsage = {
+  month: string;
+  quotas: { counters: { id: string; used: number; unit: string }[] } | null;
+  observed: Record<string, number>;
+  complete: boolean;
+};
+
+/** Read the configuration status; this endpoint never returns credentials. */
+export function getFoodyMerchant(): Promise<FoodyMerchant> {
+  return apiFetch('/api/v1/admin/foody-billing/merchant', { cache: 'no-store' });
+}
+
+/** Replace supplied credentials only; blanks keep previously stored values. */
+export function saveFoodyMerchant(input: Pick<FoodyMerchant, 'revision' | 'enabled' | 'recurring_enabled'> & Partial<Record<FoodyMerchantField, string>>): Promise<FoodyMerchant> {
+  return apiFetch('/api/v1/admin/foody-billing/merchant', { method: 'PUT', body: JSON.stringify(input) });
+}
+
+function foodyBillingPath(rid: number) {
+  return '/api/v1/admin/restaurants/' + rid + '/foody-billing';
+}
+
+/** Read the restaurant's sandbox billing and current private offer. */
+export function getFoodyPrivateBilling(rid: number): Promise<FoodyPrivateBilling> {
+  return apiFetch(foodyBillingPath(rid), { cache: 'no-store' });
+}
+
+/** Publish a new immutable version of the private offer. */
+export function saveFoodyOffer(rid: number, input: FoodyOfferTerms & { expected_version: number }): Promise<FoodyPrivateBilling> {
+  return apiFetch(foodyBillingPath(rid) + '/offer', { method: 'PUT', body: JSON.stringify(input) });
+}
+
+/** Read provider status without initiating or repeating a charge. */
+export function reconcileFoodyBilling(rid: number, transaction_id?: string): Promise<FoodyPrivateBilling> {
+  return apiFetch(foodyBillingPath(rid) + '/reconcile', { method: 'POST', body: JSON.stringify({ transaction_id }) });
+}
+
+/** Advance the first authorized monthly renewal in the sandbox. */
+export function simulateFoodyRenewal(rid: number): Promise<FoodyPrivateBilling> {
+  return apiFetch(foodyBillingPath(rid) + '/simulate-renewal', { method: 'POST', signal: AbortSignal.timeout(45_000) });
+}
+
+/** Read measured activity; it is never used to calculate a debit. */
+export function getFoodyObservedUsage(rid: number): Promise<FoodyObservedUsage> {
+  return apiFetch(foodyBillingPath(rid) + '/usage', { cache: 'no-store' });
+}
