@@ -1437,19 +1437,81 @@ export const externalApiLabels: Record<string, string> = {
  google_autocomplete: 'Address suggestions', google_details: 'Address details', google_geocoding: 'Google geocoding', google_routes: 'Google route calculations', google_optimization_single: 'Single-courier optimization', google_optimization_fleet: 'Fleet optimization', google_tiles: 'Google map tiles', geoapify_credits: 'Geoapify estimated credits',
 };
 
-/** Declared fleet metadata; never proof that bank parameters were applied. */
+/** Fleet declaration and separately verified CST state. */
 export interface TerminalFleetMetadata {
   id: string; device_id: string; restaurant_id: number; revision: number;
   serial_number: string; did: string; shva_terminal_id: string; supplier_id: string;
+  vhq_device_uid: string; ashrait_terminal_id: string;
   acquirer: string; lifecycle: 'in_service' | 'repair' | 'returned' | 'quarantine';
-  configuration_state: 'declared_not_applied'; updated_at: string;
+  configuration_state: 'declared_not_applied' | 'verified_cst'; updated_at: string;
 }
 
 /** Non-secret physical inventory, restricted to the superadmin control plane. */
 export interface TerminalFleetEntry {
   device_id: string; restaurant_id: number; restaurant_name: string; name: string;
   manufacturer: string; model: string; status: string; last_seen_at?: string;
-  forgotten_at?: string; metadata?: TerminalFleetMetadata;
+  forgotten_at?: string; metadata?: TerminalFleetMetadata; prepared_change_id?: string; serial_locked?: boolean;
+}
+
+/** Commercial identifiers from an inventory declaration or a prepared change. */
+export type TerminalFleetParameters = Pick<TerminalFleetMetadata,
+  'did' | 'shva_terminal_id' | 'ashrait_terminal_id' | 'supplier_id' | 'acquirer'>;
+
+/** Metadata saved for an inventory device without provisioning the terminal. */
+export type TerminalFleetDeclaration = TerminalFleetParameters & Pick<TerminalFleetMetadata,
+  'revision' | 'serial_number' | 'vhq_device_uid' | 'lifecycle'>;
+
+/** One request bound to the declarations reviewed by the operator. */
+export interface TerminalFleetChangeInput {
+  request_id: string;
+  source_revision: number;
+  kind: 'configure' | 'replace' | 'reassign';
+  target_device_id?: string;
+  target_revision?: number;
+  target_restaurant_id?: number;
+  requested: TerminalFleetParameters;
+}
+
+export type TerminalFleetNativeCommand = 'SetVhqDeviceId' | 'DownloadAshraitParameters';
+export type TerminalFleetCommand = TerminalFleetNativeCommand | 'UpdateVHQSHVA';
+
+/** One authorization and the observed SDK result, separate from external verification. */
+export interface TerminalFleetAttempt {
+  id: string;
+  command: TerminalFleetCommand;
+  remote?: boolean;
+  state: 'authorized' | 'dispatching' | 'confirmed' | 'not_started' | 'uncertain';
+  authorized_at: string;
+  dispatched_at?: string;
+  reviewed_at?: string;
+  review_result?: 'verified_cst' | 'verified_unchanged';
+  review_reference?: string;
+}
+
+/** A change with immutable configuration snapshots and its CST journal. */
+export interface TerminalFleetChange {
+  id: string;
+  device_id: string;
+  restaurant_id: number;
+  source_revision: number;
+  kind: TerminalFleetChangeInput['kind'];
+  state: 'prepared' | 'cancelled' | 'verified_cst' | 'verified_unchanged';
+  source_serial_number: string;
+  source: TerminalFleetParameters;
+  target_device_id: string;
+  target_restaurant_id: number;
+  target_revision: number;
+  target_serial_number: string;
+  target_vhq_device_uid: string;
+  target_before: TerminalFleetParameters;
+  requested: TerminalFleetParameters;
+  created_by: number;
+  created_at: string;
+  cancelled_by?: number;
+  cancelled_at?: string;
+  cst_execution_allowed?: boolean;
+  cst_vhq_available?: boolean;
+  attempts?: TerminalFleetAttempt[];
 }
 
 /** Lists a bounded page of payment-capable devices across restaurants. */
@@ -1460,7 +1522,7 @@ export async function listTerminalFleet(options: { q?: string; restaurant_id?: s
 }
 
 /** Saves declarations only; no bank command or reassignment occurs. */
-export async function updateTerminalFleet(deviceId: string, input: Pick<TerminalFleetMetadata, 'revision' | 'serial_number' | 'did' | 'shva_terminal_id' | 'supplier_id' | 'acquirer' | 'lifecycle'>) {
+export async function updateTerminalFleet(deviceId: string, input: TerminalFleetDeclaration) {
   return apiFetch<TerminalFleetMetadata>(`/api/v1/admin/terminals/${encodeURIComponent(deviceId)}`, { method: 'PUT', body: JSON.stringify(input) });
 }
 
@@ -1533,4 +1595,54 @@ export function simulateFoodyRenewal(rid: number): Promise<FoodyPrivateBilling> 
 /** Read measured activity; it is never used to calculate a debit. */
 export function getFoodyObservedUsage(rid: number): Promise<FoodyObservedUsage> {
   return apiFetch(foodyBillingPath(rid) + '/usage', { cache: 'no-store' });
+}
+
+/** Adds a Mini to inventory by serial number without creating a pairing. */
+export async function registerFleetMini(input: { restaurant_id: number; serial_number: string; name: string }) {
+  return apiFetch<TerminalFleetEntry>('/api/v1/admin/terminals/mini', { method: 'POST', body: JSON.stringify(input) });
+}
+
+/** Reads recent plans for one terminal. */
+export async function listTerminalFleetChanges(deviceId: string) {
+  return apiFetch<{ changes: TerminalFleetChange[] }>(`/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes`);
+}
+
+/** Records the requested maintenance without sending a terminal command. */
+export async function prepareTerminalFleetChange(deviceId: string, input: TerminalFleetChangeInput) {
+  return apiFetch<TerminalFleetChange>(`/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+/** Cancels the plan and preserves its history. */
+export async function cancelTerminalFleetChange(deviceId: string, changeId: string) {
+  return apiFetch<TerminalFleetChange>(
+    `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/cancel`,
+    { method: 'POST' },
+  );
+}
+
+/** Authorizes one command; the enrolled diagnostic POS still has to claim it. */
+export async function authorizeTerminalFleetCST(deviceId: string, changeId: string, command: TerminalFleetNativeCommand, remote: boolean) {
+  return apiFetch<TerminalFleetAttempt>(
+    `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/authorize-cst`,
+    { method: 'POST', body: JSON.stringify({ command, remote, cst_confirmed: true }) },
+  );
+}
+
+/** Stages one reviewed SHVA number in VHQ or verifies the existing write. */
+export async function stageTerminalFleetVHQ(deviceId: string, changeId: string, action: 'stage' | 'verify') {
+  return apiFetch<TerminalFleetAttempt>(
+    `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/vhq-cst`,
+    { method: 'POST', body: JSON.stringify({ action, cst_confirmed: true }) },
+  );
+}
+
+/** Records independently observed values before releasing the maintenance reservation. */
+export async function reviewTerminalFleetCST(deviceId: string, changeId: string, observed: TerminalFleetParameters, reference: string) {
+  return apiFetch<{ reviewed: true }>(
+    `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/review-cst`,
+    { method: 'POST', body: JSON.stringify({ observed, reference }) },
+  );
 }

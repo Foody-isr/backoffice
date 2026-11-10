@@ -1,0 +1,16 @@
+{
+  "reviewedAt": "2026-11-08",
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "9b9e574e1b83e93b719caa2e997e480217002ad255eda4ba0f4a3bc7d594f327",
+      "baseSha256": "9866974b55c06c4e99cedc3cc372143baf491cc9b26fff7d1e4a11a317bd8628",
+      "disposition": "no-user-impact",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "reason": "The new API types and methods belong only to the internal terminal fleet. The shared transport, authentication and entitlements procedures are unchanged."
+    }
+  ]
+}
