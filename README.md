@@ -19,6 +19,13 @@ disable filtered request/response bodies immediately in the development API.
 The setting persists until disabled; production is blocked server-side. See the
 observability guide for filtering, auditing and CloudWatch access.
 
+**Terminal fleet** is the superadmin inventory for registered Verifone hardware.
+On a development API with the VHQ CST configuration, Backoffice stages the
+reviewed SHVA parameter in VHQ and sends DID and parameter-download authorizations
+to the matching enrolled diagnostic POS. Record the observed identifiers on the
+terminal after checking synchronization. Production, replacement and transfer
+requests remain preparation only.
+
 ## Quick Start
 
 ```bash
@@ -61,11 +68,24 @@ Superadmins use the backoffice to:
 
 ### Verifone terminal inventory (`/dashboard/terminals`)
 
-Superadmins can inspect terminals across restaurants and maintain revision-checked
-declarations for serial number, DID, SHVA terminal number, supplier, acquirer and
-repair/return lifecycle. Saving is audited and explicitly marked **declared, not
-applied**. It does not reassign a device, change its live bank configuration or
-send a terminal command. Deploy the matching API and migration 290 first.
+Superadmins can search across restaurants by name or terminal identifier. Use
+**Register a Mini** to add a Mini by physical serial number and restaurant when
+it has only been configured on the iPad. Registered Portables appear through
+the existing device inventory.
+
+**Edit inventory** records declared DID, VHQ deviceUid, SHVA terminal number,
+Ashrait provisioning ID, supplier, acquirer and repair or return status.
+**Change requests** prepares a reconfiguration, a same-restaurant replacement
+or a transfer of a returned terminal. Compare the declared and requested
+identifiers before saving. Open the same history to cancel an unused request.
+For a CST configuration request, keep FoodyPOS open on the selected Portable
+or paired iPad. Authorize the DID if needed. Stage the SHVA number in VHQ when
+it differs, then authorize the parameter download. Verify the actual values on
+the terminal and record them in the request. Use **Check VHQ status** to read
+back an uncertain write. Each authorization may be claimed once.
+
+Apply API migrations 309–312 after the existing development migrations before
+testing this dashboard.
 
 ### Dashboard (`/dashboard`)
 
