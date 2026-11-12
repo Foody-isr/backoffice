@@ -665,12 +665,21 @@ export interface VerifoneCheckoutThemeStatus {
   ready: boolean;
   outdated: boolean;
   theme_id?: string;
+  source?: 'website' | 'portal';
   synced_at?: string;
 }
 
 /** Synchronize the restaurant's published branding, without starting a payment. */
 export async function syncVerifoneCheckoutTheme(restaurantId: number): Promise<VerifoneCheckoutThemeStatus> {
   return apiFetch<VerifoneCheckoutThemeStatus>(`/api/v1/admin/restaurants/${restaurantId}/payment-config/verifone-theme/sync`, { method: 'POST' });
+}
+
+/** Link an existing Verifone Central theme by UUID or exact name. */
+export async function linkVerifoneCheckoutTheme(restaurantId: number, reference: string): Promise<VerifoneCheckoutThemeStatus> {
+  return apiFetch<VerifoneCheckoutThemeStatus>(`/api/v1/admin/restaurants/${restaurantId}/payment-config/verifone-theme/link`, {
+    method: 'POST',
+    body: JSON.stringify({ theme_reference: reference }),
+  });
 }
 
 export async function updatePaymentConfig(restaurantId: number, config: UpdatePaymentConfigInput): Promise<{ message: string }> {
