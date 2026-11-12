@@ -15,6 +15,7 @@ import {
   toggleFeature,
   setRestaurantPlan,
   getPaymentConfig,
+  linkVerifoneCheckoutTheme,
   syncVerifoneCheckoutTheme,
   updatePaymentConfig,
   getCustomDomain,
@@ -70,9 +71,10 @@ export default function RestaurantDetailPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentLoadError, setPaymentLoadError] = useState('');
   const [paymentSaving, setPaymentSaving] = useState(false);
-  const [themeSyncing, setThemeSyncing] = useState(false);
-  const [themeSyncError, setThemeSyncError] = useState('');
-  const savedPaymentCreds = useRef('');
+  const [themeAction, setThemeAction] = useState<'link' | 'sync' | null>(null);
+  const [themeError, setThemeError] = useState('');
+  const [themeReference, setThemeReference] = useState('');
+  const savedPaymentCreds = useRef<UpdatePaymentConfigInput | null>(null);
   const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('payplus');
   const [paymentCreds, setPaymentCreds] = useState<UpdatePaymentConfigInput>({ provider: 'payplus' });
 
@@ -145,7 +147,7 @@ export default function RestaurantDetailPage() {
           verifone_google_pay_enabled: cfg.verifone_google_pay_enabled || false,
           verifone_checkout_theme_enabled: cfg.verifone_checkout_theme?.enabled || false,
         };
-        savedPaymentCreds.current = JSON.stringify(loadedCreds);
+        savedPaymentCreds.current = loadedCreds;
         setPaymentCreds(loadedCreds);
       })
       .catch((error: unknown) => setPaymentLoadError(error instanceof Error ? error.message : 'Payment settings could not be loaded. Reload before making changes.'))
@@ -343,16 +345,23 @@ export default function RestaurantDetailPage() {
     return f?.enabled ?? false;
   }
 
-  async function handleThemeSync() {
-    setThemeSyncError('');
-    setThemeSyncing(true);
+  async function handleThemeUpdate(action: 'link' | 'sync') {
+    setThemeError('');
+    setThemeAction(action);
     try {
-      await syncVerifoneCheckoutTheme(id);
-      setPaymentConfig(null);
+      const theme = action === 'link'
+        ? await linkVerifoneCheckoutTheme(id, themeReference.trim())
+        : await syncVerifoneCheckoutTheme(id);
+      setPaymentConfig((config) => config && { ...config, verifone_checkout_theme: theme });
+      setPaymentCreds((creds) => ({ ...creds, verifone_checkout_theme_enabled: theme.enabled }));
+      if (savedPaymentCreds.current) {
+        savedPaymentCreds.current = { ...savedPaymentCreds.current, verifone_checkout_theme_enabled: theme.enabled };
+      }
+      if (action === 'link') setThemeReference('');
     } catch (error: unknown) {
-      setThemeSyncError(error instanceof Error ? error.message : 'Theme synchronization failed');
+      setThemeError(error instanceof Error ? error.message : 'Could not update the Verifone theme');
     } finally {
-      setThemeSyncing(false);
+      setThemeAction(null);
     }
   }
 
@@ -367,6 +376,9 @@ export default function RestaurantDetailPage() {
   if (error || !restaurant) {
     return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error || 'Not found'}</div>;
   }
+
+  const checkoutTheme = paymentConfig?.verifone_checkout_theme;
+  const paymentSettingsSaved = paymentConfig?.provider === paymentProvider && JSON.stringify(paymentCreds) === JSON.stringify(savedPaymentCreds.current);
 
   // Group features by category
   const grouped = catalog.reduce<Record<string, FeatureMeta[]>>((acc, f) => {
@@ -569,6 +581,7 @@ export default function RestaurantDetailPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Provider</label>
                 <select
                   value={paymentProvider}
+                  disabled={themeAction !== null}
                   onChange={(e) => {
                     const v = e.target.value as PaymentProvider;
                     setPaymentProvider(v);
@@ -624,31 +637,53 @@ export default function RestaurantDetailPage() {
                       />
                     </div>
                   ))}
-                  <fieldset disabled={themeSyncing} className="space-y-3 border-t border-gray-200 pt-4">
+                  <fieldset disabled={themeAction !== null || paymentSaving} className="space-y-3 border-t border-gray-200 pt-4">
                     <legend className="text-sm font-semibold text-gray-700">Hosted payment page appearance</legend>
                     <p className="max-w-2xl text-xs leading-5 text-gray-500">
-                      Checkout follows the customer&apos;s ordering language, with English as fallback and a language selector. Synchronize the restaurant&apos;s published logo and colors to brand Verifone&apos;s page. Draft website changes are not included.
+                      Checkout follows the customer&apos;s ordering language, with English as fallback and a language selector. The selected theme applies to new Checkout links.
                     </p>
                     <label className="flex items-start gap-2 text-sm text-gray-700">
-                      <input type="checkbox" className="mt-0.5" disabled={!paymentConfig?.verifone_checkout_theme?.ready}
+                      <input type="checkbox" className="mt-0.5" disabled={!checkoutTheme?.ready && !paymentCreds.verifone_checkout_theme_enabled}
                         checked={paymentCreds.verifone_checkout_theme_enabled || false}
                         onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_checkout_theme_enabled: e.target.checked })} />
-                      <span>Use the restaurant&apos;s synchronized theme</span>
+                      <span>Use the selected Checkout theme</span>
                     </label>
                     <p role="status" className="text-xs leading-5 text-gray-500">
-                      {!paymentConfig?.verifone_checkout_theme?.ready ? 'No theme synchronized for this organization and environment. The Verifone account default is used.' :
-                        paymentConfig.verifone_checkout_theme.outdated ? 'Published branding has changed. Synchronize again to update future payment pages.' :
-                          `Theme synchronized${paymentConfig.verifone_checkout_theme.synced_at ? ` on ${formatDate(paymentConfig.verifone_checkout_theme.synced_at)}` : ''}.`}
+                      {checkoutTheme?.ready && (
+                        <>
+                          {checkoutTheme.source === 'portal' ? 'Verifone Central theme linked.' :
+                            `Published branding synchronized${checkoutTheme.synced_at ? ` on ${formatDate(checkoutTheme.synced_at)}` : ''}.`}
+                          {checkoutTheme.theme_id && <> <code className="break-all">{checkoutTheme.theme_id}</code></>}
+                          {checkoutTheme.outdated && ' Published branding has changed. Synchronize again to update new links.'}
+                        </>
+                      )}
+                      {!checkoutTheme?.enabled && ' The Verifone account default is used.'}
+                      {checkoutTheme?.enabled && !checkoutTheme.ready && 'The active theme is unavailable for this configuration. Disable it or link a theme for this organization and environment.'}
                     </p>
-                    <button type="button" onClick={handleThemeSync}
-                      disabled={themeSyncing || paymentSaving || paymentLoading || paymentConfig?.provider !== paymentProvider || JSON.stringify(paymentCreds) !== savedPaymentCreds.current}
+                    <div className="max-w-2xl space-y-2">
+                      <label htmlFor="verifone-theme-reference" className="block text-xs font-medium text-gray-600">Verifone theme name or ID</label>
+                      <p id="verifone-theme-reference-help" className="text-xs leading-5 text-gray-500">
+                        In Verifone Central, save the theme under Administration → Checkout Themes in this restaurant&apos;s Verifone organization and environment. Enter its exact name or UUID.
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input id="verifone-theme-reference" type="text" autoComplete="off" maxLength={255}
+                          aria-describedby="verifone-theme-reference-help" value={themeReference}
+                          onChange={(e) => setThemeReference(e.target.value)}
+                          className="w-full max-w-sm rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                        <button type="button" onClick={() => handleThemeUpdate('link')} disabled={!paymentSettingsSaved || !themeReference.trim()}
+                          className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50">
+                          {themeAction === 'link' ? 'Linking Verifone theme...' : 'Link Verifone theme'}
+                        </button>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => handleThemeUpdate('sync')} disabled={!paymentSettingsSaved}
                       className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50">
-                      {themeSyncing ? 'Synchronizing logo and colors...' : 'Synchronize published logo and colors'}
+                      {themeAction === 'sync' ? 'Synchronizing logo and colors...' : 'Synchronize published logo and colors'}
                     </button>
                     <p className="max-w-2xl text-xs leading-5 text-gray-500">
-                      Save payment settings first. Synchronization activates a restaurant-specific theme for new Checkout links only; existing links are retained. Logos must be public HTTPS PNG, JPEG or WebP images. Re-synchronize after publishing branding changes. Disable the theme before changing organization or environment. Apple Pay and Google Pay&apos;s native sheets keep their own appearance.
+                      Save payment settings before linking or synchronizing. Synchronization uses the published logo in PNG, JPEG or WebP over public HTTPS. Disable the theme before changing organization or environment. Apple Pay and Google Pay&apos;s native sheets keep their own appearance.
                     </p>
-                    {themeSyncError && <p role="alert" className="text-sm text-red-700">{themeSyncError}</p>}
+                    {themeError && <p role="alert" className="text-sm text-red-700">{themeError}</p>}
                   </fieldset>
                   <fieldset className="space-y-4 border-t border-gray-200 pt-4">
                     <legend className="text-sm font-semibold text-gray-700">Wallets on the hosted payment page</legend>
@@ -895,7 +930,7 @@ export default function RestaurantDetailPage() {
               {/* Save button */}
               <button
                 onClick={handlePaymentSave}
-                disabled={paymentSaving || themeSyncing || paymentLoading || !paymentConfig || !!paymentLoadError}
+                disabled={paymentSaving || themeAction !== null || paymentLoading || !paymentConfig || !!paymentLoadError}
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
               >
                 {paymentSaving ? 'Saving...' : 'Save Payment Config'}
