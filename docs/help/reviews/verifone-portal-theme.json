@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "path": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "sha256": "5f032cd73a93bd8e9cc19483aa887003929e220281a64309cd97823261dff476",
+      "baseSha256": "f3e93a2588c253bbbaf2e76bea15d2bfd90ef79ffc2258223157c87877b0d34c",
+      "disposition": "no-user-impact",
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "reason": "The interface changes apply to the existing restaurant’s Payment tab and theme actions. The onboarding review covers the restaurant creation flow and credentials."
+    },
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "36362a2460947bcdf655d95c2414a2bde9f9bac20c62ac62ae30c1c8ddaebcba",
+      "baseSha256": "9b9e574e1b83e93b719caa2e997e480217002ad255eda4ba0f4a3bc7d594f327",
+      "disposition": "no-user-impact",
+      "features": [
+        "shared-runtime"
+      ],
+      "reason": "The API client adds a theme status field and calls the theme endpoint through the existing request helper. The review covers the shared authentication, transport and error handling paths."
+    }
+  ]
+}
