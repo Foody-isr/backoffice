@@ -619,6 +619,16 @@ export interface PaymentConfigResponse {
   masked_verifone_google_pay_payment_contract_id?: string;
   masked_verifone_token_scope?: string;
   masked_verifone_public_key_alias?: string;
+  verifone_public_key_configured?: boolean;
+  verifone_direct_card_enabled?: boolean;
+  verifone_direct_apple_pay_enabled?: boolean;
+  verifone_direct_google_pay_enabled?: boolean;
+  masked_verifone_direct_apple_pay_contract_id?: string;
+  masked_verifone_direct_google_pay_contract_id?: string;
+  verifone_apple_pay_domain?: string;
+  verifone_apple_pay_association_configured?: boolean;
+  verifone_google_pay_gateway_merchant_id?: string;
+  verifone_google_pay_merchant_id?: string;
   masked_stancer_secret_key?: string;
   masked_stancer_public_key?: string;
 }
@@ -649,6 +659,16 @@ export interface UpdatePaymentConfigInput {
   verifone_google_pay_payment_contract_id?: string;
   verifone_token_scope?: string;
   verifone_public_key_alias?: string;
+  verifone_public_key?: string;
+  verifone_direct_card_enabled?: boolean;
+  verifone_direct_apple_pay_enabled?: boolean;
+  verifone_direct_google_pay_enabled?: boolean;
+  verifone_direct_apple_pay_contract_id?: string;
+  verifone_direct_google_pay_contract_id?: string;
+  verifone_apple_pay_domain?: string;
+  verifone_apple_pay_domain_association?: string;
+  verifone_google_pay_gateway_merchant_id?: string;
+  verifone_google_pay_merchant_id?: string;
   verifone_token_charging_enabled?: boolean;
   verifone_invoice4u_enabled?: boolean;
   verifone_invoice4u_receipt_type?: 'FULL_RECEIPT' | 'INVOICE' | 'INVOICE_RECEIPT' | '';

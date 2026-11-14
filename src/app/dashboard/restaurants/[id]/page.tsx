@@ -146,6 +146,12 @@ export default function RestaurantDetailPage() {
           verifone_apple_pay_enabled: cfg.verifone_apple_pay_enabled || false,
           verifone_google_pay_enabled: cfg.verifone_google_pay_enabled || false,
           verifone_checkout_theme_enabled: cfg.verifone_checkout_theme?.enabled || false,
+          verifone_direct_card_enabled: cfg.verifone_direct_card_enabled || false,
+          verifone_direct_apple_pay_enabled: cfg.verifone_direct_apple_pay_enabled || false,
+          verifone_direct_google_pay_enabled: cfg.verifone_direct_google_pay_enabled || false,
+          verifone_apple_pay_domain: cfg.verifone_apple_pay_domain ?? '',
+          verifone_google_pay_gateway_merchant_id: cfg.verifone_google_pay_gateway_merchant_id ?? '',
+          verifone_google_pay_merchant_id: cfg.verifone_google_pay_merchant_id ?? '',
         };
         savedPaymentCreds.current = loadedCreds;
         setPaymentCreds(loadedCreds);
@@ -319,6 +325,22 @@ export default function RestaurantDetailPage() {
         input.verifone_checkout_theme_enabled = paymentCreds.verifone_checkout_theme_enabled || false;
         input.verifone_token_scope = paymentCreds.verifone_token_scope;
         input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
+        input.verifone_public_key = paymentCreds.verifone_public_key;
+        input.verifone_direct_card_enabled = input.verifone_environment === 'sandbox' && paymentCreds.verifone_direct_card_enabled === true;
+        input.verifone_direct_apple_pay_enabled = paymentCreds.verifone_direct_apple_pay_enabled;
+        input.verifone_direct_google_pay_enabled = paymentCreds.verifone_direct_google_pay_enabled;
+        input.verifone_direct_apple_pay_contract_id = paymentCreds.verifone_direct_apple_pay_contract_id;
+        input.verifone_direct_google_pay_contract_id = paymentCreds.verifone_direct_google_pay_contract_id;
+        if (paymentCreds.verifone_apple_pay_domain !== (paymentConfig?.verifone_apple_pay_domain ?? '')) {
+          input.verifone_apple_pay_domain = paymentCreds.verifone_apple_pay_domain;
+        }
+        input.verifone_apple_pay_domain_association = paymentCreds.verifone_apple_pay_domain_association;
+        if (paymentCreds.verifone_google_pay_gateway_merchant_id !== (paymentConfig?.verifone_google_pay_gateway_merchant_id ?? '')) {
+          input.verifone_google_pay_gateway_merchant_id = paymentCreds.verifone_google_pay_gateway_merchant_id;
+        }
+        if (paymentCreds.verifone_google_pay_merchant_id !== (paymentConfig?.verifone_google_pay_merchant_id ?? '')) {
+          input.verifone_google_pay_merchant_id = paymentCreds.verifone_google_pay_merchant_id;
+        }
         input.verifone_token_charging_enabled = paymentCreds.verifone_token_charging_enabled || false;
         input.verifone_invoice4u_enabled = paymentCreds.verifone_invoice4u_enabled || false;
         input.verifone_invoice4u_receipt_type = paymentCreds.verifone_invoice4u_receipt_type || '';
@@ -623,7 +645,6 @@ export default function RestaurantDetailPage() {
                     ['verifone_token_payment_contract_id', 'Token contract (no CVV)', paymentConfig?.masked_verifone_token_payment_contract_id],
                     ['verifone_installments_payment_contract_id', 'Installments contract', paymentConfig?.masked_verifone_installments_payment_contract_id],
                     ['verifone_token_scope', 'Token scope', paymentConfig?.masked_verifone_token_scope],
-                    ['verifone_public_key_alias', 'Public-key alias', paymentConfig?.masked_verifone_public_key_alias],
                   ] as const).map(([field, label, masked]) => (
                     <div key={field}>
                       <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
@@ -637,6 +658,106 @@ export default function RestaurantDetailPage() {
                       />
                     </div>
                   ))}
+                  <fieldset className="space-y-3 border-t border-gray-200 pt-4">
+                    <legend className="text-sm font-semibold text-gray-700">Card form in Foody</legend>
+                    <p id="verifone-capture-key-help" className="max-w-md text-xs leading-5 text-gray-500">
+                      Use the public key and alias issued for this restaurant&apos;s Verifone organization and environment. Enter the corresponding key when you change either.
+                    </p>
+                    <div className="max-w-md">
+                      <label htmlFor="verifone-key-alias" className="mb-1 block text-xs font-medium text-gray-500">Public key alias</label>
+                      <input id="verifone-key-alias" type="text" autoComplete="off" maxLength={80}
+                        placeholder={paymentConfig?.masked_verifone_public_key_alias || 'Enter the alias'}
+                        value={paymentCreds.verifone_public_key_alias ?? ''}
+                        onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_public_key_alias: e.target.value || undefined })}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                    </div>
+                    <div className="max-w-md">
+                      <label htmlFor="verifone-public-key" className="mb-1 block text-xs font-medium text-gray-500">Public key</label>
+                      <textarea id="verifone-public-key" rows={4} maxLength={65536} spellCheck={false}
+                        aria-describedby="verifone-capture-key-help"
+                        placeholder={paymentConfig?.verifone_public_key_configured ? 'Key saved. Paste a new key to replace it.' : 'Paste the public key from Verifone'}
+                        value={paymentCreds.verifone_public_key ?? ''}
+                        onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_public_key: e.target.value.trim() ? e.target.value : undefined })}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                      {paymentConfig?.verifone_public_key_configured && (
+                        <label className="mt-2 flex items-start gap-2 text-xs text-gray-700">
+                          <input type="checkbox" checked={paymentCreds.verifone_public_key === ''}
+                            onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_public_key: e.target.checked ? '' : undefined, verifone_direct_card_enabled: e.target.checked ? false : paymentCreds.verifone_direct_card_enabled })} />
+                          Remove the saved public key on save
+                        </label>
+                      )}
+                    </div>
+                    <label className="flex items-start gap-2 text-sm text-gray-700">
+                      <input type="checkbox" className="mt-0.5"
+                        disabled={paymentCreds.verifone_environment === 'production' || paymentCreds.verifone_public_key === ''}
+                        checked={paymentCreds.verifone_environment === 'sandbox' && paymentCreds.verifone_direct_card_enabled === true}
+                        onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_direct_card_enabled: e.target.checked })} />
+                      <span>Enable the card form in Foody for CST test payments</span>
+                    </label>
+                  </fieldset>
+                  <fieldset className="space-y-5 border-t border-gray-200 pt-4">
+                    <legend className="text-sm font-semibold text-gray-700">Wallets in the Foody checkout</legend>
+                    {paymentCreds.verifone_invoice4u_enabled && paymentCreds.verifone_invoice4u_receipt_type !== 'FULL_RECEIPT' && (
+                      <p className="text-xs leading-5 text-amber-800">Direct wallets with Invoice4U require the Full receipt setting. Detailed invoices use the existing payment methods.</p>
+                    )}
+                    <div className="grid gap-5 xl:grid-cols-2">
+                      <section className="space-y-3">
+                        <label className="flex items-start gap-2 text-sm font-medium text-gray-800">
+                          <input type="checkbox" className="mt-0.5" checked={paymentCreds.verifone_direct_apple_pay_enabled ?? false}
+                            onChange={(event) => setPaymentCreds({ ...paymentCreds, verifone_direct_apple_pay_enabled: event.target.checked })} />
+                          Enable direct Apple Pay
+                        </label>
+                        <p className="text-xs leading-5 text-gray-600">In Verifone Central, select Apple Pay for Web with direct API enabled. Save the domain and association file below, verify the domain in Central, then enable the button.</p>
+                        <label className="block text-xs font-medium text-gray-600">
+                          Apple Pay checkout domain
+                          <input type="text" autoComplete="off" maxLength={253} placeholder="checkout.restaurant.example"
+                            value={paymentCreds.verifone_apple_pay_domain ?? ''}
+                            onChange={(event) => setPaymentCreds({ ...paymentCreds, verifone_apple_pay_domain: event.target.value })}
+                            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+                        </label>
+                        <label className="block text-xs font-medium text-gray-600">
+                          Apple domain association file contents
+                          <textarea rows={3} maxLength={32768} spellCheck={false}
+                            placeholder={paymentConfig?.verifone_apple_pay_association_configured ? 'File saved. Paste the contents to replace it.' : 'Paste the file downloaded from Verifone Central'}
+                            value={paymentCreds.verifone_apple_pay_domain_association ?? ''}
+                            onChange={(event) => setPaymentCreds({ ...paymentCreds, verifone_apple_pay_domain_association: event.target.value || undefined })}
+                            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm" />
+                        </label>
+                        <label className="block text-xs font-medium text-gray-600">
+                          Direct Apple Pay contract UUID
+                          <input type="password" autoComplete="new-password" maxLength={36}
+                            placeholder={paymentConfig?.masked_verifone_direct_apple_pay_contract_id || 'Verifone Apple Pay for Web contract'}
+                            value={paymentCreds.verifone_direct_apple_pay_contract_id ?? ''}
+                            onChange={(event) => setPaymentCreds({ ...paymentCreds, verifone_direct_apple_pay_contract_id: event.target.value.trim() || undefined })}
+                            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+                        </label>
+                      </section>
+                      <section className="space-y-3">
+                        <label className="flex items-start gap-2 text-sm font-medium text-gray-800">
+                          <input type="checkbox" className="mt-0.5" checked={paymentCreds.verifone_direct_google_pay_enabled ?? false}
+                            onChange={(event) => setPaymentCreds({ ...paymentCreds, verifone_direct_google_pay_enabled: event.target.checked })} />
+                          Enable direct Google Pay
+                        </label>
+                        <p className="text-xs leading-5 text-gray-600">Use the gateway merchant ID issued by Verifone for this environment. Google supplies the production merchant ID after approving the website integration.</p>
+                        {([
+                          ['verifone_google_pay_gateway_merchant_id', 'Verifone gateway merchant ID'],
+                          ['verifone_google_pay_merchant_id', 'Google Pay merchant ID'],
+                          ['verifone_direct_google_pay_contract_id', 'Direct Google Pay contract UUID'],
+                        ] as const).map(([field, label]) => (
+                          <label key={field} className="block text-xs font-medium text-gray-600">
+                            {label}
+                            <input type={field === 'verifone_direct_google_pay_contract_id' ? 'password' : 'text'}
+                              autoComplete={field === 'verifone_direct_google_pay_contract_id' ? 'new-password' : 'off'}
+                              maxLength={field === 'verifone_direct_google_pay_contract_id' ? 36 : 100}
+                              placeholder={field === 'verifone_direct_google_pay_contract_id' ? paymentConfig?.masked_verifone_direct_google_pay_contract_id : undefined}
+                              value={paymentCreds[field] ?? ''}
+                              onChange={(event) => setPaymentCreds({ ...paymentCreds, [field]: event.target.value.trim() || (field === 'verifone_direct_google_pay_contract_id' ? undefined : '') })}
+                              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+                          </label>
+                        ))}
+                      </section>
+                    </div>
+                  </fieldset>
                   <fieldset disabled={themeAction !== null || paymentSaving} className="space-y-3 border-t border-gray-200 pt-4">
                     <legend className="text-sm font-semibold text-gray-700">Hosted payment page appearance</legend>
                     <p className="max-w-2xl text-xs leading-5 text-gray-500">

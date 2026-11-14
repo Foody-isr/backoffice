@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "path": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "sha256": "aecbb898e3f576579933e0107c3eb465f1e97cc52220798cd53d35d0a5668c7b",
+      "disposition": "no-user-impact",
+      "reason": "The settings live in the internal Backoffice Verifone payment configuration procedure. The other restaurant operations mapped to this API client or restaurant page are unaffected.",
+      "baseSha256": "5f032cd73a93bd8e9cc19483aa887003929e220281a64309cd97823261dff476",
+      "features": [
+        "backoffice-onboarding"
+      ]
+    },
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "c67227987d406bc1ca8ab3b615e6ccb9898e6fb0052f333138bc70558150c323",
+      "disposition": "no-user-impact",
+      "reason": "The settings live in the internal Backoffice Verifone payment configuration procedure. The other restaurant operations mapped to this API client or restaurant page are unaffected.",
+      "baseSha256": "36362a2460947bcdf655d95c2414a2bde9f9bac20c62ac62ae30c1c8ddaebcba",
+      "features": [
+        "shared-runtime"
+      ]
+    }
+  ]
+}
