@@ -1,24 +1,29 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { listTerminalFleet, type TerminalFleetEntry } from '@/lib/api';
-import { ChangeRequests, EditDeclaration, RegisterMini, fleetLifecycles } from './terminal-dialogs';
+import { listHardware, listTerminalFleet, type TerminalFleetEntry } from '@/lib/api';
+import { ChangeRequests, EditDeclaration, ForgetDevice, RegisterMini, fleetLifecycles } from './terminal-dialogs';
 
-type Panel = { kind: 'register' } | { kind: 'declaration' | 'changes'; terminal: TerminalFleetEntry };
+type Panel = { kind: 'register' } | { kind: 'declaration' | 'changes' | 'forget'; terminal: TerminalFleetEntry };
 
 const pageSize = 100;
 const button = 'rounded-full border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline-blue-600 disabled:opacity-40';
 const statusLabels: Record<string, string> = {
   online: 'Online', offline: 'Offline', unknown: 'Unknown', attention: 'Needs attention', unconfigured: 'Unconfigured',
 };
+const deviceKinds: Record<string, string> = {
+  payment_terminal: 'Payment terminal', printer: 'Printer', tablet: 'Tablet',
+  phone: 'Phone', computer: 'Computer', display: 'Display',
+};
 
-/** The global Verifone fleet and its provisioning requests. */
+/** The global device inventory and Verifone provisioning requests. */
 export default function TerminalFleetPage() {
   const [rows, setRows] = useState<TerminalFleetEntry[]>([]);
   const [search, setSearch] = useState('');
   const [restaurant, setRestaurant] = useState('');
   const [filters, setFilters] = useState({ q: '', restaurant_id: '' });
   const [includeForgotten, setIncludeForgotten] = useState(false);
+  const [allDevices, setAllDevices] = useState(false);
   const [offset, setOffset] = useState(0);
   const [more, setMore] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,16 +36,19 @@ export default function TerminalFleetPage() {
     setLoading(true);
     setError('');
     try {
-      const result = await listTerminalFleet({ ...filters, offset, include_forgotten: includeForgotten });
+      const params = { ...filters, offset, include_forgotten: includeForgotten };
+      const result = allDevices
+        ? await listHardware(params)
+        : await listTerminalFleet(params);
       if (request !== generation.current) return;
-      setRows(result.terminals);
+      setRows('devices' in result ? result.devices : result.terminals);
       setMore(result.has_more);
     } catch {
-      if (request === generation.current) setError('Could not load the terminal fleet. Try Refresh.');
+      if (request === generation.current) setError('Could not load the inventory. Try Refresh.');
     } finally {
       if (request === generation.current) setLoading(false);
     }
-  }, [filters, offset, includeForgotten]);
+  }, [filters, offset, includeForgotten, allDevices]);
 
   useEffect(() => {
     const generationRef = generation;
@@ -59,12 +67,20 @@ export default function TerminalFleetPage() {
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Terminal fleet</h1>
           <p className="mt-2 max-w-prose text-sm text-gray-600">
-            Find payment terminals across restaurants and prepare changes for Verifone provisioning.
+            Find hardware across restaurants and manage Verifone provisioning.
           </p>
         </div>
-        <button type="button" className="rounded-full bg-gray-900 px-5 py-2 text-sm font-medium text-white focus-visible:outline-blue-600"
-          onClick={() => setPanel({ kind: 'register' })}>Register a Mini</button>
+        {!allDevices && <button type="button" className="rounded-full bg-gray-900 px-5 py-2 text-sm font-medium text-white focus-visible:outline-blue-600"
+          onClick={() => setPanel({ kind: 'register' })}>Register a Mini</button>}
       </header>
+
+      <div role="group" aria-label="Inventory view" className="flex flex-wrap gap-2">
+        {[false, true].map(all => <button key={String(all)} type="button" aria-pressed={allDevices === all}
+          className={`${button} aria-pressed:border-gray-900 aria-pressed:bg-gray-900 aria-pressed:text-white`}
+          onClick={() => { setAllDevices(all); setOffset(0); }}>
+          {all ? 'All devices' : 'Payment terminals'}
+        </button>)}
+      </div>
 
       <form className="flex flex-wrap items-end gap-3" onSubmit={event => {
         event.preventDefault();
@@ -72,7 +88,7 @@ export default function TerminalFleetPage() {
         setFilters({ q: search.trim(), restaurant_id: restaurant });
       }}>
         <label className="flex min-w-[14rem] flex-1 flex-col gap-1 text-sm">
-          Search by restaurant, terminal or identifier
+          Search by restaurant, device or identifier
           <input className="rounded-lg border border-gray-300 px-3 py-2" value={search} maxLength={100}
             onChange={event => setSearch(event.target.value)} />
         </label>
@@ -90,16 +106,16 @@ export default function TerminalFleetPage() {
           setIncludeForgotten(event.target.checked);
           setOffset(0);
         }} />
-        Show forgotten terminals
+        {allDevices ? 'Show forgotten devices' : 'Show forgotten terminals'}
       </label>
 
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-      {loading ? <p role="status" className="text-sm text-gray-600">Loading terminals…</p> : !error && (
+      {loading ? <p role="status" className="text-sm text-gray-600">Loading inventory…</p> : !error && (
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 text-gray-700">
               <tr>
-                {['Terminal', 'Restaurant', 'Fleet identifiers', 'Bank declaration', 'Status'].map(label => (
+                {(allDevices ? ['Device', 'Restaurant', 'Type', 'Status'] : ['Terminal', 'Restaurant', 'Fleet identifiers', 'Bank declaration', 'Status']).map(label => (
                   <th key={label} scope="col" className="whitespace-nowrap px-4 py-3 font-medium">{label}</th>
                 ))}
                 <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
@@ -109,13 +125,14 @@ export default function TerminalFleetPage() {
               {rows.map(row => (
                 <tr key={row.device_id} className="align-top">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">{row.name}</div>
+                    <div className="font-medium text-gray-900">{row.name || row.model || 'Unnamed device'}</div>
                     <div className="text-gray-600">{[row.manufacturer, row.model].filter(Boolean).join(' ')}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div>{row.restaurant_name || 'Restaurant'}</div>
                     <div className="tabular-nums text-gray-600">#{row.restaurant_id}</div>
                   </td>
+                  {allDevices ? <td className="px-4 py-3">{deviceKinds[row.kind ?? ''] ?? 'Other device'}</td> : <>
                   <td className="space-y-1 px-4 py-3 tabular-nums">
                     <div>Serial <span className="font-medium">{row.metadata?.serial_number || '—'}</span></div>
                     <div>DID / VHQ <span className="font-medium">{row.metadata?.did || '—'}</span></div>
@@ -127,6 +144,7 @@ export default function TerminalFleetPage() {
                     <div>Supplier <span className="font-medium">{row.metadata?.supplier_id || '—'}</span></div>
                     {row.metadata?.acquirer && <div className="text-gray-600">{row.metadata.acquirer}</div>}
                   </td>
+                  </>}
                   <td className="space-y-1 px-4 py-3">
                     <div>{row.forgotten_at ? 'Forgotten' : statusLabels[row.status] ?? 'Unknown'}</div>
                     {row.metadata && <div className="text-gray-600">{fleetLifecycles[row.metadata.lifecycle]}</div>}
@@ -137,20 +155,22 @@ export default function TerminalFleetPage() {
                     </time>}
                   </td>
                   <td className="space-y-2 px-4 py-3 text-right">
-                    <button className={`${button} whitespace-nowrap`} type="button"
-                      onClick={() => setPanel({ kind: 'changes', terminal: row })}>Change requests</button>
-                    <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm underline focus-visible:outline-blue-600"
-                      type="button" onClick={() => setPanel({ kind: 'declaration', terminal: row })}>Edit inventory</button>
+                    {!allDevices && <button className={`${button} whitespace-nowrap`} type="button"
+                      onClick={() => setPanel({ kind: 'changes', terminal: row })}>{row.forgotten_at ? 'Change history' : 'Change requests'}</button>}
+                    {!allDevices && !row.forgotten_at && <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm underline focus-visible:outline-blue-600"
+                      type="button" onClick={() => setPanel({ kind: 'declaration', terminal: row })}>Edit inventory</button>}
+                    {!row.forgotten_at && <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm text-red-700 underline focus-visible:outline-blue-600"
+                      type="button" onClick={() => setPanel({ kind: 'forget', terminal: row })}>Forget device</button>}
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-gray-600">No terminals match these filters.</td></tr>}
+              {rows.length === 0 && <tr><td colSpan={allDevices ? 5 : 6} className="p-6 text-center text-gray-600">No devices match these filters.</td></tr>}
             </tbody>
           </table>
         </div>
       )}
 
-      <nav aria-label="Terminal pages" className="flex gap-3">
+      <nav aria-label="Inventory pages" className="flex gap-3">
         <button className={button} type="button" disabled={loading || offset === 0}
           onClick={() => setOffset(value => Math.max(0, value - pageSize))}>Previous</button>
         <button className={button} type="button" disabled={loading || !more}
@@ -160,6 +180,7 @@ export default function TerminalFleetPage() {
       {panel?.kind === 'register' && <RegisterMini onSaved={completeEdit} onClose={() => setPanel(null)} />}
       {panel?.kind === 'declaration' && <EditDeclaration terminal={panel.terminal} onSaved={completeEdit} onClose={() => setPanel(null)} />}
       {panel?.kind === 'changes' && <ChangeRequests terminal={rows.find(row => row.device_id === panel.terminal.device_id) ?? panel.terminal} onChanged={() => void load()} onClose={() => setPanel(null)} />}
+      {panel?.kind === 'forget' && <ForgetDevice device={panel.terminal} onForgotten={completeEdit} onClose={() => setPanel(null)} />}
     </section>
   );
 }
