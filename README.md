@@ -12,7 +12,7 @@ Internal superadmin dashboard for the Foody team. Used to manage the entire plat
 
 Operational status, error monitoring, and the incident workflow are documented
 in [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md). The backoffice exposes the
-operator entry point at **Dashboard → Operations**.
+operator entry point at **Platform → Operations**.
 
 Operations also offers **Verifone JSON diagnostics**: superadmins can enable or
 disable filtered request/response bodies immediately in the development API.
@@ -66,6 +66,23 @@ Superadmins use the backoffice to:
 
 ## Pages & Features
 
+The navigation groups work under **Management**, **Payments & devices**,
+**POS content** and **Platform**. The header shows which API the workspace
+uses. On smaller screens, use **Open navigation** to display the sections.
+
+**Market** is retired from the Backoffice. The old **Feature Catalog**
+bookmark opens **Restaurants**, where plans and features are still managed
+on each restaurant's **Features** tab. The old **Menu Manager** and **Combo
+Menus** bookmarks explain how to manage the restaurant's catalog in Foody
+Admin under **Items & menus → Item library** and **Menus**.
+
+### Cibus (Pluxee) (`/dashboard/payments`)
+
+**Payments & devices → Cibus (Pluxee)** opens Foody's platform settings for
+the Cibus environment, API endpoint and optional integrator credentials.
+Restaurants enter their terminal identifiers separately in Foody Admin.
+The form requires a successful settings load before it accepts changes.
+
 ### Verifone terminal inventory (`/dashboard/terminals`)
 
 Superadmins can search across restaurants by name or terminal identifier. Use
@@ -110,7 +127,7 @@ Two tabs:
 - Owner details
 - **Copy prod → dev** — connect as superadmin to both environments, preview
   the selected production restaurant, then confirm replacing its dev data.
-  The same action is available under **Clone Data**. Stock is included by
+  The same action is available under **Platform → Clone data**. Stock is included by
   default. Payment credentials, staff identities, push registrations and live
   integrations are excluded. A conflicting restaurant ID blocks the copy.
   Credentials for the other environment stay in memory until the dialog closes.
@@ -125,7 +142,7 @@ Two tabs:
 
 ### Onboard (`/dashboard/onboard`)
 
-Wizard to onboard a new restaurant:
+Open **Management → Restaurants → Onboard New** to start the wizard:
 1. Fill in owner details (name, email, phone, password)
 2. Fill in restaurant details (name, slug, address, timezone, plan tier)
 3. Submit → creates owner user + restaurant + 30-day trial subscription in one atomic operation
@@ -323,7 +340,7 @@ explanation. See Landing’s `docs/help/MAINTENANCE.md` for the complete workflo
 
 ## External-service usage and allowances
 
-**Usage and quotas** compares restaurant consumption by service in the current
+**Platform → Usage and quotas** compares restaurant consumption by service in the current
 environment and links to each restaurant allocation. The restaurant detail page
 also links there. Complete monthly overrides require a reason and explicit save;
 zero pauses new calls, restoring defaults only edits the form, and concurrent

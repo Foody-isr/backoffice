@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Foody Backoffice',
-  description: 'Foody Admin — Restaurant management, onboarding, and feature control',
+  description: 'Foody Backoffice — Restaurant management and platform operations',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

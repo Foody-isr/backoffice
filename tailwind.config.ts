@@ -7,16 +7,14 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          200: '#fed7aa',
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#EB5204',   // Foody primary orange
-          600: '#d94a03',
-          700: '#c2410c',
-          800: '#9a3412',
-          900: '#7c2d12',
+          50: '#f7f7f7',
+          100: '#eeeeee',
+          200: '#dddddd',
+          300: '#bebebe',
+          400: '#828282',
+          500: 'var(--action)',
+          600: 'var(--action-hover)',
+          700: 'var(--fg)',
         },
       },
     },

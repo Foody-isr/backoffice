@@ -359,18 +359,18 @@ function ReportView({ report }: { report: CloneReport }) {
         </Banner>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+      <div className="table-scroll" role="region" aria-label="Copy report table" tabIndex={0}>
+        <table className="data-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2 font-medium">Table</th>
-              <th className="px-4 py-2 font-medium">Cluster</th>
-              <th className="px-4 py-2 text-right font-medium">In bundle</th>
-              <th className="px-4 py-2 text-right font-medium">Written</th>
-              <th className="px-4 py-2 text-right font-medium">Removed</th>
+              <th scope="col">Table</th>
+              <th scope="col">Cluster</th>
+              <th scope="col" className="text-end">In bundle</th>
+              <th scope="col" className="text-end">Written</th>
+              <th scope="col" className="text-end">Removed</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {nonEmpty.map((t) => (
               <tr key={t.name} className={t.source !== t.inserted ? 'bg-amber-50' : undefined}>
                 <td className="px-4 py-2 font-mono text-xs text-gray-900">{t.name}</td>

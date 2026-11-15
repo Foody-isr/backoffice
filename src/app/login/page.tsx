@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/api';
 
@@ -27,65 +28,48 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-500 rounded-2xl mb-4">
-              <span className="text-3xl font-black text-white">F</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Foody Backoffice</h1>
-            <p className="text-sm text-gray-500 mt-1">Admin access only</p>
+    <main className="grid min-h-dvh place-items-center px-4 py-8">
+      <div className="w-full max-w-md rounded-lg border border-[var(--line)] p-6 sm:p-8">
+        <div className="mb-8">
+          <Image src="/brand/foody-symbol.svg" alt="" width={36} height={36} unoptimized className="mb-5" />
+          <h1 className="page-title">Foody Backoffice</h1>
+          <p className="mt-1 text-sm text-[var(--fg-muted)]">Admin access only</p>
+        </div>
+
+        {error && <p role="alert" className="error-notice mb-4">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="mb-1 block text-sm font-medium">Email</label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="field w-full"
+            />
           </div>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-              {error}
-            </div>
-          )}
+          <div>
+            <label htmlFor="password" className="mb-1 block text-sm font-medium">Password</label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="field w-full"
+            />
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition"
-                placeholder="admin@foody-pos.co.il"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white font-semibold rounded-lg text-sm transition"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        </div>
+          <button type="submit" disabled={loading} className="btn-primary w-full">
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1147,10 +1147,10 @@ export default function RestaurantDetailPage() {
                         {/* Option A — A Record (works everywhere) */}
                         <div className="mb-3">
                           <p className="text-xs font-semibold text-gray-700 mb-1">Option A &mdash; A Record <span className="font-normal text-green-600">(recommended, works with all providers)</span></p>
-                          <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                            <table className="w-full text-xs">
+                          <div className="table-scroll" role="region" aria-label="DNS A record" tabIndex={0}>
+                            <table className="data-table text-xs">
                               <thead>
-                                <tr className="bg-gray-100 text-gray-600">
+                                <tr>
                                   <th className="px-3 py-2 text-left font-medium">Type</th>
                                   <th className="px-3 py-2 text-left font-medium">Name / Host</th>
                                   <th className="px-3 py-2 text-left font-medium">Value / Points to</th>
@@ -1175,10 +1175,10 @@ export default function RestaurantDetailPage() {
                         {/* Option B — CNAME (if supported) */}
                         <div>
                           <p className="text-xs font-semibold text-gray-700 mb-1">Option B &mdash; CNAME Record <span className="font-normal text-gray-400">(only if the provider supports CNAME on root domain)</span></p>
-                          <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                            <table className="w-full text-xs">
+                          <div className="table-scroll" role="region" aria-label="DNS CNAME record" tabIndex={0}>
+                            <table className="data-table text-xs">
                               <thead>
-                                <tr className="bg-gray-100 text-gray-600">
+                                <tr>
                                   <th className="px-3 py-2 text-left font-medium">Type</th>
                                   <th className="px-3 py-2 text-left font-medium">Name / Host</th>
                                   <th className="px-3 py-2 text-left font-medium">Value / Points to</th>
