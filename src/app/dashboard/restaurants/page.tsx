@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { listRestaurants, listSubscriptions, deleteRestaurant, Restaurant, SubscriptionWithRestaurant, SubscriptionStatus } from '@/lib/api';
 import { planColor, capitalize, formatShortDate } from '@/lib/utils';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const SUB_STATUS_COLOR: Record<SubscriptionStatus, string> = {
   trial: 'bg-blue-100 text-blue-700',
@@ -18,23 +18,23 @@ export default function RestaurantsPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [subMap, setSubMap] = useState<Map<number, SubscriptionWithRestaurant>>(new Map());
   const [search, setSearch] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [subscriptionError, setSubscriptionError] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
-    loadRestaurants();
-    listSubscriptions().then((d) => {
-      const m = new Map<number, SubscriptionWithRestaurant>();
-      (d.subscriptions ?? []).forEach((s) => m.set(s.restaurant_id, s));
-      setSubMap(m);
-    }).catch(() => {});
+    void loadRestaurants();
+    void loadSubscriptions();
   }, []);
 
-  async function loadRestaurants(q?: string) {
+  async function loadRestaurants(query = '') {
+    setAppliedSearch(query);
+    setError('');
     setLoading(true);
     try {
-      const data = await listRestaurants(q);
+      const data = await listRestaurants(query);
       setRestaurants(data.restaurants || []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load');
@@ -43,8 +43,14 @@ export default function RestaurantsPage() {
     }
   }
 
-  function handleSearch() {
-    loadRestaurants(search);
+  async function loadSubscriptions() {
+    setSubscriptionError(false);
+    try {
+      const { subscriptions } = await listSubscriptions();
+      setSubMap(new Map((subscriptions ?? []).map(s => [s.restaurant_id, s])));
+    } catch {
+      setSubscriptionError(true);
+    }
   }
 
   async function handleDelete(r: Restaurant) {
@@ -69,118 +75,132 @@ export default function RestaurantsPage() {
     }
   }
 
-  if (error) return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>;
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Restaurants</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} registered
-          </p>
+          <h1 className="page-title">Restaurants</h1>
+          {!loading && !error && (
+            <p className="mt-1 text-sm text-[var(--fg-muted)]" role="status">
+              {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}{appliedSearch ? ' found' : ' registered'}
+            </p>
+          )}
         </div>
-        <Link
-          href="/dashboard/onboard"
-          className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition"
-        >
-          + Onboard New
+        <Link href="/dashboard/onboard" className="btn-primary">
+          <PlusIcon aria-hidden="true" className="size-4" />
+          Onboard New
         </Link>
-      </div>
+      </header>
 
-      {/* Search */}
-      <div className="mb-4 flex gap-2">
-        <div className="relative flex-1 max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <form
+        role="search"
+        aria-label="Search restaurants"
+        className="flex flex-wrap gap-2"
+        onSubmit={event => {
+          event.preventDefault();
+          if (!loading) void loadRestaurants(search.trim());
+        }}
+      >
+        <div className="relative w-full sm:max-w-sm">
+          <MagnifyingGlassIcon aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fg-muted)]" />
           <input
-            type="text"
-            placeholder="Search by name or slug..."
+            aria-label="Restaurant name or slug"
+            type="search"
+            placeholder="Search by name or slug"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            onChange={event => setSearch(event.target.value)}
+            className="field w-full pl-9"
           />
         </div>
-        <button
-          onClick={handleSearch}
-          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm font-medium rounded-lg transition"
-        >
-          Search
-        </button>
-      </div>
+        <button type="submit" disabled={loading} className="btn-secondary">Search</button>
+        {(search || appliedSearch) && (
+          <button type="button" disabled={loading} className="min-h-11 rounded-md px-3 text-sm underline disabled:opacity-50" onClick={() => {
+            setSearch('');
+            void loadRestaurants();
+          }}>
+            Clear search
+          </button>
+        )}
+      </form>
 
-      {/* Table */}
+      {subscriptionError && (
+        <div className="error-notice flex flex-wrap items-center justify-between gap-3">
+          <p role="alert">Subscription statuses could not be loaded.</p>
+          <button type="button" className="btn-secondary" onClick={() => void loadSubscriptions()}>Retry subscriptions</button>
+        </div>
+      )}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+        <p role="status" className="py-12 text-center text-sm text-[var(--fg-muted)]">Loading restaurants…</p>
+      ) : error ? (
+        <div className="error-notice flex flex-wrap items-center justify-between gap-3">
+          <p role="alert">{error}</p>
+          <button type="button" className="btn-secondary" onClick={() => void loadRestaurants(appliedSearch)}>Retry</button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="table-scroll" role="region" aria-label="Restaurants table" tabIndex={0}>
+          <table className="data-table">
             <thead>
-              <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-semibold text-gray-600">ID</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Name</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Slug</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Owner</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Plan</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Subscription</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Created</th>
-                <th className="px-4 py-3 font-semibold text-gray-600"></th>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Slug</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Plan</th>
+                <th scope="col">Subscription</th>
+                <th scope="col">Created</th>
+                <th scope="col" className="text-end">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
-              {restaurants.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-gray-500">#{r.id}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.name}</td>
-                  <td className="px-4 py-3 text-gray-500 font-mono text-xs">{r.slug || '—'}</td>
-                  <td className="px-4 py-3 text-gray-600">{r.owner?.full_name || `User #${r.owner_id}`}</td>
-                  <td className="px-4 py-3">
-                    {r.plan ? (
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${planColor(r.plan.plan_tier)}`}>
-                        {capitalize(r.plan.plan_tier)}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400 text-xs">No plan</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {(() => {
-                      const s = subMap.get(r.id);
-                      if (!s) return <span className="text-gray-400 text-xs">—</span>;
-                      return (
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${SUB_STATUS_COLOR[s.status]}`}>
-                          {s.status.replace('_', ' ')}
+            <tbody>
+              {restaurants.map((r) => {
+                const subscription = subMap.get(r.id);
+                return (
+                  <tr key={r.id}>
+                    <td className="tabular-nums text-gray-600">#{r.id}</td>
+                    <th scope="row" className="min-w-36 font-semibold">{r.name}</th>
+                    <td className="text-xs text-gray-600">{r.slug || '—'}</td>
+                    <td className="min-w-32 text-gray-600">{r.owner?.full_name || `User #${r.owner_id}`}</td>
+                    <td>
+                      {r.plan ? (
+                        <span className={`table-badge ${planColor(r.plan.plan_tier)}`}>
+                          {capitalize(r.plan.plan_tier)}
                         </span>
-                      );
-                    })()}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{formatShortDate(r.created_at)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/dashboard/restaurants/${r.id}`}
-                        className="text-brand-500 hover:text-brand-600 text-xs font-semibold"
-                      >
-                        Manage →
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(r)}
-                        disabled={deletingId === r.id}
-                        className="px-2 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
-                          bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-                      >
-                        {deletingId === r.id ? 'Deleting…' : 'Delete'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      ) : (
+                        <span className="text-xs text-gray-600">No plan</span>
+                      )}
+                    </td>
+                    <td>
+                      {subscription ? (
+                        <span className={`table-badge ${SUB_STATUS_COLOR[subscription.status]}`}>
+                          {capitalize(subscription.status.replace('_', ' '))}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-600">—</span>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap text-xs tabular-nums text-gray-600">{formatShortDate(r.created_at)}</td>
+                    <td>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/dashboard/restaurants/${r.id}`} className="btn-secondary min-h-8 px-3 text-xs">
+                          Manage
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(r)}
+                          disabled={deletingId === r.id}
+                          className="min-h-8 whitespace-nowrap rounded-full px-3 text-xs font-medium text-[var(--danger-500)] hover:bg-[var(--danger-50)] disabled:opacity-50"
+                        >
+                          {deletingId === r.id ? 'Deleting…' : 'Delete'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {restaurants.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
-                    No restaurants found
+                  <td colSpan={8} className="py-12 text-center text-[var(--fg-muted)]">
+                    {appliedSearch ? 'No restaurants match this search.' : 'No restaurants have been onboarded yet.'}
                   </td>
                 </tr>
               )}

@@ -271,21 +271,21 @@ const toolLinks = [
 export default function IncidentGuidePage() {
   return (
     <div className="space-y-8 pb-12">
-      <header className="overflow-hidden rounded-2xl bg-[#1a1a2e] text-white">
+      <header className="overflow-hidden rounded-lg border border-[var(--line)]">
         <div className="grid gap-8 p-6 lg:grid-cols-[1fr_auto] lg:items-end lg:p-8">
           <div>
             <Link
               href="/dashboard/operations"
-              className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-orange-300 hover:text-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="mb-5 inline-flex items-center gap-2 rounded-md text-sm font-semibold underline underline-offset-4"
             >
               <ArrowLeftIcon className="h-4 w-4" />
               Retour au statut en direct
             </Link>
             <div className="flex items-center gap-3">
-              <LifebuoyIcon className="h-7 w-7 text-orange-400" />
-              <h1 className="text-2xl font-bold">Guide de réponse aux incidents</h1>
+              <LifebuoyIcon aria-hidden="true" className="size-6 shrink-0" />
+              <h1 className="page-title">Guide de réponse aux incidents</h1>
             </div>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-gray-300">
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--fg-muted)]">
               Quel que soit le point d’entrée — Sentry, Grafana, monitor GitHub ou message client — commence par cadrer l’impact, rassemble des preuves sûres et choisis l’action réversible la plus petite.
             </p>
           </div>
@@ -296,30 +296,30 @@ export default function IncidentGuidePage() {
                 href={href}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                className="btn-secondary"
               >
                 {name}
                 <ArrowTopRightOnSquareIcon className="h-4 w-4" />
               </a>
             ) : (
-              <span key={name} className="rounded-lg border border-white/10 px-3 py-2 text-sm text-gray-500">
+              <span key={name} className="rounded-md border border-[var(--line)] px-3 py-2 text-sm text-[var(--fg-muted)]">
                 {name} non configuré
               </span>
             ))}
           </div>
         </div>
-        <div className="grid border-t border-white/10 sm:grid-cols-3">
-          <div className="border-b border-white/10 bg-red-500/15 px-5 py-4 sm:border-b-0 sm:border-r">
-            <p className="text-xs font-bold uppercase tracking-wider text-red-300">SEV-1 · immédiat</p>
-            <p className="mt-1 text-sm text-gray-200">Commandes, paiement, données ou sécurité à risque.</p>
+        <div className="grid border-t border-[var(--line)] sm:grid-cols-3">
+          <div className="border-b border-[var(--line)] bg-red-50 px-5 py-4 sm:border-b-0 sm:border-r">
+            <p className="text-xs font-semibold text-red-800">SEV-1 · immédiat</p>
+            <p className="mt-1 text-sm">Commandes, paiement, données ou sécurité à risque.</p>
           </div>
-          <div className="border-b border-white/10 bg-amber-500/10 px-5 py-4 sm:border-b-0 sm:border-r">
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-300">SEV-2 · rapide</p>
-            <p className="mt-1 text-sm text-gray-200">Dégradation limitée à un flux ou à certains restaurants.</p>
+          <div className="border-b border-[var(--line)] bg-amber-50 px-5 py-4 sm:border-b-0 sm:border-r">
+            <p className="text-xs font-semibold text-amber-800">SEV-2 · rapide</p>
+            <p className="mt-1 text-sm">Dégradation limitée à un flux ou à certains restaurants.</p>
           </div>
-          <div className="bg-sky-500/10 px-5 py-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-sky-300">SEV-3 · planifié</p>
-            <p className="mt-1 text-sm text-gray-200">Anomalie sans impact client immédiat.</p>
+          <div className="bg-sky-50 px-5 py-4">
+            <p className="text-xs font-semibold text-sky-800">SEV-3 · planifié</p>
+            <p className="mt-1 text-sm">Anomalie sans impact client immédiat.</p>
           </div>
         </div>
       </header>
@@ -423,18 +423,18 @@ export default function IncidentGuidePage() {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Carte Foody</p>
           <h2 id="services-heading" className="mt-1 text-xl font-bold text-gray-900">Quel service regarder ?</h2>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-bold uppercase tracking-wider text-gray-500">
+        <div className="table-scroll" role="region" aria-label="Services Foody" tabIndex={0}>
+          <table className="data-table [&_td]:align-top [&_th]:align-top">
+            <thead>
               <tr>
-                <th className="px-5 py-3">Service</th>
-                <th className="px-5 py-3">Responsabilité</th>
-                <th className="px-5 py-3">Premiers signaux</th>
+                <th scope="col">Service</th>
+                <th scope="col">Responsabilité</th>
+                <th scope="col">Premiers signaux</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {serviceMap.map(([service, responsibility, signals]) => (
-                <tr key={service} className="align-top hover:bg-gray-50/70">
+                <tr key={service}>
                   <th scope="row" className="whitespace-nowrap px-5 py-4 text-left font-bold text-gray-900">{service}</th>
                   <td className="min-w-72 px-5 py-4 leading-6 text-gray-700">{responsibility}</td>
                   <td className="min-w-72 px-5 py-4 leading-6 text-gray-600">{signals}</td>
@@ -478,14 +478,14 @@ export default function IncidentGuidePage() {
       </section>
 
       <section aria-labelledby="incident-note-heading" className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="rounded-xl bg-[#1a1a2e] p-6 text-white">
-          <ClockIcon className="h-6 w-6 text-orange-400" />
+        <div className="rounded-lg border border-[var(--line)] bg-[var(--surface-2)] p-6">
+          <ClockIcon aria-hidden="true" className="size-6" />
           <h2 id="incident-note-heading" className="mt-3 font-bold">Quand fermer un incident ?</h2>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-gray-300">
-            <li className="flex gap-2"><CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-400" />Le parcours touché fonctionne à nouveau.</li>
-            <li className="flex gap-2"><CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-400" />Les alertes restent normales pendant une fenêtre complète.</li>
-            <li className="flex gap-2"><CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-400" />La cause ou l’hypothèse est documentée avec preuves.</li>
-            <li className="flex gap-2"><CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-400" />Une action préventive a un propriétaire et une échéance.</li>
+          <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--fg-muted)]">
+            <li className="flex gap-2"><CheckCircleIcon className="mt-1 size-4 shrink-0 text-emerald-700" />Le parcours touché fonctionne à nouveau.</li>
+            <li className="flex gap-2"><CheckCircleIcon className="mt-1 size-4 shrink-0 text-emerald-700" />Les alertes restent normales pendant une fenêtre complète.</li>
+            <li className="flex gap-2"><CheckCircleIcon className="mt-1 size-4 shrink-0 text-emerald-700" />La cause ou l’hypothèse est documentée avec preuves.</li>
+            <li className="flex gap-2"><CheckCircleIcon className="mt-1 size-4 shrink-0 text-emerald-700" />Une action préventive a un propriétaire et une échéance.</li>
           </ul>
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-6">

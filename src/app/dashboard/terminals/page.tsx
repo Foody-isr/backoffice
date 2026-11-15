@@ -7,7 +7,7 @@ import { ChangeRequests, EditDeclaration, ForgetDevice, RegisterMini, fleetLifec
 type Panel = { kind: 'register' } | { kind: 'declaration' | 'changes' | 'forget'; terminal: TerminalFleetEntry };
 
 const pageSize = 100;
-const button = 'rounded-full border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50 focus-visible:outline-blue-600 disabled:opacity-40';
+const button = 'btn-secondary';
 const statusLabels: Record<string, string> = {
   online: 'Online', offline: 'Offline', unknown: 'Unknown', attention: 'Needs attention', unconfigured: 'Unconfigured',
 };
@@ -65,12 +65,12 @@ export default function TerminalFleetPage() {
     <section className="min-w-0 space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Terminal fleet</h1>
+          <h1 className="page-title">Terminal fleet</h1>
           <p className="mt-2 max-w-prose text-sm text-gray-600">
             Find hardware across restaurants and manage Verifone provisioning.
           </p>
         </div>
-        {!allDevices && <button type="button" className="rounded-full bg-gray-900 px-5 py-2 text-sm font-medium text-white focus-visible:outline-blue-600"
+        {!allDevices && <button type="button" className="btn-primary"
           onClick={() => setPanel({ kind: 'register' })}>Register a Mini</button>}
       </header>
 
@@ -89,12 +89,12 @@ export default function TerminalFleetPage() {
       }}>
         <label className="flex min-w-[14rem] flex-1 flex-col gap-1 text-sm">
           Search by restaurant, device or identifier
-          <input className="rounded-lg border border-gray-300 px-3 py-2" value={search} maxLength={100}
+          <input className="field" value={search} maxLength={100}
             onChange={event => setSearch(event.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Restaurant ID
-          <input className="w-36 rounded-lg border border-gray-300 px-3 py-2" inputMode="numeric"
+          <input className="field w-36" inputMode="numeric"
             pattern="[1-9][0-9]*" maxLength={10} value={restaurant} onChange={event => setRestaurant(event.target.value)} />
         </label>
         <button className={button} type="submit">Search</button>
@@ -111,17 +111,17 @@ export default function TerminalFleetPage() {
 
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
       {loading ? <p role="status" className="text-sm text-gray-600">Loading inventory…</p> : !error && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-gray-700">
+        <div className="table-scroll" role="region" aria-label="Terminal fleet table" tabIndex={0}>
+          <table className="data-table [&_td]:align-top">
+            <thead>
               <tr>
                 {(allDevices ? ['Device', 'Restaurant', 'Type', 'Status'] : ['Terminal', 'Restaurant', 'Fleet identifiers', 'Bank declaration', 'Status']).map(label => (
-                  <th key={label} scope="col" className="whitespace-nowrap px-4 py-3 font-medium">{label}</th>
+                  <th key={label} scope="col">{label}</th>
                 ))}
-                <th scope="col" className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                <th scope="col" className="text-end"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {rows.map(row => (
                 <tr key={row.device_id} className="align-top">
                   <td className="px-4 py-3">
@@ -155,7 +155,7 @@ export default function TerminalFleetPage() {
                     </time>}
                   </td>
                   <td className="space-y-2 px-4 py-3 text-right">
-                    {!allDevices && <button className={`${button} whitespace-nowrap`} type="button"
+                    {!allDevices && <button className="btn-secondary min-h-8 px-3 text-xs" type="button"
                       onClick={() => setPanel({ kind: 'changes', terminal: row })}>{row.forgotten_at ? 'Change history' : 'Change requests'}</button>}
                     {!allDevices && !row.forgotten_at && <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm underline focus-visible:outline-blue-600"
                       type="button" onClick={() => setPanel({ kind: 'declaration', terminal: row })}>Edit inventory</button>}

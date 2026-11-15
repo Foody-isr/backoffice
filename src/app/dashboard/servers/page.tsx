@@ -195,7 +195,7 @@ export default function ServersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Servers</h1>
+        <h1 className="page-title">Servers</h1>
         <p className="text-sm text-gray-500 mt-1">
           Monitor and control the Foody AWS instances. Only the dev server can be started or stopped here; production is view-only.
         </p>
@@ -366,26 +366,26 @@ export default function ServersPage() {
       )}
 
       {/* Instances */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr className="text-left text-gray-600">
-              <th className="px-4 py-3 font-semibold">Server</th>
-              <th className="px-4 py-3 font-semibold">State</th>
-              <th className="px-4 py-3 font-semibold">Type</th>
-              <th className="px-4 py-3 font-semibold">Public IP</th>
-              <th className="px-4 py-3 font-semibold">Private IP</th>
-              <th className="px-4 py-3 font-semibold">Zone</th>
-              <th className="px-4 py-3 font-semibold">Launched</th>
-              <th className="px-4 py-3 font-semibold text-right">Actions</th>
+      <div className="table-scroll" role="region" aria-label="Servers table" tabIndex={0}>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Server</th>
+              <th scope="col">State</th>
+              <th scope="col">Type</th>
+              <th scope="col">Public IP</th>
+              <th scope="col">Private IP</th>
+              <th scope="col">Zone</th>
+              <th scope="col">Launched</th>
+              <th scope="col" className="text-end">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {instances.map((inst) => {
               const busy = actioningId === inst.instance_id;
               const transitional = TRANSITIONAL.has(inst.state);
               return (
-                <tr key={inst.instance_id} className="hover:bg-gray-50 transition-colors">
+                <tr key={inst.instance_id}>
                   <td className="px-4 py-3">
                     <div className="font-medium text-gray-900">{inst.name || inst.instance_id}</div>
                     <div className="text-xs text-gray-400">

@@ -12,6 +12,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [appliedFilters, setAppliedFilters] = useState({ role: '', search: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [resettingId, setResettingId] = useState<number | null>(null);
@@ -20,23 +21,21 @@ export default function UsersPage() {
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, []);
 
-  async function loadUsers(role?: string, q?: string) {
+  async function loadUsers(role = '', query = '') {
+    setAppliedFilters({ role, search: query });
+    setError('');
     setLoading(true);
     try {
-      const data = await listUsers({ role: role || undefined, search: q || undefined });
+      const data = await listUsers({ role: role || undefined, search: query || undefined });
       setUsers(data.users || []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load');
     } finally {
       setLoading(false);
     }
-  }
-
-  function handleFilter() {
-    loadUsers(roleFilter, search);
   }
 
   async function handleResetPassword(userId: number) {
@@ -75,116 +74,132 @@ export default function UsersPage() {
     }
   }
 
-  if (error) return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>;
-
+  const filtered = Boolean(appliedFilters.role || appliedFilters.search);
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {users.length} user{users.length !== 1 ? 's' : ''} registered
-        </p>
-      </div>
+    <div className="space-y-6">
+      <header>
+        <h1 className="page-title">Users</h1>
+        {!error && !loading && (
+          <p role="status" className="mt-1 text-sm text-[var(--fg-muted)]">
+            {users.length} user{users.length !== 1 ? 's' : ''}{filtered ? ' found' : ' registered'}
+          </p>
+        )}
+      </header>
 
-      {/* Filters */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <form
+        role="search"
+        aria-label="Search users"
+        className="flex flex-wrap gap-2"
+        onSubmit={event => {
+          event.preventDefault();
+          if (!loading) void loadUsers(roleFilter, search.trim());
+        }}
+      >
+        <div className="relative w-full sm:max-w-xs">
+          <MagnifyingGlassIcon aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--fg-muted)]" />
           <input
-            type="text"
-            placeholder="Search name, email, or phone..."
+            aria-label="Name, email or phone"
+            type="search"
+            placeholder="Search name, email or phone"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleFilter()}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            onChange={event => setSearch(event.target.value)}
+            className="field w-full pl-9"
           />
         </div>
         <select
+          aria-label="Role"
           value={roleFilter}
-          onChange={(e) => {
-            setRoleFilter(e.target.value);
-            loadUsers(e.target.value, search);
+          disabled={loading}
+          onChange={event => {
+            setRoleFilter(event.target.value);
+            void loadUsers(event.target.value, search.trim());
           }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+          className="field"
         >
           <option value="">All roles</option>
           {ROLES.filter(Boolean).map((r) => (
             <option key={r} value={r}>{capitalize(r)}</option>
           ))}
         </select>
-        <button
-          onClick={handleFilter}
-          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm font-medium rounded-lg transition"
-        >
-          Search
-        </button>
-      </div>
+        <button type="submit" disabled={loading} className="btn-secondary">Search</button>
+        {(search || filtered) && (
+          <button type="button" disabled={loading} className="min-h-11 rounded-md px-3 text-sm underline disabled:opacity-50" onClick={() => {
+            setSearch('');
+            setRoleFilter('');
+            void loadUsers();
+          }}>
+            Clear filters
+          </button>
+        )}
+      </form>
 
-      {/* Table */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+        <p role="status" className="py-12 text-center text-sm text-[var(--fg-muted)]">Loading users…</p>
+      ) : error ? (
+        <div className="error-notice flex flex-wrap items-center justify-between gap-3">
+          <p role="alert">{error}</p>
+          <button type="button" className="btn-secondary" onClick={() => void loadUsers(appliedFilters.role, appliedFilters.search)}>Retry</button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="table-scroll" role="region" aria-label="Users table" tabIndex={0}>
+          <table className="data-table">
             <thead>
-              <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-semibold text-gray-600">ID</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Name</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Email</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Phone</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Role</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Restaurants</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Created</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Actions</th>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Role</th>
+                <th scope="col">Restaurants</th>
+                <th scope="col">Created</th>
+                <th scope="col" className="text-end">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-gray-500">#{u.id}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{u.full_name}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{u.email}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{u.phone || '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${roleColor(u.role)}`}>
+                <tr key={u.id}>
+                  <td className="tabular-nums text-gray-600">#{u.id}</td>
+                  <th scope="row" className="min-w-32 font-semibold">{u.full_name}</th>
+                  <td className="text-xs text-gray-600">{u.email}</td>
+                  <td className="whitespace-nowrap text-xs tabular-nums text-gray-600">{u.phone || '—'}</td>
+                  <td>
+                    <span className={`table-badge ${roleColor(u.role)}`}>
                       {capitalize(u.role)}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="min-w-32">
                     {u.restaurant_roles && u.restaurant_roles.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {u.restaurant_roles.map((rr, idx) => (
                           <span
                             key={idx}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
+                            className="rounded-md bg-[var(--surface-2)] px-2 py-1 text-xs"
                           >
                             {rr.restaurant_name}
-                            <span className="text-gray-400">({rr.role})</span>
+                            <span className="text-gray-600"> ({rr.role})</span>
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-xs">—</span>
+                      <span className="text-xs text-gray-600">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{formatShortDate(u.created_at)}</td>
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap text-xs tabular-nums text-gray-600">{formatShortDate(u.created_at)}</td>
+                  <td>
                     {u.role !== 'superadmin' && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-end gap-2">
                         <button
+                          type="button"
                           onClick={() => setPasswordUser(u)}
-                          className="px-3 py-1 text-xs font-medium rounded-lg transition
-                            bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                          className="btn-secondary min-h-8 px-3 text-xs"
                         >
                           Set Password
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleResetPassword(u.id)}
                           disabled={resettingId === u.id}
-                          className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
-                            bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
+                          className="btn-secondary min-h-8 px-3 text-xs"
                         >
                           {resettingId === u.id
                             ? 'Sending\u2026'
@@ -193,10 +208,10 @@ export default function UsersPage() {
                               : 'Email Reset Link'}
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteUser(u)}
                           disabled={deletingId === u.id}
-                          className="px-3 py-1 text-xs font-medium rounded-lg transition disabled:opacity-50
-                            bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                          className="min-h-8 whitespace-nowrap rounded-full px-3 text-xs font-medium text-[var(--danger-500)] hover:bg-[var(--danger-50)] disabled:opacity-50"
                         >
                           {deletingId === u.id ? 'Deleting\u2026' : 'Delete'}
                         </button>
@@ -207,8 +222,8 @@ export default function UsersPage() {
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
-                    No users found
+                  <td colSpan={8} className="py-12 text-center text-[var(--fg-muted)]">
+                    {filtered ? 'No users match these filters.' : 'No users found.'}
                   </td>
                 </tr>
               )}

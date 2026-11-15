@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import FoodySubscriptionSummary from '@/components/FoodySubscriptionSummary';
 import { getFoodyObservedUsage, getFoodyPrivateBilling, reconcileFoodyBilling, saveFoodyOffer, simulateFoodyRenewal, type FoodyObservedUsage, type FoodyPrivateBilling } from '@/lib/api';
 
 const inputClass = 'mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm';
@@ -30,8 +31,8 @@ function minor(value: string) {
   return Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'));
 }
 
-/** Publish private sandbox offers for the selected restaurant. */
-export default function FoodyPrivateOffer({ restaurantId }: { restaurantId: number }) {
+/** Show sandbox billing and manage private offers for legacy restaurants. */
+export default function FoodyPrivateOffer({ restaurantId, modular }: { restaurantId: number; modular: boolean }) {
   const [view, setView] = useState<FoodyPrivateBilling | null>(null);
   const [draft, setDraft] = useState<Draft>(fromOffer(null));
   const [usage, setUsage] = useState<FoodyObservedUsage | null>(null);
@@ -49,23 +50,25 @@ export default function FoodyPrivateOffer({ restaurantId }: { restaurantId: numb
       setView(result); setDraft(fromOffer(result.offer));
     } catch (e) {
       setView(null);
-      setError(e instanceof Error && e.message === 'foody_billing_sandbox_only' ? 'Private offers are available in the development Backoffice.' : 'Could not load the private offer.');
+      setError(e instanceof Error && e.message === 'foody_billing_sandbox_only'
+        ? 'Private offers are available in the development Backoffice.'
+        : 'Could not load sandbox billing.');
     } finally { setLoading(false); }
   }, [restaurantId]);
   useEffect(() => { void load(); }, [load]);
   const offerID = view?.offer?.id;
   useEffect(() => {
-    if (!offerID) return;
+    if (!offerID || view?.onboarding) return;
     let current = true;
     setUsageError(false);
     getFoodyObservedUsage(restaurantId).then((next) => { if (current) setUsage(next); },
       () => { if (current) setUsageError(true); });
     return () => { current = false; };
-  }, [offerID, restaurantId]);
+  }, [offerID, restaurantId, view?.onboarding]);
 
   async function publish(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!view || lock.current || !draft.tax) return;
+    if (!view || modular || view.onboarding || lock.current || !draft.tax) return;
     const monthly_minor = minor(draft.monthly), annual_minor = minor(draft.annual);
     if (!monthly_minor || !annual_minor || monthly_minor > 100000000 || annual_minor > 100000000) {
       setError('Enter positive ILS amounts with up to two decimal places.'); return;
@@ -110,11 +113,37 @@ export default function FoodyPrivateOffer({ restaurantId }: { restaurantId: numb
   }
 
   const edit = (field: Exclude<keyof Draft, 'tax'>, value: string) => setDraft((prev) => ({ ...prev, [field]: value }));
+  const payment = view?.payment;
+  const paymentDetails = payment && <div className="mt-2 border-t border-gray-200 pt-2 text-sm">
+    <p>{statusLabels[payment.status] ?? payment.status} · {money(payment.amount_minor)} · <bdi>{payment.reference}</bdi></p>
+    {payment.status === 'review' && <label className="block text-sm">Matching transaction ID from Verifone Central
+      <input value={transaction} maxLength={36} onChange={(e) => setTransaction(e.target.value)} className={inputClass} />
+    </label>}
+    {['creating', 'pending', 'review'].includes(payment.status) && <button type="button" disabled={busy || loading} className={secondary + ' mt-2'} onClick={() => void reconcile()}>Verify payment</button>}
+  </div>;
+
+  if (modular || view?.onboarding) {
+    return <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-6" aria-label="Sandbox subscription and modules">
+      {view?.onboarding
+        ? <FoodySubscriptionSummary billing={view} onboarding={view.onboarding} />
+        : <h2 className="text-lg font-semibold text-gray-900">Subscription &amp; modules</h2>}
+      {loading && <p role="status" className="text-sm text-gray-600">Loading subscription…</p>}
+      {view?.owner_url && <a href={view.owner_url} className="text-sm font-semibold text-brand-700 underline underline-offset-2">Open owner billing page</a>}
+      {paymentDetails}
+      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      {!loading && !view?.onboarding && (
+        <div className="space-y-2">
+          {!error && <p role="alert" className="text-sm text-red-700">The modular subscription could not be loaded.</p>}
+          <button type="button" onClick={() => void load()} className={secondary}>Reload subscription</button>
+        </div>
+      )}
+    </section>;
+  }
   return <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-6" aria-label="Foody private offer">
     <div className="flex flex-wrap items-start justify-between gap-2">
-      <div><p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Sandbox</p>
-        <h2 className="text-lg font-semibold text-gray-900">Foody private offer</h2>
-        <p className="mt-1 text-sm text-gray-600">Publish for this restaurant’s owner. Accepted amounts and payments already in progress keep their original terms.</p>
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Private sandbox offer</h2>
+        <p className="mt-1 text-sm text-gray-600">The offer description records the terms shared with the owner. See Features &amp; access for the restaurant’s current rights.</p>
       </div>
       <Link href="/dashboard/foody-billing" className="text-sm font-medium text-brand-700 underline">Foody Verifone settings</Link>
     </div>
@@ -125,27 +154,25 @@ export default function FoodyPrivateOffer({ restaurantId }: { restaurantId: numb
       {view.offer && <div className="rounded-lg bg-gray-50 p-4 text-sm">
         <p className="font-medium">Published version {view.offer.version} · {view.offer.title}</p>
         <p>Monthly {money(view.offer.monthly.total_minor)} incl. VAT · Annual {money(view.offer.annual.total_minor)} incl. VAT</p>
+        <p className="mt-2 whitespace-pre-wrap text-gray-600">{view.offer.includes}</p>
         <p>{view.checkout_enabled ? (view.monthly_enabled ? 'Monthly and annual checkouts enabled' : 'Annual checkout enabled; recurring contract disabled') : 'Checkout disabled in merchant settings'}</p>
         {view.owner_url && <a href={view.owner_url} className="font-medium text-brand-700 underline">Open owner billing page</a>}
-        {view.agreement && <p>Paid until {formatDate(view.agreement.period_end)} · accepted version {view.accepted_offer?.version}
+        {view.agreement && <p>Paid through {formatDate(view.agreement.period_end)} · {view.agreement.cycle} · accepted version {view.accepted_offer?.version}
           {view.agreement.renews && view.agreement.offer_id !== view.offer.id ? ' · new consent required at renewal' : ''}</p>}
+        {view.agreement && view.accepted_offer && view.accepted_offer.id !== view.offer.id && (
+          <p className="text-gray-600">Accepted amount {money(view.accepted_offer[view.agreement.cycle].total_minor)} incl. VAT</p>
+        )}
+        {!view.agreement && <p className="mt-1 text-gray-600">Awaiting a confirmed sandbox payment.</p>}
         {view.can_simulate_renewal && <button type="button" disabled={busy || loading} className={secondary + ' mt-2'}
           onClick={() => void simulateRenewal()}>Test first monthly renewal</button>}
-        {view.payment && <div className="mt-2 border-t border-gray-200 pt-2">
-          <p>{statusLabels[view.payment.status] ?? view.payment.status} · {money(view.payment.amount_minor)} · <bdi>{view.payment.reference}</bdi></p>
-          {view.payment.status === 'review' && <label className="block text-sm">Matching transaction ID from Verifone Central
-            <input value={transaction} maxLength={36} onChange={(e) => setTransaction(e.target.value)} className={inputClass} />
-          </label>}
-          {['creating', 'pending', 'review'].includes(view.payment.status) && <button type="button" disabled={busy} className={secondary + ' mt-2'} onClick={() => void reconcile()}>Verify payment</button>}
-        </div>}
+        {paymentDetails}
       </div>}
       <form onSubmit={publish}>
         <fieldset disabled={busy || loading} className="space-y-3">
           <legend className="font-medium">{view.offer ? 'Edit and publish a new version' : 'Create an offer'}</legend>
           <label className="block text-sm">Offer name<input required maxLength={120} className={inputClass} value={draft.title} onChange={(e) => edit('title', e.target.value)} /></label>
-          <label className="block text-sm">Included modules and licences<textarea required maxLength={5000} rows={3} className={inputClass} value={draft.includes} onChange={(e) => edit('includes', e.target.value)} /></label>
+          <label className="block text-sm">Offer description<textarea required maxLength={5000} rows={3} className={inputClass} value={draft.includes} onChange={(e) => edit('includes', e.target.value)} /></label>
           <label className="block text-sm">Terms, exclusions and cancellation<textarea required maxLength={5000} rows={3} className={inputClass} value={draft.terms} onChange={(e) => edit('terms', e.target.value)} /></label>
-          <button type="button" className={secondary} onClick={() => setDraft((prev) => ({ ...prev, monthly: '400', annual: '4560' }))}>Use pilot prices: ₪400 / ₪4,560</button>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-sm">Monthly amount (ILS)<input required inputMode="decimal" maxLength={10} className={inputClass} value={draft.monthly} onChange={(e) => edit('monthly', e.target.value)} /></label>
             <label className="block text-sm">Annual amount (ILS)<input required inputMode="decimal" maxLength={10} className={inputClass} value={draft.annual} onChange={(e) => edit('annual', e.target.value)} /></label>

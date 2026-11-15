@@ -5,12 +5,16 @@ import { useRouter } from 'next/navigation';
 import {
   onboardRestaurant,
   getFeatureCatalog,
+  getFoodyModuleCatalog,
+  resendFoodyModularInvite,
   sendInviteEmail,
+  type FoodyModuleCatalog,
   OnboardInput,
   PlanDefinition,
   PlanTier,
 } from '@/lib/api';
 import { planColor, capitalize } from '@/lib/utils';
+import ModularBillingFields, { billingInput, newBillingDraft } from './ModularBillingFields';
 
 type SetupMode = 'invite' | 'manual';
 
@@ -39,6 +43,7 @@ export default function OnboardPage() {
     restaurant: any;
     tempPassword?: string;
     mode: SetupMode;
+    inviteSent?: boolean;
   } | null>(null);
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'sent' | 'error'>('idle');
@@ -48,6 +53,10 @@ export default function OnboardPage() {
   const [restaurantName, setRestaurantName] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
   const [planTier, setPlanTier] = useState<PlanTier>('starter');
+  const [catalog, setCatalog] = useState<FoodyModuleCatalog | null>(null);
+  const [catalogState, setCatalogState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
+  const [billingDraft, setBillingDraft] = useState(() => newBillingDraft());
   // Deliberately empty: the superadmin must choose. A default here is what
   // flags every restaurant English regardless of the language it actually
   // trades in, and that misfiles the whole catalog on first menu import.
@@ -58,18 +67,37 @@ export default function OnboardPage() {
   const [currency, setCurrency] = useState<Currency | ''>('');
 
   useEffect(() => {
-    getFeatureCatalog().then((data) => setPlans(data.plans));
-  }, []);
+    const request = new AbortController();
+    getFoodyModuleCatalog(request.signal).then(async value => {
+      if (request.signal.aborted) return;
+      if (value) {
+        setCatalog(value);
+        setBillingDraft(newBillingDraft(value.minimum_trial_days));
+      } else {
+        const data = await getFeatureCatalog();
+        if (request.signal.aborted) return;
+        setCatalog(null);
+        setPlans(data.plans);
+      }
+      setCatalogState('ready');
+    }).catch(() => {
+      if (!request.signal.aborted) setCatalogState('error');
+    });
+    return () => request.abort();
+  }, [catalogAttempt]);
+
+  const billing = catalog ? billingInput(catalog, billingDraft) : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitDisabled) return;
     setError('');
     setLoading(true);
 
     const input: OnboardInput = {
-      restaurant_name: setupMode === 'manual' ? restaurantName.trim() : '',
-      owner_email: ownerEmail,
-      plan_tier: planTier,
+      restaurant_name: catalog || setupMode === 'manual' ? restaurantName.trim() : '',
+      owner_email: ownerEmail.trim(),
+      ...(billing ? { billing } : { plan_tier: planTier }),
       default_locale: defaultLocale || undefined,
       currency: currency || undefined,
     };
@@ -83,9 +111,11 @@ export default function OnboardPage() {
         restaurant: data.restaurant,
         tempPassword: data.temporary_password,
         mode: setupMode,
+        inviteSent: data.invite_sent,
       });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Onboarding failed');
+      setError(catalog ? 'Could not create this sandbox restaurant. Check the offer and account details before retrying.'
+        : err instanceof Error ? err.message : 'Onboarding failed');
     } finally {
       setLoading(false);
     }
@@ -93,11 +123,49 @@ export default function OnboardPage() {
 
   const selectedPlan = plans.find((p) => p.tier === planTier);
   const submitDisabled =
-    loading ||
+    loading || catalogState !== 'ready' ||
+    (catalog !== null && (!billing || !restaurantName.trim())) ||
     !ownerEmail.trim() ||
     !defaultLocale ||
     !currency ||
     (setupMode === 'manual' && ownerPassword.length < 8);
+
+  if (catalogState === 'loading') return <p role="status">Loading subscription offers…</p>;
+  if (catalogState === 'error') return <div role="alert" className="space-y-3">
+    <p>Subscription offers could not be loaded.</p>
+    <button type="button" className="rounded-md border px-4 py-2" onClick={() => {
+      setCatalogState('loading');
+      setCatalogAttempt(n => n + 1);
+    }}>Retry</button>
+  </div>;
+
+  if (success && catalog) {
+    const sent = inviteStatus === 'sent' || success.inviteSent === true;
+    return <section className="max-w-xl space-y-4">
+      <h1 className="text-2xl font-semibold">Sandbox restaurant created</h1>
+      <p role="status" className="text-sm text-gray-700">
+        {sent ? 'The owner’s invitation was sent.' : 'The restaurant is ready. Invitation delivery could not be confirmed.'}
+      </p>
+      {inviteStatus === 'error' && <p role="alert" className="text-sm text-red-700">Could not send the invitation. Try again.</p>}
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => router.push(`/dashboard/restaurants/${success.restaurant.id}`)}
+          className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white">View restaurant</button>
+        <button type="button" disabled={inviteSending} className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium"
+          onClick={async () => {
+            setInviteSending(true);
+            setInviteStatus('idle');
+            try {
+              await resendFoodyModularInvite(success.restaurant.id);
+              setInviteStatus('sent');
+            } catch {
+              setInviteStatus('error');
+            } finally {
+              setInviteSending(false);
+            }
+          }}>{inviteSending ? 'Sending…' : 'Resend invitation'}</button>
+      </div>
+    </section>;
+  }
 
   // ─── Success screen ────────────────────────────────────────────────
   if (success) {
@@ -272,7 +340,7 @@ export default function OnboardPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Onboard New Restaurant</h1>
         <p className="text-sm text-gray-500 mt-1">
-          {setupMode === 'invite'
+          {catalog ? 'Create a sandbox restaurant and choose the subscription offer before inviting its owner.' : setupMode === 'invite'
             ? "Enter the owner's email and select a plan. They'll receive an onboarding email to set up their account, restaurant details, and POS."
             : "Set up the restaurant and account yourself. The owner can sign in immediately with the credentials you choose."}
         </p>
@@ -286,7 +354,7 @@ export default function OnboardPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Setup mode */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        {!catalog && <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-4">Setup Mode</h2>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -318,12 +386,12 @@ export default function OnboardPage() {
               </p>
             </button>
           </div>
-        </div>
+        </div>}
 
         {/* Owner & restaurant details */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h2 className="text-base font-semibold text-gray-900">
-            {setupMode === 'manual' ? 'Owner & Restaurant' : 'Owner Email'}
+            {catalog || setupMode === 'manual' ? 'Owner & Restaurant' : 'Owner Email'}
           </h2>
 
           <div>
@@ -346,6 +414,11 @@ export default function OnboardPage() {
             )}
           </div>
 
+          {catalog && <label className="block text-sm font-medium">
+            Restaurant name
+            <input required type="text" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+              value={restaurantName} onChange={event => setRestaurantName(event.target.value)} />
+          </label>}
           {setupMode === 'manual' && (
             <>
               <div>
@@ -440,7 +513,7 @@ export default function OnboardPage() {
         </div>
 
         {/* Plan Selection */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        {catalog ? <ModularBillingFields catalog={catalog} value={billingDraft} onChange={setBillingDraft} /> : <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-base font-semibold text-gray-900 mb-4">Subscription Plan</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {plans.map((p) => (
@@ -482,7 +555,7 @@ export default function OnboardPage() {
               </div>
             </div>
           )}
-        </div>
+        </div>}
 
         {/* Submit */}
         <div className="flex gap-3">

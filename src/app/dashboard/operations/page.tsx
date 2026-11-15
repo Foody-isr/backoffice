@@ -81,6 +81,7 @@ export default function OperationsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
+    setLoading(true);
     setError(null);
     try {
       const response = await fetch('/api/operations/status');
@@ -107,29 +108,30 @@ export default function OperationsPage() {
     };
   }, [data]);
 
-  const headline = summary.down > 0
-    ? `${summary.down} service${summary.down === 1 ? '' : 's'} unavailable`
-    : summary.degraded > 0
-      ? `${summary.degraded} service${summary.degraded === 1 ? '' : 's'} responding slowly`
-      : 'All public services are responding';
+  const statusState: ServiceState = error || summary.down > 0 ? 'down' : summary.degraded > 0 ? 'degraded' : 'operational';
+  const headline = error ? 'Status checks unavailable'
+    : !data ? 'Waiting for service checks'
+    : summary.down > 0 ? `${summary.down} service${summary.down === 1 ? '' : 's'} unavailable`
+    : summary.degraded > 0 ? `${summary.degraded} service${summary.degraded === 1 ? '' : 's'} responding slowly`
+    : 'All public services are responding';
 
   return (
     <div className="space-y-7">
-      <header className="overflow-hidden rounded-2xl bg-[#1a1a2e] text-white">
+      <header className="overflow-hidden rounded-lg border border-[var(--line)]">
         <div className="grid gap-6 p-6 lg:grid-cols-[1fr_auto] lg:items-end lg:p-8">
           <div>
             <div className="flex items-center gap-3">
-              <SignalIcon className="h-6 w-6 text-orange-400" />
-              <h1 className="text-2xl font-bold">Operations</h1>
+              <SignalIcon aria-hidden="true" className="size-6" />
+              <h1 className="page-title">Operations</h1>
             </div>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--fg-muted)]">
               One place to detect an outage, open the right evidence and keep customer data out of diagnostics.
             </p>
           </div>
-          <div className="flex flex-col gap-3 text-sm text-gray-300 lg:items-end">
+          <div className="flex flex-col gap-3 text-sm text-[var(--fg-muted)] lg:items-end">
             <Link
               href="/dashboard/operations/guide"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-orange-300/40 bg-orange-400/10 px-3 py-2 font-semibold text-orange-100 transition hover:bg-orange-400/20 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="btn-secondary"
             >
               <BookOpenIcon className="h-4 w-4" />
               Incident guide
@@ -144,25 +146,21 @@ export default function OperationsPage() {
           </div>
         </div>
         <div
-          className={`flex flex-col gap-3 border-t px-6 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-8 ${
-            summary.down > 0
-              ? 'border-red-400/30 bg-red-500/15'
-              : summary.degraded > 0
-                ? 'border-amber-400/30 bg-amber-500/15'
-                : 'border-emerald-400/20 bg-emerald-500/10'
+          className={`flex flex-col gap-3 border-t border-[var(--line)] px-6 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-8 ${
+            error || data ? statePresentation[statusState].className : 'bg-[var(--surface-2)] text-[var(--fg-muted)]'
           }`}
         >
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <StatusIcon state={summary.down > 0 ? 'down' : summary.degraded > 0 ? 'degraded' : 'operational'} />
+          <div role="status" className="flex items-center gap-2 text-sm font-semibold">
+            {error || data ? <StatusIcon state={statusState} /> : <ClockIcon aria-hidden="true" className="size-5" />}
             {headline}
           </div>
           <button
             type="button"
             onClick={refresh}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-300 disabled:opacity-50"
+            className="btn-secondary"
           >
-            <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon aria-hidden="true" className={`size-4 ${loading ? 'motion-safe:animate-spin' : ''}`} />
             Check now
           </button>
         </div>
@@ -190,22 +188,22 @@ export default function OperationsPage() {
             Checking Foody services…
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-semibold text-gray-500">
+          <div className="table-scroll" role="region" aria-label="Public service checks table" tabIndex={0}>
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="px-5 py-3">Service</th>
-                  <th className="px-5 py-3">Environment</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3 text-right">Latency</th>
-                  <th className="px-5 py-3 text-right">HTTP</th>
+                  <th scope="col">Service</th>
+                  <th scope="col">Environment</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" className="text-end">Latency</th>
+                  <th scope="col" className="text-end">HTTP</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {data?.services.map((service) => {
                   const presentation = statePresentation[service.state];
                   return (
-                    <tr key={service.id} className="hover:bg-gray-50/70">
+                    <tr key={service.id}>
                       <td className="px-5 py-4">
                         <a
                           href={service.url}
@@ -265,7 +263,7 @@ export default function OperationsPage() {
           </div>
         </div>
 
-        <aside className="rounded-xl border border-gray-200 bg-[#fffaf5] p-5">
+        <aside className="rounded-lg border border-[var(--line)] bg-[var(--surface-2)] p-5">
           <h2 className="font-semibold text-gray-900">First ten minutes of an incident</h2>
           <ol className="mt-4 space-y-4 text-sm text-gray-700">
             <li className="flex gap-3">
