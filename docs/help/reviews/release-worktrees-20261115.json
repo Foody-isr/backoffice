@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "5463dc507fb4c0076cbea7bd23dd44d4831b9ae8d1ec634bc7577b3bcac5325b",
+      "baseSha256": "c67227987d406bc1ca8ab3b615e6ccb9898e6fb0052f333138bc70558150c323",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The changed types and calls are scoped to the terminal fleet. The shared request/authentication function and all restaurant entitlements and access operations use their prior behavior."
+    }
+  ]
+}

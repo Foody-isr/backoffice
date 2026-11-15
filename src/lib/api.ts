@@ -1488,7 +1488,7 @@ export type TerminalFleetParameters = Pick<TerminalFleetMetadata,
 
 /** Metadata saved for an inventory device without provisioning the terminal. */
 export type TerminalFleetDeclaration = TerminalFleetParameters & Pick<TerminalFleetMetadata,
-  'revision' | 'serial_number' | 'vhq_device_uid' | 'lifecycle'>;
+  'revision' | 'serial_number' | 'lifecycle'>;
 
 /** One request bound to the declarations reviewed by the operator. */
 export interface TerminalFleetChangeInput {
@@ -1539,12 +1539,18 @@ export interface TerminalFleetChange {
   cancelled_by?: number;
   cancelled_at?: string;
   cst_execution_allowed?: boolean;
+  cst_vhq_required?: boolean;
   cst_vhq_available?: boolean;
   attempts?: TerminalFleetAttempt[];
 }
 
 /** Lists a bounded page of payment-capable devices across restaurants. */
-export async function listTerminalFleet(options: { q?: string; restaurant_id?: string; offset?: number } = {}) {
+export async function listTerminalFleet(options: {
+  q?: string;
+  restaurant_id?: string;
+  offset?: number;
+  include_forgotten?: boolean;
+} = {}) {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(options)) if (value !== undefined && value !== '') query.set(key, String(value));
   return apiFetch<{ terminals: TerminalFleetEntry[]; has_more: boolean }>(`/api/v1/admin/terminals?${query}`);
@@ -1660,18 +1666,18 @@ export async function authorizeTerminalFleetCST(deviceId: string, changeId: stri
   );
 }
 
-/** Stages one reviewed SHVA number in VHQ or verifies the existing write. */
-export async function stageTerminalFleetVHQ(deviceId: string, changeId: string, action: 'stage' | 'verify') {
-  return apiFetch<TerminalFleetAttempt>(
-    `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/vhq-cst`,
-    { method: 'POST', body: JSON.stringify({ action, cst_confirmed: true }) },
-  );
-}
-
 /** Records independently observed values before releasing the maintenance reservation. */
 export async function reviewTerminalFleetCST(deviceId: string, changeId: string, observed: TerminalFleetParameters, reference: string) {
   return apiFetch<{ reviewed: true }>(
     `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/review-cst`,
     { method: 'POST', body: JSON.stringify({ observed, reference }) },
+  );
+}
+
+/** Stages or verifies the SHVA value for a legacy VHQ change request. */
+export async function stageTerminalFleetVHQ(deviceId: string, changeId: string, action: 'stage' | 'verify') {
+  return apiFetch<TerminalFleetAttempt>(
+    `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/vhq-cst`,
+    { method: 'POST', body: JSON.stringify({ action, cst_confirmed: true }) },
   );
 }
