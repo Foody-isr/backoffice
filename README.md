@@ -12,7 +12,7 @@ Internal superadmin dashboard for the Foody team. Used to manage the entire plat
 
 Operational status, error monitoring, and the incident workflow are documented
 in [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md). The backoffice exposes the
-operator entry point at **Dashboard → Operations**.
+operator entry point at **Platform → Operations**.
 
 Operations also offers **Verifone JSON diagnostics**: superadmins can enable or
 disable filtered request/response bodies immediately in the development API.
@@ -66,6 +66,19 @@ Superadmins use the backoffice to:
 
 ## Pages & Features
 
+The navigation groups work under **Management**, **Payments & devices**,
+**POS content** and **Platform**. The header shows which API the workspace
+uses. On smaller screens, use **Open navigation** to display the sections.
+
+**Market** is retired from the Backoffice. Open **Payments & devices → Plans & modules** for public rates. Restaurant feature settings are under **Features & access**. The old **Menu Manager** and **Combo Menus** links redirect to Restaurants. Use Foody Admin to edit menus and combos.
+
+### Cibus (Pluxee) (`/dashboard/payments`)
+
+**Payments & devices → Cibus (Pluxee)** opens Foody's platform settings for
+the Cibus environment, API endpoint and optional integrator credentials.
+Restaurants enter their terminal identifiers separately in Foody Admin.
+The form requires a successful settings load before it accepts changes.
+
 ### Verifone terminal inventory (`/dashboard/terminals`)
 
 Superadmins can search across restaurants by name or terminal identifier. Use
@@ -105,19 +118,19 @@ Full list of all onboarded restaurants with:
 
 Two tabs:
 
-**Features tab**
+**Features & access tab**
 - Restaurant info (address, phone, timezone, pickup/delivery flags)
 - Owner details
 - **Copy prod → dev** — connect as superadmin to both environments, preview
   the selected production restaurant, then confirm replacing its dev data.
-  The same action is available under **Clone Data**. Stock is included by
+  The same action is available under **Platform → Clone data**. Stock is included by
   default. Payment credentials, staff identities, push registrations and live
   integrations are excluded. A conflicting restaurant ID blocks the copy.
   Credentials for the other environment stay in memory until the dialog closes.
 - Plan selector — change plan tier (resets feature flags to plan defaults)
 - Feature flag matrix — per-restaurant on/off toggles grouped by category (Core, Ordering, Operations, Intelligence, Notifications)
 
-**Billing tab**
+**Billing & modules tab**
 - Subscription status, plan tier, payment method (card brand + last 4)
 - Trial end date / next billing date / grace period deadline
 - Manual **Activate** and **Deactivate** buttons for support use
@@ -125,7 +138,7 @@ Two tabs:
 
 ### Onboard (`/dashboard/onboard`)
 
-Wizard to onboard a new restaurant:
+Open **Management → Restaurants → Onboard New** to start the wizard:
 1. Fill in owner details (name, email, phone, password)
 2. Fill in restaurant details (name, slug, address, timezone, plan tier)
 3. Submit → creates owner user + restaurant + 30-day trial subscription in one atomic operation
@@ -169,17 +182,13 @@ Onboard → trial (30 days)
 - Superadmin can manually activate/deactivate from the Billing tab
 - The scheduler runs every 24h to enforce grace period expirations and trial expirations
 
-## Feature Flags & Plans
+## Plans, modules and feature access
 
-Plans define a set of default-enabled features:
+**Plans & modules** shows the public software rates and included licences from the API, with a table of the feature flags each module grants. [Public pricing](https://foody-pos.co.il/en/pricing)
 
-| Plan | Monthly | Key Inclusions |
-|------|---------|----------------|
-| **Starter** | ₪299 | POS, menu management, receipt printing, pickup/takeaway, push notifications |
-| **Premium** | ₪799 | Everything in Starter + QR dine-in, online payments, delivery, stock management, advanced analytics, WhatsApp |
-| **Enterprise** | Custom | Everything in Premium + multi-restaurant, custom API, priority support |
+When you open a restaurant, **Billing & modules** shows the subscription. For restaurants in the development pilot, it shows the offer, the modules in the offer, the currently active modules, the licences and the trial or paid period. **Features & access** shows those restaurants’ current flags in read-only form.
 
-Changing a restaurant's plan resets all feature flags to the plan's defaults. Individual flags can then be overridden per-restaurant.
+For existing contracts, **Billing & modules** shows the legacy subscription and any private sandbox offer. Use **Features & access** for the existing tier and manual flag controls. Changing the legacy tier resets flags to its defaults.
 
 ## Tech Stack
 
@@ -323,7 +332,7 @@ explanation. See Landing’s `docs/help/MAINTENANCE.md` for the complete workflo
 
 ## External-service usage and allowances
 
-**Usage and quotas** compares restaurant consumption by service in the current
+**Platform → Usage and quotas** compares restaurant consumption by service in the current
 environment and links to each restaurant allocation. The restaurant detail page
 also links there. Complete monthly overrides require a reason and explicit save;
 zero pauses new calls, restoring defaults only edits the form, and concurrent

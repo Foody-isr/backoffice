@@ -45,6 +45,7 @@ export interface Restaurant {
   plan?: RestaurantPlan;
   owner?: User;
   features?: RestaurantFeature[];
+  module_access?: FoodyModuleAccess;
   settings?: RestaurantSettings;
 }
 
@@ -95,6 +96,12 @@ export interface PlanDefinition {
   features: FeatureKey[];
   order_limit: number;
 }
+
+export type FeatureCatalog = {
+  features: FeatureMeta[];
+  plans: PlanDefinition[];
+  software_catalog?: FoodyModuleCatalog;
+};
 
 export interface DashboardStats {
   total_restaurants: number;
@@ -192,7 +199,8 @@ export interface OnboardInput {
   owner_email?: string;
   owner_phone?: string;
   owner_password?: string;
-  plan_tier: PlanTier;
+  plan_tier?: PlanTier;
+  billing?: ModularOnboardingInput;
   pos_platform?: 'ipad' | 'macos' | 'both';
 }
 
@@ -356,7 +364,7 @@ export async function deleteRestaurant(id: number) {
 }
 
 export async function onboardRestaurant(input: OnboardInput) {
-  return apiFetch<{ restaurant: Restaurant; temporary_password?: string }>('/api/v1/admin/restaurants/onboard', {
+  return apiFetch<{ restaurant: Restaurant; temporary_password?: string; invite_sent?: boolean }>('/api/v1/admin/restaurants/onboard', {
     method: 'POST',
     body: JSON.stringify(input),
   });
@@ -364,8 +372,9 @@ export async function onboardRestaurant(input: OnboardInput) {
 
 // ─── Features ───────────────────────────────────────────────────────
 
-export async function getFeatureCatalog() {
-  return apiFetch<{ features: FeatureMeta[]; plans: PlanDefinition[] }>('/api/v1/admin/features/catalog');
+/** Read the current software catalogue and existing contract defaults. */
+export async function getFeatureCatalog(signal?: AbortSignal) {
+  return apiFetch<FeatureCatalog>('/api/v1/admin/features/catalog', { signal, cache: 'no-store' });
 }
 
 export async function getRestaurantFeatures(restaurantId: number) {
@@ -410,178 +419,6 @@ export async function adminDeactivateSubscription(restaurantId: number) {
   return apiFetch<{ ok: boolean }>(
     `/api/v1/admin/restaurants/${restaurantId}/subscription/deactivate`,
     { method: 'POST' }
-  );
-}
-
-// ─── Combo Menus ────────────────────────────────────────────────────
-
-export interface ComboStepItem {
-  id?: number;
-  menu_item_id: number;
-  price_delta: number;
-  menu_item?: {
-    id: number;
-    name: string;
-    image_url?: string;
-    modifiers?: MenuItemModifier[];
-  };
-}
-
-export interface ComboStep {
-  id?: number;
-  name: string;
-  min_picks: number;
-  max_picks: number;
-  sort_order: number;
-  fixed_modifier_name?: string | null;
-  items: ComboStepItem[];
-}
-
-export interface ComboMenu {
-  id: number;
-  restaurant_id: number;
-  name: string;
-  description: string;
-  price: number;
-  image_url: string;
-  is_active: boolean;
-  sort_order: number;
-  steps: ComboStep[];
-  created_at?: string;
-}
-
-export interface ComboInput {
-  name: string;
-  description?: string;
-  price: number;
-  image_url?: string;
-  is_active: boolean;
-  sort_order?: number;
-  steps: {
-    name: string;
-    min_picks: number;
-    max_picks: number;
-    sort_order: number;
-    fixed_modifier_name?: string | null;
-    items: { menu_item_id: number; price_delta: number }[];
-  }[];
-}
-
-export interface MenuItemRef {
-  id: number;
-  name: string;
-  price: number;
-  image_url?: string;
-  category_name?: string;
-  modifiers?: MenuItemModifier[];
-}
-
-export interface MenuCategory {
-  id: number;
-  name: string;
-  items: MenuItemRef[];
-}
-
-export async function listCombos(restaurantId: number) {
-  return apiFetch<{ combos: ComboMenu[] }>(
-    `/api/v1/combos?restaurant_id=${restaurantId}`
-  );
-}
-
-export async function getCombo(restaurantId: number, comboId: number) {
-  return apiFetch<{ combo: ComboMenu }>(
-    `/api/v1/combos/${comboId}?restaurant_id=${restaurantId}`
-  );
-}
-
-export async function createCombo(restaurantId: number, input: ComboInput) {
-  return apiFetch<{ combo: ComboMenu }>(
-    `/api/v1/combos?restaurant_id=${restaurantId}`,
-    { method: 'POST', body: JSON.stringify(input) }
-  );
-}
-
-export async function updateCombo(restaurantId: number, comboId: number, input: ComboInput) {
-  return apiFetch<{ combo: ComboMenu }>(
-    `/api/v1/combos/${comboId}?restaurant_id=${restaurantId}`,
-    { method: 'PUT', body: JSON.stringify(input) }
-  );
-}
-
-export async function deleteCombo(restaurantId: number, comboId: number) {
-  return apiFetch<{ deleted: boolean }>(
-    `/api/v1/combos/${comboId}?restaurant_id=${restaurantId}`,
-    { method: 'DELETE' }
-  );
-}
-
-export async function fetchMenuItems(restaurantId: number): Promise<MenuCategory[]> {
-  // Use staff endpoint so combo_only items are included (public endpoint filters them out)
-  const data = await apiFetch<{ categories: MenuCategory[] }>(
-    `/api/v1/menu?restaurant_id=${restaurantId}`
-  );
-  return data.categories || [];
-}
-
-// ─── Menu Management ────────────────────────────────────────────────
-
-export interface MenuItemModifier {
-  id: number;
-  menu_item_id: number;
-  name: string;
-  action: 'add' | 'remove';
-  category: string;
-  price_delta: number;
-  is_active: boolean;
-  sort_order: number;
-  max_selection: number;
-  free_quantity: number;
-  extra_price: number;
-}
-
-export interface MenuItemFull {
-  id: number;
-  category_id: number;
-  name: string;
-  description: string;
-  image_url: string;
-  price: number;
-  is_active: boolean;
-  combo_only: boolean;
-  sort_order: number;
-  modifiers?: MenuItemModifier[];
-}
-
-export interface MenuCategoryFull {
-  id: number;
-  restaurant_id: number;
-  name: string;
-  image_url: string;
-  sort_order: number;
-  items: MenuItemFull[];
-}
-
-export async function fetchMenuFull(restaurantId: number): Promise<MenuCategoryFull[]> {
-  const data = await apiFetch<{ categories: MenuCategoryFull[] }>(
-    `/api/v1/menu?restaurant_id=${restaurantId}&include_inactive_modifiers=true`
-  );
-  return data.categories || [];
-}
-
-export async function bulkCreateModifiers(restaurantId: number, modifiers: {
-  menu_item_id: number; name: string; action: string; category?: string;
-  price_delta: number; is_active: boolean; sort_order?: number;
-}[]) {
-  return apiFetch<{ modifiers: MenuItemModifier[] }>(
-    `/api/v1/menu/modifiers/bulk?restaurant_id=${restaurantId}`,
-    { method: 'POST', body: JSON.stringify({ modifiers }) }
-  );
-}
-
-export async function deleteModifier(restaurantId: number, modifierId: number) {
-  return apiFetch<void>(
-    `/api/v1/menu/modifiers/${modifierId}?restaurant_id=${restaurantId}`,
-    { method: 'DELETE' }
   );
 }
 
@@ -866,185 +703,6 @@ export async function updateSpokeConfig(
   });
 }
 
-// ─── Market & Playbook ──────────────────────────────────────────────
-
-export interface Objection {
-  q: string;
-  a: string;
-}
-
-export interface Competitor {
-  name: string;
-  notes: string;
-}
-
-export interface LeadSegment {
-  id: number;
-  slug: string;
-  name: string;
-  description: string;
-  pain_points: string[];
-  key_features: string[];
-  pitch_angle: string;
-  objections: Objection[];
-  demo_notes: string;
-  pricing_notes: string;
-  typical_deal_size: string;
-  disqualifiers: string[];
-  competitors: Competitor[];
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface LeadSegmentWithCount extends LeadSegment {
-  prospect_count: number;
-}
-
-export interface LeadSegmentInput {
-  slug: string;
-  name: string;
-  description: string;
-  pain_points: string[];
-  key_features: string[];
-  pitch_angle: string;
-  objections: Objection[];
-  demo_notes: string;
-  pricing_notes: string;
-  typical_deal_size: string;
-  disqualifiers: string[];
-  competitors: Competitor[];
-  sort_order: number;
-}
-
-export type ProspectStatus = 'researching' | 'pitched' | 'won' | 'lost' | 'on_hold';
-
-export type ProspectCloseReason =
-  | ''
-  | 'price'
-  | 'competitor_won'
-  | 'feature_gap'
-  | 'timing'
-  | 'no_decision_maker'
-  | 'ghosted'
-  | 'other';
-
-export const PROSPECT_STATUSES: ProspectStatus[] = [
-  'researching',
-  'pitched',
-  'won',
-  'lost',
-  'on_hold',
-];
-
-export const CLOSED_PROSPECT_STATUSES: ProspectStatus[] = ['won', 'lost', 'on_hold'];
-
-export function isClosedStatus(s: ProspectStatus): boolean {
-  return CLOSED_PROSPECT_STATUSES.includes(s);
-}
-
-export interface MarketProspect {
-  id: number;
-  segment_id: number | null;
-  name: string;
-  city: string;
-  website: string;
-  socials: string;
-  notes: string;
-  starred: boolean;
-  status: ProspectStatus;
-  what_offered: string[];
-  loved: string[];
-  did_not_love: string[];
-  close_reason: ProspectCloseReason;
-  close_reason_detail: string;
-  closed_at: string | null;
-  created_at: string;
-  updated_at: string;
-  segment?: LeadSegment | null;
-}
-
-export interface MarketProspectInput {
-  segment_id: number | null;
-  name: string;
-  city: string;
-  website: string;
-  socials: string;
-  notes: string;
-  starred: boolean;
-  status: ProspectStatus;
-  what_offered: string[];
-  loved: string[];
-  did_not_love: string[];
-  close_reason: ProspectCloseReason;
-  close_reason_detail: string;
-}
-
-export interface ProspectFilters {
-  segment_id?: number;
-  starred?: boolean;
-  status?: ProspectStatus;
-  search?: string;
-}
-
-export async function listSegments() {
-  return apiFetch<{ segments: LeadSegmentWithCount[] }>('/api/v1/admin/market/segments');
-}
-
-export async function getSegment(slug: string) {
-  return apiFetch<{ segment: LeadSegment }>(`/api/v1/admin/market/segments/${encodeURIComponent(slug)}`);
-}
-
-export async function createSegment(input: LeadSegmentInput) {
-  return apiFetch<{ segment: LeadSegment }>('/api/v1/admin/market/segments', {
-    method: 'POST',
-    body: JSON.stringify(input),
-  });
-}
-
-export async function updateSegment(id: number, input: LeadSegmentInput) {
-  return apiFetch<{ segment: LeadSegment }>(`/api/v1/admin/market/segments/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(input),
-  });
-}
-
-export async function deleteSegment(id: number) {
-  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/market/segments/${id}`, {
-    method: 'DELETE',
-  });
-}
-
-export async function listProspects(filters?: ProspectFilters) {
-  const qs = new URLSearchParams();
-  if (filters?.segment_id) qs.set('segment_id', String(filters.segment_id));
-  if (filters?.starred) qs.set('starred', 'true');
-  if (filters?.status) qs.set('status', filters.status);
-  if (filters?.search) qs.set('search', filters.search);
-  const query = qs.toString() ? `?${qs.toString()}` : '';
-  return apiFetch<{ prospects: MarketProspect[] }>(`/api/v1/admin/market/prospects${query}`);
-}
-
-export async function createProspect(input: MarketProspectInput) {
-  return apiFetch<{ prospect: MarketProspect }>('/api/v1/admin/market/prospects', {
-    method: 'POST',
-    body: JSON.stringify(input),
-  });
-}
-
-export async function updateProspect(id: number, input: MarketProspectInput) {
-  return apiFetch<{ prospect: MarketProspect }>(`/api/v1/admin/market/prospects/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(input),
-  });
-}
-
-export async function deleteProspect(id: number) {
-  return apiFetch<{ deleted: boolean }>(`/api/v1/admin/market/prospects/${id}`, {
-    method: 'DELETE',
-  });
-}
-
 // ─── POS Login Screen ───────────────────────────────────────────────
 // Foody-curated content for the foodypos login carousel. Each slide is a
 // background photo + localized headline + caption; the eyebrow line is a
@@ -1325,13 +983,18 @@ const CLONE_API_URLS: Record<CloneEnvironment, string> = {
   development: 'https://dev-api.foody-pos.co.il',
 };
 
+/** Identifies the canonical environment served by the API selected for this browser. */
+export function getApiEnvironment(): CloneEnvironment | undefined {
+  return (Object.keys(CLONE_API_URLS) as CloneEnvironment[]).find(
+    (env) => CLONE_API_URLS[env] === API_URL.replace(/\/$/, ''),
+  );
+}
+
 /** Reuses a login only for the exact API that issued it. */
 export function getCurrentCloneSession(): CloneSession | null {
   const token = getToken();
   if (!token) return null;
-  const environment = (Object.keys(CLONE_API_URLS) as CloneEnvironment[]).find(
-    (env) => CLONE_API_URLS[env] === API_URL.replace(/\/$/, ''),
-  );
+  const environment = getApiEnvironment();
   return environment ? { environment, token } : null;
 }
 
@@ -1594,9 +1257,19 @@ type FoodyOfferTerms = {
   monthly_minor: number; annual_minor: number; tax_mode: 'ht' | 'ttc'; start_date: string;
 };
 type FoodyPrice = { net_minor: number; vat_minor: number; total_minor: number };
+type FoodyOffer = FoodyOfferTerms & { id: number; version: number; monthly: FoodyPrice; annual: FoodyPrice };
 export type FoodyPrivateBilling = {
-  offer: (FoodyOfferTerms & { id: number; version: number; monthly: FoodyPrice; annual: FoodyPrice }) | null;
-  accepted_offer: { id: number; version: number } | null;
+  onboarding?: {
+    mode: 'public' | 'private';
+    trial_days: number;
+    trial_allowed: FoodyModule[];
+    selection: FoodyModule[];
+    licences: FoodyLicenceCounts;
+    access: FoodyModuleAccess;
+    catalog: FoodyModuleCatalog;
+  };
+  offer: FoodyOffer | null;
+  accepted_offer: FoodyOffer | null;
   agreement: { offer_id: number; cycle: 'monthly' | 'annual'; period_end: string; renews: boolean } | null;
   payment: { status: string; kind: string; amount_minor: number; reference: string } | null;
   checkout_enabled: boolean;
@@ -1698,4 +1371,61 @@ export async function stageTerminalFleetVHQ(deviceId: string, changeId: string, 
     `/api/v1/admin/terminals/${encodeURIComponent(deviceId)}/changes/${encodeURIComponent(changeId)}/vhq-cst`,
     { method: 'POST', body: JSON.stringify({ action, cst_confirmed: true }) },
   );
+}
+
+export type FoodyModule = 'restaurant' | 'ordering' | 'kitchen';
+
+export type FoodyLicenceCounts = { pos: number; chef: number; kds: number };
+
+export type FoodyModuleAccess = {
+  status: 'pending' | 'trial' | 'active' | 'expired';
+  modules: FoodyModule[];
+  seats: FoodyLicenceCounts;
+  trial_ends_at?: string;
+};
+
+export type FoodyModuleCatalog = {
+  version: string;
+  currency: 'ILS';
+  minimum_trial_days: number;
+  extra_pos_minor: number;
+  products: {
+    id: FoodyModule;
+    name: Record<'en' | 'fr' | 'he', string>;
+    monthly_minor: number;
+    included: FoodyLicenceCounts;
+    features: FeatureKey[];
+  }[];
+};
+
+export type ModularOnboardingInput = {
+  mode: 'public' | 'private';
+  catalog_version: string;
+  trial_days: number;
+  trial_modules: FoodyModule[];
+  custom?: {
+    modules: FoodyModule[];
+    extra_pos_licences: number;
+    title: string;
+    terms: string;
+    monthly_minor: number;
+    annual_minor: number;
+    tax_mode: 'ht' | 'ttc';
+  };
+};
+
+/** Returns the software catalogue available on the sandbox API. */
+export async function getFoodyModuleCatalog(signal?: AbortSignal): Promise<FoodyModuleCatalog | null> {
+  try {
+    return await apiFetch<FoodyModuleCatalog>('/api/v1/admin/foody-billing/catalog', { signal });
+  } catch (error) {
+    if (runtimeHost !== 'dev-backoffice.foody-pos.co.il' &&
+      error instanceof Error && ['foody_billing_sandbox_only', 'API error 404'].includes(error.message)) return null;
+    throw error;
+  }
+}
+
+/** Requests delivery of the scoped invitation for this sandbox restaurant. */
+export function resendFoodyModularInvite(id: number) {
+  return apiFetch<{ invite_sent: boolean }>(`/api/v1/admin/restaurants/${id}/modular-invite`, { method: 'POST' });
 }

@@ -17,8 +17,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+      <div role="status" className="flex min-h-dvh items-center justify-center gap-3 text-sm text-[var(--fg-muted)]">
+        <div aria-hidden="true" className="size-5 rounded-full border-2 border-brand-500 border-t-transparent motion-safe:animate-spin" />
+        Loading Backoffice…
       </div>
     );
   }
@@ -26,10 +27,13 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!isLoggedIn) return null;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-dvh lg:flex">
+      <a href="#workspace" className="sr-only z-50 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-md focus:bg-white focus:p-3">
+        Skip to content
+      </a>
       <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 lg:p-8 max-w-7xl mx-auto">{children}</div>
+      <main id="workspace" tabIndex={-1} className="min-w-0 flex-1 scroll-mt-16 lg:scroll-mt-0">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:p-8">{children}</div>
       </main>
     </div>
   );

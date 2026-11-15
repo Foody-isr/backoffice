@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CopyRestaurantToDev from '@/components/CopyRestaurantToDev';
 import FoodyPrivateOffer from '@/components/FoodyPrivateOffer';
+import RestaurantFeatureAccess from '@/components/RestaurantFeatureAccess';
 import {
   getRestaurant,
   getFeatureCatalog,
@@ -23,8 +24,7 @@ import {
   getSpokeConfig,
   updateSpokeConfig,
   Restaurant,
-  FeatureMeta,
-  PlanDefinition,
+  FeatureCatalog,
   RestaurantFeature,
   FeatureKey,
   PlanTier,
@@ -34,10 +34,18 @@ import {
   UpdatePaymentConfigInput,
   SpokeConfigResponse,
 } from '@/lib/api';
-import { planColor, capitalize, formatDate, categoryInfo } from '@/lib/utils';
+import { planColor, capitalize, formatDate } from '@/lib/utils';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 type Tab = 'features' | 'billing' | 'payment' | 'domain' | 'spoke';
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'billing', label: 'Billing & modules' },
+  { id: 'features', label: 'Features & access' },
+  { id: 'payment', label: 'Payment' },
+  { id: 'domain', label: 'Domain' },
+  { id: 'spoke', label: 'Spoke' },
+];
 
 const SUB_STATUS_COLOR: Record<string, string> = {
   trial: 'bg-blue-100 text-blue-700',
@@ -49,22 +57,32 @@ const SUB_STATUS_COLOR: Record<string, string> = {
 
 export default function RestaurantDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const id = Number(params.id);
+  return <RestaurantDetail key={id} id={id} />;
+}
 
-  const [tab, setTab] = useState<Tab>('features');
+function RestaurantDetail({ id }: { id: number }) {
+  const router = useRouter();
+
+  const [tab, setTab] = useState<Tab>('billing');
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [catalog, setCatalog] = useState<FeatureMeta[]>([]);
-  const [plans, setPlans] = useState<PlanDefinition[]>([]);
+  const [catalog, setCatalog] = useState<FeatureCatalog | null>(null);
+  const [catalogError, setCatalogError] = useState(false);
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
+  const [accessLoading, setAccessLoading] = useState(false);
   const [features, setFeatures] = useState<RestaurantFeature[]>([]);
   const [sub, setSub] = useState<SubscriptionDetail | null>(null);
-  const [subLoading, setSubLoading] = useState(false);
+  const [subLoading, setSubLoading] = useState(true);
+  const [subError, setSubError] = useState(false);
+  const [subAttempt, setSubAttempt] = useState(0);
   const [subAction, setSubAction] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [ownerEmailDraft, setOwnerEmailDraft] = useState('');
   const [ownerEmailSaving, setOwnerEmailSaving] = useState(false);
   const [error, setError] = useState('');
+  const hasRestaurant = restaurant !== null;
+  const modular = Boolean(restaurant?.module_access);
 
   // Payment config state
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfigResponse | null>(null);
@@ -99,15 +117,10 @@ export default function RestaurantDetailPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [restData, catalogData] = await Promise.all([
-        getRestaurant(id),
-        getFeatureCatalog(),
-      ]);
+      const restData = await getRestaurant(id);
       setRestaurant(restData.restaurant);
       setOwnerEmailDraft(restData.restaurant.owner?.email || '');
       setFeatures(restData.restaurant.features || []);
-      setCatalog(catalogData.features);
-      setPlans(catalogData.plans);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load');
     } finally {
@@ -120,13 +133,39 @@ export default function RestaurantDetailPage() {
   }, [loadData]);
 
   useEffect(() => {
-    if (tab !== 'billing' || sub !== null) return;
+    if (tab !== 'features') return;
+    const request = new AbortController();
+    setCatalogError(false);
+    getFeatureCatalog(request.signal).then(setCatalog, () => {
+      if (!request.signal.aborted) setCatalogError(true);
+    });
+    return () => request.abort();
+  }, [tab, catalogAttempt]);
+
+  useEffect(() => {
+    if (tab !== 'billing' || !hasRestaurant || modular) return;
+    let current = true;
     setSubLoading(true);
+    setSubError(false);
     getRestaurantSubscription(id)
-      .then((d) => setSub(d.subscription))
-      .catch(() => {})
-      .finally(() => setSubLoading(false));
-  }, [tab, id, sub]);
+      .then((data) => { if (current) setSub(data.subscription); })
+      .catch((e: unknown) => {
+        if (!current) return;
+        setSub(null);
+        if (!(e instanceof Error && e.message === 'subscription not found')) setSubError(true);
+      })
+      .finally(() => { if (current) setSubLoading(false); });
+    return () => { current = false; };
+  }, [tab, id, hasRestaurant, modular, subAttempt]);
+
+  function openTab(next: Tab) {
+    if (next === tab) return;
+    setTab(next);
+    if (next === 'features' && modular) {
+      setAccessLoading(true);
+      void loadData().finally(() => setAccessLoading(false));
+    }
+  }
 
   useEffect(() => {
     if (tab !== 'payment' || paymentConfig !== null) return;
@@ -362,11 +401,6 @@ export default function RestaurantDetailPage() {
     }
   }
 
-  function isFeatureEnabled(key: FeatureKey): boolean {
-    const f = features.find((f) => f.feature_key === key);
-    return f?.enabled ?? false;
-  }
-
   async function handleThemeUpdate(action: 'link' | 'sync') {
     setThemeError('');
     setThemeAction(action);
@@ -402,14 +436,7 @@ export default function RestaurantDetailPage() {
   const checkoutTheme = paymentConfig?.verifone_checkout_theme;
   const paymentSettingsSaved = paymentConfig?.provider === paymentProvider && JSON.stringify(paymentCreds) === JSON.stringify(savedPaymentCreds.current);
 
-  // Group features by category
-  const grouped = catalog.reduce<Record<string, FeatureMeta[]>>((acc, f) => {
-    if (!acc[f.category]) acc[f.category] = [];
-    acc[f.category].push(f);
-    return acc;
-  }, {});
-
-  const categoryOrder = ['core', 'ordering', 'operations', 'intelligence', 'notifications'];
+  const plans = catalog?.plans ?? [];
 
   return (
     <div>
@@ -421,7 +448,7 @@ export default function RestaurantDetailPage() {
         >
           <ArrowLeftIcon className="w-4 h-4" /> Back
         </button>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{restaurant.name}</h1>
             <p className="text-sm text-gray-500 mt-1">
@@ -430,48 +457,52 @@ export default function RestaurantDetailPage() {
           </div>
           <Link className="text-sm underline" href={`/dashboard/restaurants/${id}/usage`}>Usage and quotas</Link>
           <CopyRestaurantToDev restaurant={restaurant} />
-          {restaurant.plan ? (
+          {modular ? (
+            <span className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">Sandbox modules</span>
+          ) : restaurant.plan && (
             <span className={`px-3 py-1 rounded-full text-sm font-bold ${planColor(restaurant.plan.plan_tier)}`}>
-              {capitalize(restaurant.plan.plan_tier)}
-            </span>
-          ) : (
-            <span className="px-3 py-1 rounded-full text-sm font-bold bg-amber-100 text-amber-700">
-              No Plan
+              Legacy {capitalize(restaurant.plan.plan_tier)}
             </span>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200">
-        {(['features', 'billing', 'payment', 'domain', 'spoke'] as Tab[]).map((t) => (
+      <nav aria-label="Restaurant settings" className="mb-6 flex flex-wrap gap-1 border-b border-gray-200">
+        {TABS.map(({ id: value, label }) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition border-b-2 -mb-px ${
-              tab === t
+            type="button"
+            key={value}
+            aria-current={tab === value}
+            onClick={() => openTab(value)}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 -mb-px ${
+              tab === value
                 ? 'border-brand-500 text-brand-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            {t}
+            {label}
           </button>
         ))}
-      </div>
+      </nav>
 
       {tab === 'billing' && (
         <div className="space-y-6">
-          <FoodyPrivateOffer key={id} restaurantId={id} />
-          {subLoading ? (
+          {!modular && (subLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
+            </div>
+          ) : subError ? (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-50 p-4 text-sm text-red-800">
+              <p>The existing subscription could not be loaded.</p>
+              <button type="button" className="rounded-md border border-red-200 bg-white px-3 py-1.5" onClick={() => setSubAttempt(subAttempt + 1)}>Retry</button>
             </div>
           ) : sub ? (
             <>
               {/* Subscription status card */}
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Subscription</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Legacy subscription</h2>
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${SUB_STATUS_COLOR[sub.status] ?? 'bg-gray-100 text-gray-500'}`}>
                     {sub.status.replace('_', ' ')}
                   </span>
@@ -555,8 +586,9 @@ export default function RestaurantDetailPage() {
               )}
             </>
           ) : (
-            <p className="text-sm text-gray-400">No subscription found for this restaurant.</p>
-          )}
+            <p className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-600">No legacy subscription is recorded for this restaurant.</p>
+          ))}
+          <FoodyPrivateOffer restaurantId={id} modular={modular} />
         </div>
       )}
 
@@ -1147,10 +1179,10 @@ export default function RestaurantDetailPage() {
                         {/* Option A — A Record (works everywhere) */}
                         <div className="mb-3">
                           <p className="text-xs font-semibold text-gray-700 mb-1">Option A &mdash; A Record <span className="font-normal text-green-600">(recommended, works with all providers)</span></p>
-                          <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                            <table className="w-full text-xs">
+                          <div className="table-scroll" role="region" aria-label="DNS A record" tabIndex={0}>
+                            <table className="data-table text-xs">
                               <thead>
-                                <tr className="bg-gray-100 text-gray-600">
+                                <tr>
                                   <th className="px-3 py-2 text-left font-medium">Type</th>
                                   <th className="px-3 py-2 text-left font-medium">Name / Host</th>
                                   <th className="px-3 py-2 text-left font-medium">Value / Points to</th>
@@ -1175,10 +1207,10 @@ export default function RestaurantDetailPage() {
                         {/* Option B — CNAME (if supported) */}
                         <div>
                           <p className="text-xs font-semibold text-gray-700 mb-1">Option B &mdash; CNAME Record <span className="font-normal text-gray-400">(only if the provider supports CNAME on root domain)</span></p>
-                          <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                            <table className="w-full text-xs">
+                          <div className="table-scroll" role="region" aria-label="DNS CNAME record" tabIndex={0}>
+                            <table className="data-table text-xs">
                               <thead>
-                                <tr className="bg-gray-100 text-gray-600">
+                                <tr>
                                   <th className="px-3 py-2 text-left font-medium">Type</th>
                                   <th className="px-3 py-2 text-left font-medium">Name / Host</th>
                                   <th className="px-3 py-2 text-left font-medium">Value / Points to</th>
@@ -1344,8 +1376,8 @@ export default function RestaurantDetailPage() {
       )}
 
       {tab === 'features' && (
-      <>{/* Restaurant Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="space-y-6">
+      <div className={`grid gap-6 ${!modular && catalog ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="text-sm font-semibold text-gray-500 mb-3">Details</h3>
           <div className="space-y-2 text-sm">
@@ -1424,8 +1456,8 @@ export default function RestaurantDetailPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-sm font-semibold text-gray-500 mb-3">Plan & Limits</h3>
+        {!modular && catalog && <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-gray-500 mb-3">Legacy plan &amp; limits</h3>
           {restaurant.plan ? (
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -1441,7 +1473,7 @@ export default function RestaurantDetailPage() {
                 </span>
               </div>
               <hr className="my-2" />
-              <p className="text-xs text-gray-400 mb-2">Change plan:</p>
+              <p className="text-xs text-gray-400 mb-2">Change legacy plan</p>
               <div className="flex gap-2">
                 {plans.map((p) => (
                   <button
@@ -1467,7 +1499,7 @@ export default function RestaurantDetailPage() {
                 </svg>
                 <span className="text-sm font-medium">No plan assigned</span>
               </div>
-              <p className="text-xs text-gray-400">Assign a plan to enable feature gating for this restaurant.</p>
+              <p className="text-xs text-gray-400">Assign an existing tier for this restaurant.</p>
               <div className="flex gap-2">
                 {plans.map((p) => (
                   <button
@@ -1482,83 +1514,20 @@ export default function RestaurantDetailPage() {
               </div>
             </div>
           )}
+        </div>}
+      </div>
+
+      {catalogError ? (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-50 p-4 text-sm text-red-800">
+          <p>Feature settings could not be loaded.</p>
+          <button type="button" className="rounded-md border border-red-200 bg-white px-3 py-1.5" onClick={() => setCatalogAttempt(catalogAttempt + 1)}>Retry</button>
         </div>
-      </div>
-
-      {/* Feature Flags */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-gray-900">Feature Flags</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Toggle features for this restaurant. Dependencies are enforced automatically.
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        {categoryOrder.map((cat) => {
-          const items = grouped[cat];
-          if (!items) return null;
-          const info = categoryInfo(cat);
-          return (
-            <div key={cat} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <span>{info.icon}</span>
-                  {info.label}
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {items.map((fm) => {
-                  const enabled = isFeatureEnabled(fm.key);
-                  const isSaving = saving === fm.key;
-                  const deps = fm.requires_all?.length
-                    ? fm.requires_all.map((d) => catalog.find((c) => c.key === d)?.label || d).join(', ')
-                    : null;
-                  return (
-                    <div key={fm.key} className="px-5 py-4 flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-900">{fm.label}</span>
-                          {fm.always_on && (
-                            <span className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-semibold rounded">
-                              ALWAYS ON
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-0.5">{fm.description}</p>
-                        {deps && (
-                          <p className="text-xs text-amber-600 mt-0.5">Requires: {deps}</p>
-                        )}
-                      </div>
-                      <div className="ml-4 flex-shrink-0">
-                        {fm.always_on ? (
-                          <div className="w-11 h-6 bg-brand-500 rounded-full relative opacity-60 cursor-not-allowed">
-                            <div className="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow" />
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleToggle(fm.key, !enabled)}
-                            disabled={isSaving}
-                            className={`w-11 h-6 rounded-full relative transition-colors duration-200 ${
-                              enabled ? 'bg-brand-500' : 'bg-gray-300'
-                            } ${isSaving ? 'opacity-50' : ''}`}
-                          >
-                            <div
-                              className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
-                                enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
-                              }`}
-                            />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      </>)}
+      ) : accessLoading || !catalog ? (
+        <p role="status" className="text-sm text-gray-600">Loading feature access…</p>
+      ) : (
+        <RestaurantFeatureAccess catalog={catalog} features={features} modular={modular} saving={saving} onToggle={handleToggle} />
+      )}
+      </div>)}
     </div>
   );
 }

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "4801155fc36421c4cd2b2486efac1bc93aefe962",
-  "documentationRevision": "8bb175f6087efcc7d8809dd944d75e3dae015033255f886c06be8925f92e9181",
+  "documentationRef": "b5b5dffc806025649f1ac3e7e67c7b24242de5a6",
+  "documentationRevision": "d77cacdebb334e038d6adadc8c3dee3653e6941a36b4b8d9df6c14a50f308523",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -164,15 +164,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/foody-billing-sandbox.md",
-          "sha256": "960c7ee5324e3438abfcc403e748709b2e42b7f42f9ab5c30165eb239f4c39e2"
+          "sha256": "032de17983ddce2c379338553bafad782f2d86808026d2204fc17d7ac57be15e"
         },
         "fr": {
           "path": "docs/help/internal/fr/foody-billing-sandbox.md",
-          "sha256": "a66f9c0761d740342fa282ab62781bd81e333f399fbe7852a868bea9ad4de5bd"
+          "sha256": "87f7600cc46008f2ecf185d2cd85332a8ee3faaec79a7ba075963b19729c264e"
         },
         "he": {
           "path": "docs/help/internal/he/foody-billing-sandbox.md",
-          "sha256": "30aaef849c1909a9b1307706a05c2bc3524dd3e6ab5fc7424acde54631c16ecf"
+          "sha256": "6fbc3aed0a8b8d606b592abbbf22b9f4bcedf22dc794eec0c425dfc1dbbe0069"
         }
       }
     },
@@ -1323,15 +1323,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/payments/victa-mini.mdx",
-          "sha256": "f1cacb68cdbd8e021cb752e8c5f3648abb17d8f9ac4b4390927f66dbd222eaf0"
+          "sha256": "c7e38e848b1b38ff1688ca5a5814bb97afe17e926edf6a33fcc84f0c18681365"
         },
         "fr": {
           "path": "src/content/help/fr/payments/victa-mini.mdx",
-          "sha256": "841fd6e574af99c17586bd5881ddf492fd234dfc5145997011df6c54c55682f5"
+          "sha256": "6ea4dffe048a67198e542a730fc5be5235016ac012984b41daea61321356cef4"
         },
         "he": {
           "path": "src/content/help/he/payments/victa-mini.mdx",
-          "sha256": "8dc29e188bb348053ba495a0c3c3f8e437548d1fb086e20649729391bbae7497"
+          "sha256": "59e3000ebf6d029e4490fe25554aeb825686c1d0c1fe888eb0b675f3cb9fa20d"
         }
       }
     },
@@ -1703,15 +1703,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/access-and-dashboard.md",
-          "sha256": "7393c7b64907c131127e35ec2991bf67e5a2adc49878669dd5ef4af9a84a2c81"
+          "sha256": "b7a1489a7025af41a29c1439cee8e0e0534f24d9673ce28050a54345178329da"
         },
         "fr": {
           "path": "docs/help/internal/fr/access-and-dashboard.md",
-          "sha256": "eeb02d0b4b43f5bde516624eac9fa765303e594234e0b5b610f3d867ea87bc5a"
+          "sha256": "47d50bda4505cc9bd7a0a58f5a5d42ed80460afa1262f497999a570d4fa1d7f1"
         },
         "he": {
           "path": "docs/help/internal/he/access-and-dashboard.md",
-          "sha256": "6515d3eb337509f429bac0d5fce1159fee6ca9da5935e18b5fbf36b347b46491"
+          "sha256": "c313331e2ef4dd8d11bc15b0a60ff569c31cb324828da423441fb88011b7fa0c"
         }
       }
     },
@@ -1722,15 +1722,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/restaurant-onboarding.md",
-          "sha256": "a96920d748fe168f8a7b37b0b408536b309251a543ee3c4db25968be7eda3b88"
+          "sha256": "56066899e541983d83247ab5a87da65f70cc889c76363b1d609bfb72f48580b7"
         },
         "fr": {
           "path": "docs/help/internal/fr/restaurant-onboarding.md",
-          "sha256": "ab86e82eac47c87583ab509484f9658b32001539f22556c40606cfb2755d3f33"
+          "sha256": "c864a1aa9d1a021cdd0ab55f8481dfe52476f595c526dcae7c274f3db1388d2b"
         },
         "he": {
           "path": "docs/help/internal/he/restaurant-onboarding.md",
-          "sha256": "bb2dc2fe989a14741590b9f3ef2615844563db8c4f3c5a8cc946abb90a4b832d"
+          "sha256": "86a6fc2e50b8e30ed67352a105d59189d679052dbb91dcde29f4bacb8048ef3a"
         }
       }
     },
@@ -1741,34 +1741,34 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/features-and-payments.md",
-          "sha256": "dc6065402692211aa630dc7ad93273bba1ca151b954c97ad619b27957f290954"
+          "sha256": "f2861c32d05890adfe9ba268df51b1b9ff962379f28ba33b0a1a77a436ee597a"
         },
         "fr": {
           "path": "docs/help/internal/fr/features-and-payments.md",
-          "sha256": "0cada42850e0f33c35d1a2d0cf837092df70bd19c58808f155414753959aa789"
+          "sha256": "fb7f0e3da813797e09a95c2556e5ba9fe2e4f4d997ea167ecffdb58f245cd515"
         },
         "he": {
           "path": "docs/help/internal/he/features-and-payments.md",
-          "sha256": "062a856331b125205126a7e738c127da5aa6a69d6f455ac598d0345d95c913fe"
+          "sha256": "03fe29f4f07471117002b71403177a893b29c7dee976076eed0abdcbde37abc1"
         }
       }
     },
     "internal/market-and-prospects": {
       "feature": "backoffice-market",
       "audience": "internal",
-      "status": "available",
+      "status": "retired",
       "translations": {
         "en": {
           "path": "docs/help/internal/en/market-and-prospects.md",
-          "sha256": "906fb51804f51ad4d6c15d313216aa0040a30efc012a314e619addb2cf1c25ae"
+          "sha256": "bec90c562b713a1437850d470eecf94616352fc4cd47ce06bdc487e905a9e1d5"
         },
         "fr": {
           "path": "docs/help/internal/fr/market-and-prospects.md",
-          "sha256": "b083bba955048c74f3c86861794daff7c805f4da4937083858cc4a9d74534428"
+          "sha256": "0a7ee3678b9bf04abdf44ed4ad541127d8d2119745bafa8b69f5eae87509ecb5"
         },
         "he": {
           "path": "docs/help/internal/he/market-and-prospects.md",
-          "sha256": "9a302492ab484cdd7c88247a659f86865e8fb83107c9c2c1518e43aebf89c292"
+          "sha256": "18727781d4296eda4c7b61efce29e5ab66a39208cde27bdeb5ef0d89537f5bbc"
         }
       }
     },
@@ -1779,15 +1779,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/catalog-and-assets.md",
-          "sha256": "cc60c23dc4eae920f0e6079f8cbee4d456ab89b0c547a1811641c80c4c75135c"
+          "sha256": "cf217f78e8f7af356b9f063668f55e97daf8c1adbf6a954404d193b2bee64c61"
         },
         "fr": {
           "path": "docs/help/internal/fr/catalog-and-assets.md",
-          "sha256": "20641a32e5192576c7c5d94b629230a2c4ca8079a50d6d4d2a1171930dbedb96"
+          "sha256": "844fb22bf1fffa397701b47adbfa01f92ef1b36c1f92473e41db78a8c8dea98a"
         },
         "he": {
           "path": "docs/help/internal/he/catalog-and-assets.md",
-          "sha256": "e84b3022bc28bd152eb098e94ad924866115f92088701a2901dcf1fd88b46131"
+          "sha256": "fb1ef5944b3245f2e309ed581f15ce92a8d31350ef28435fbf493e550d7a61e0"
         }
       }
     },
@@ -1798,15 +1798,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/operations-and-cloning.md",
-          "sha256": "6110f1dfee175d3bdd846366a50afbb547bf88635a880f0d7fcfdb96140eac80"
+          "sha256": "e74fbe46d325d6ef1086b6238529ce59694f5764bb403604319aad6b8926d7ec"
         },
         "fr": {
           "path": "docs/help/internal/fr/operations-and-cloning.md",
-          "sha256": "363cb01330940477d7d78e78cc8584dca09236ac8ba6cce2f33a9096cee054a5"
+          "sha256": "06c19a113384a7c900f76dd05ae50aac86f2ce623cbbe27c0423845de5826593"
         },
         "he": {
           "path": "docs/help/internal/he/operations-and-cloning.md",
-          "sha256": "4632c1ddaf84602ce1fc63e5d12f5b371b3386331e7b878d9656eaac6d458f09"
+          "sha256": "3e7472e5ec5002a880090fc6379187ec92d7b6a30962212939859b3c9608284a"
         }
       }
     },
@@ -1817,15 +1817,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/api-and-release.md",
-          "sha256": "c7fd0d100b7fb124ac8b5263646075cc50e1faf4774fea5ad5c20a6a041d6151"
+          "sha256": "f183f61b304cdb1e486e53e9957adb3833b593cbc455d870ba335f4df4e32601"
         },
         "fr": {
           "path": "docs/help/internal/fr/api-and-release.md",
-          "sha256": "628422e25a489ae8b193b8e35b6d8652804879dc106f3611faccca45c21b0399"
+          "sha256": "6fb495cee056b9629cd0b7a3ee27fcb8ece9d9f28bffbe43337dd8362e26b325"
         },
         "he": {
           "path": "docs/help/internal/he/api-and-release.md",
-          "sha256": "1f07b6be5fe29afaa07d7fa2c5889cd3f2aa98476a0cef585ce83fdc240d4e5f"
+          "sha256": "7d23a763ca36a6c166c14ad72bff6c6ad9277b6ba2365fd621de1c4a3dd19681"
         }
       }
     },
@@ -1855,15 +1855,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/shared-runtime.md",
-          "sha256": "30c2321092c53be1f4d5de9ca1993cedd2ab06b9f070f24b5bd0066ba41e9a9a"
+          "sha256": "ab976aae6a644a8acd2aa753ba5842aa38bd5415c0819328d2395b5e2137a3e4"
         },
         "fr": {
           "path": "docs/help/internal/fr/shared-runtime.md",
-          "sha256": "f0d27f3af22379071bd7fa3136f981444150d985273c5bf67ddd0bf3ecec8ae5"
+          "sha256": "78c98805ea5fab735fd4efed832af38f40e8f740c7100a89d5e9659cee5fd858"
         },
         "he": {
           "path": "docs/help/internal/he/shared-runtime.md",
-          "sha256": "5b9c264e5477cafc4cfc1403d6b1082ed213489807f8f887cf107493b141453b"
+          "sha256": "20ce12aa1e8064c9c181fc2990c7d77bfe884acf31e5ae9a164a30702d4d8428"
         }
       }
     },
@@ -2161,31 +2161,25 @@
       ]
     },
     "src/app/dashboard/api-usage/page.tsx": {
-      "sha256": "bcfd4a52f0e2daaa0ec27a5a178555a267f69f273d98de027560cfa667c438c0",
+      "sha256": "f44531bfd25e45382e99583e806784061e146ec9023810d9ad7a9d92ffe03e21",
       "features": [
         "backoffice-entitlements"
       ]
     },
     "src/app/dashboard/clone/page.tsx": {
-      "sha256": "3ad86ea4f9d74707c7829a80786e64b5ea17a9dc85afbe4648ff2c9c9b403ea2",
+      "sha256": "1e61a411749fe3e4fa04158ffd33458fe76cc46de43fff0bb2cb467f0ba8a661",
       "features": [
         "backoffice-operations"
       ]
     },
-    "src/app/dashboard/combos/ComboFormModal.tsx": {
-      "sha256": "b7be4ed7eab49da19bdb65f720d3d1157f5b5b611c6abbd5492e947807ff3927",
-      "features": [
-        "backoffice-assets"
-      ]
-    },
     "src/app/dashboard/combos/page.tsx": {
-      "sha256": "0912a1d9454b9db49ebf97e9453151baa9db50cb9fede0acbcd5706fa17d86af",
+      "sha256": "ae13010176df537e3e3755dfce52bbfd2710c469947cb7a8383f24a910ffcbc7",
       "features": [
         "backoffice-assets"
       ]
     },
     "src/app/dashboard/features/page.tsx": {
-      "sha256": "f5ae642bdf1552502d974150a32f013954b4f57c0ff7b0697f10068be57b391a",
+      "sha256": "c1cfa0d97baa9c7391664a1585145c6f3ce778a358d837c25b67c5b8d25ce3d3",
       "features": [
         "backoffice-entitlements"
       ]
@@ -2203,73 +2197,55 @@
       ]
     },
     "src/app/dashboard/layout.tsx": {
-      "sha256": "3352f955ac6d93bb05329ef1f1d28208c86e8cf49afe7a0e2e1caa633a208c77",
+      "sha256": "aa3adb8b8f5932c67b82fb5b730ef3caef120da54f57d4ee48cb8557f86d924a",
       "features": [
         "backoffice-access"
       ]
     },
-    "src/app/dashboard/market/ProspectFormModal.tsx": {
-      "sha256": "f5b57035ed1da70d79d869594ebd8e37acba88e68100f9ff95f00e18e0eb013a",
-      "features": [
-        "backoffice-market"
-      ]
-    },
-    "src/app/dashboard/market/SegmentFormModal.tsx": {
-      "sha256": "13815b49ea75c7a13ef60c7d0eea74bb4fd7ccc8a8a5a7594ea3ffb9b7c63ec4",
-      "features": [
-        "backoffice-market"
-      ]
-    },
-    "src/app/dashboard/market/page.tsx": {
-      "sha256": "d34e16adba32aef396244b24b1c8a87359337d1d8fb2358fc019c4363cbf29ed",
-      "features": [
-        "backoffice-market"
-      ]
-    },
-    "src/app/dashboard/market/prospects/page.tsx": {
-      "sha256": "27e2e6635001d49c4d27bbb110f11a9e95c71dd176cc4cbaf71814c788d9c83c",
-      "features": [
-        "backoffice-market"
-      ]
-    },
-    "src/app/dashboard/market/segments/[slug]/page.tsx": {
-      "sha256": "b698d8e92587324717261055a51bb231165ca25cc04ca1e1cfac1b78b70dd5e3",
+    "src/app/dashboard/market/[[...path]]/page.tsx": {
+      "sha256": "284358d8a5e0befd4f43370a604c2863bcdfa99397a55bee6404a6de7e12c9c2",
       "features": [
         "backoffice-market"
       ]
     },
     "src/app/dashboard/menu/page.tsx": {
-      "sha256": "a5edd7659c930c2a2c63f971abdf6f4d4fc5aa72e40f6a6461406dd49022eaa6",
+      "sha256": "30d60decfa1b0770248fb249e6bae95db7f67b9cbea66ba60bd1d3861a54b71b",
       "features": [
         "backoffice-assets"
       ]
     },
+    "src/app/dashboard/onboard/ModularBillingFields.tsx": {
+      "sha256": "91c23bd9eb525054ceadc81dc3d985a3066f30f22fdd41840bdb88aaae0d31ab",
+      "features": [
+        "foody-billing-sandbox"
+      ]
+    },
     "src/app/dashboard/onboard/page.tsx": {
-      "sha256": "73f8b99361769d3fd6914a21380472026dcab36bcaa9593f87afd76d175ba942",
+      "sha256": "b9e4bc43d8bec31a9970b43c7924ba39508d04fdc22fbce4b42a021995f4afb3",
       "features": [
         "backoffice-onboarding"
       ]
     },
     "src/app/dashboard/operations/guide/page.tsx": {
-      "sha256": "9f861925f2893085a012515f24f6ec694d832645ff2d4a0eb69cdbce4628966a",
+      "sha256": "2f3086d78ba799bb6c8aa20ce4a1ffb386430602a349cf161bb7d9ae425cc817",
       "features": [
         "backoffice-operations"
       ]
     },
     "src/app/dashboard/operations/page.tsx": {
-      "sha256": "18b99c190fd932cbeab848fa4887ba83b68eada84e7cb31967e7dc28b05481d5",
+      "sha256": "9ca1d25e6137771b403256a8b4bd1a773b8fc3434a2f125c3652682b57825d6f",
       "features": [
         "backoffice-operations"
       ]
     },
     "src/app/dashboard/page.tsx": {
-      "sha256": "6351b00740bc75be448572b58f352bf094c621836f57f1d445c20e2d5e879c1f",
+      "sha256": "26a8e0a57febb80d55e63fb08e9f7b5eea5f39c8f147b07e96b66532c1d589d2",
       "features": [
         "backoffice-access"
       ]
     },
     "src/app/dashboard/payments/page.tsx": {
-      "sha256": "24cdd56416e5fc3ed502e5a7442c16eef52d847b99f85baee6bc910cdd217ef6",
+      "sha256": "eb4951ac17069d7fee743e0136ac3fde816fffe14694f22dec9384ac632078bc",
       "features": [
         "backoffice-entitlements"
       ]
@@ -2281,7 +2257,7 @@
       ]
     },
     "src/app/dashboard/restaurants/[id]/page.tsx": {
-      "sha256": "aecbb898e3f576579933e0107c3eb465f1e97cc52220798cd53d35d0a5668c7b",
+      "sha256": "13227e28f8b3db046c018fe8f3f00ac6ff4cd8317edba67b7edf3d03936c3afa",
       "features": [
         "backoffice-onboarding",
         "backoffice-entitlements"
@@ -2295,19 +2271,19 @@
       ]
     },
     "src/app/dashboard/restaurants/page.tsx": {
-      "sha256": "5ccf726cf524a064508bb77fed311a25b2c19ccf5d90d3c7cc898b1284bf88ee",
+      "sha256": "0388c330dfce81ae74913bd36a30a2ff13932712ac1f4e00720546f6e6e3db53",
       "features": [
         "backoffice-onboarding"
       ]
     },
     "src/app/dashboard/servers/page.tsx": {
-      "sha256": "0992aaa11793b7ed041ca258f0eccf585f920760d7d8735d0a0236bf5067437e",
+      "sha256": "94ebf5c0b8a06a2794b050622e0d1d97d564c8d1f758e1f79c3e8a867aa0f376",
       "features": [
         "backoffice-operations"
       ]
     },
     "src/app/dashboard/terminals/page.tsx": {
-      "sha256": "4b77733227da127bcaa17722db118158a47e394364b58d86333214d2ca930712",
+      "sha256": "10023698d9f39ec629e47d3c521900d5365d81c6111b1e7b6c4211dc18fadce6",
       "features": [
         "platform-api"
       ]
@@ -2325,7 +2301,7 @@
       ]
     },
     "src/app/dashboard/users/page.tsx": {
-      "sha256": "9f8eb4e974eec20a060dc9f88455a04d6f092010ebb9ac8aab8226c9d7a44a14",
+      "sha256": "e31a88e5350645cda05008b487467d045ca4b094cdbb8c459e09cc4f4fd8104e",
       "features": [
         "backoffice-onboarding"
       ]
@@ -2337,19 +2313,19 @@
       ]
     },
     "src/app/globals.css": {
-      "sha256": "8d0d088f06f3ae6aa7f743780e37f262f08a6b51ed3fcaa8f36cd7cd44b584b5",
+      "sha256": "ba2434b8402a909ec264008e2e85f68ed9c57b2012334d02957306bc3afa44ae",
       "features": [
-        "shared-runtime"
+        "backoffice-access"
       ]
     },
     "src/app/layout.tsx": {
-      "sha256": "d2c6ef015a0b5a50fa8223af9e73c52d07f1ac3408730320e2ddcab4ce7a6ac1",
+      "sha256": "084b88cd34c3108056fffa4486069a245edf8fc4993aeeaeca474ac8857d1661",
       "features": [
-        "shared-runtime"
+        "backoffice-access"
       ]
     },
     "src/app/login/page.tsx": {
-      "sha256": "c0352aad1d89ae2cae0fa79cfd5287ba89ae89636aed54723dc9140fdfc185db",
+      "sha256": "2924d4e59dacafad173e6b631f9deb53eb1bb018ca234fb93c4f50d3e4d56013",
       "features": [
         "backoffice-access"
       ]
@@ -2367,28 +2343,30 @@
       ]
     },
     "src/components/FoodyPrivateOffer.tsx": {
-      "sha256": "e70cf4310fa91d7dbbffe674abc777e56b5d724b720c181a153c022c9f987e50",
+      "sha256": "8f928a3236d6071a9e55010a1b8d16a5a780a80fbfc4acbc1062185db4a5657d",
       "features": [
         "foody-billing-sandbox"
       ]
     },
-    "src/components/ProspectStatusChip.tsx": {
-      "sha256": "324b1e2137077fe4e5a8b6da5f4518b02799c34f8c2dae80b5b3633cd1ca8ef7",
+    "src/components/FoodySubscriptionSummary.tsx": {
+      "sha256": "bebeae97641b40b78e1e473bbf3c45523e169925c5d340cded72e85f8b5d5a16",
       "features": [
-        "backoffice-access"
+        "foody-billing-sandbox"
+      ]
+    },
+    "src/components/RestaurantFeatureAccess.tsx": {
+      "sha256": "2a7e7adfa0d9cf568be3ba93daf5b663ed0c2114f681742b907f22dc84846ae5",
+      "features": [
+        "backoffice-access",
+        "backoffice-entitlements"
       ]
     },
     "src/components/Sidebar.tsx": {
-      "sha256": "8ad00b7ba08edb5d7f7a6ee2a4475deb4294d6295d9997b50a29dee533a6954c",
+      "sha256": "97b12e7552fff05ae69b8df5764e394b12213794fefb8a4652cecdbc91c24f48",
       "features": [
         "backoffice-access",
+        "backoffice-entitlements",
         "platform-api"
-      ]
-    },
-    "src/components/StringListField.tsx": {
-      "sha256": "194bf6af642da2a44c1523ed6dacad9e0f9943f962e0881e23b4d2fbf46b99c5",
-      "features": [
-        "backoffice-access"
       ]
     },
     "src/components/VerifoneDiagnostics.tsx": {
@@ -2410,7 +2388,7 @@
       ]
     },
     "src/lib/api.ts": {
-      "sha256": "359b8aaead4e2dfe4892420743f7b9372761fe4021597a04b0e6a794af96b18a",
+      "sha256": "bcbd3059b7274d81ecd158cc7edc7082de7c2cf573e6916095e564bff3da9d86",
       "features": [
         "backoffice-entitlements",
         "platform-api",
@@ -2422,6 +2400,12 @@
       "features": [
         "backoffice-access",
         "shared-runtime"
+      ]
+    },
+    "src/lib/foody-modules.ts": {
+      "sha256": "6a02d8151b106da951f67327f354946f22d18c11a4c3233594ec3985b6657d7c",
+      "features": [
+        "foody-billing-sandbox"
       ]
     },
     "src/lib/sentry-options.ts": {
@@ -2494,23 +2478,6 @@
       ]
     },
     {
-      "id": "foodybackoffice:src/app/dashboard/combos/ComboFormModal.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/combos/ComboFormModal.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-assets"
-      ],
-      "labels": [],
-      "actions": [
-        "handleSubmit",
-        "removeItemFromStep",
-        "removeStep",
-        "updateItemDelta",
-        "updateStep"
-      ]
-    },
-    {
       "id": "foodybackoffice:src/app/dashboard/combos/page.tsx:next-page:1",
       "kind": "next-page",
       "source": "src/app/dashboard/combos/page.tsx",
@@ -2519,23 +2486,6 @@
         "backoffice-assets"
       ],
       "route": "/dashboard/combos"
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/combos/page.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/combos/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-assets"
-      ],
-      "labels": [],
-      "actions": [
-        "handleDelete",
-        "handleSaved",
-        "loadCombos",
-        "openCreate",
-        "openEdit"
-      ]
     },
     {
       "id": "foodybackoffice:src/app/dashboard/features/page.tsx:next-page:1",
@@ -2599,108 +2549,14 @@
       ]
     },
     {
-      "id": "foodybackoffice:src/app/dashboard/market/ProspectFormModal.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/market/ProspectFormModal.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "labels": [],
-      "actions": [
-        "closeReasonHeading",
-        "closed",
-        "handleSubmit"
-      ]
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/SegmentFormModal.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/market/SegmentFormModal.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "labels": [],
-      "actions": [
-        "handleNameChange",
-        "handleSubmit",
-        "remove",
-        "update"
-      ]
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/page.tsx:next-page:1",
+      "id": "foodybackoffice:src/app/dashboard/market/[[...path]]/page.tsx:next-page:1",
       "kind": "next-page",
-      "source": "src/app/dashboard/market/page.tsx",
+      "source": "src/app/dashboard/market/[[...path]]/page.tsx",
       "line": 1,
       "features": [
         "backoffice-market"
       ],
-      "route": "/dashboard/market"
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/page.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/market/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "labels": [],
-      "actions": [
-        "handleDelete",
-        "load"
-      ]
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/prospects/page.tsx:next-page:1",
-      "kind": "next-page",
-      "source": "src/app/dashboard/market/prospects/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "route": "/dashboard/market/prospects"
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/prospects/page.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/market/prospects/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "labels": [],
-      "actions": [
-        "handleDelete",
-        "load"
-      ]
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/segments/[slug]/page.tsx:next-page:1",
-      "kind": "next-page",
-      "source": "src/app/dashboard/market/segments/[slug]/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "route": "/dashboard/market/segments/[slug]"
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/market/segments/[slug]/page.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/market/segments/[slug]/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-market"
-      ],
-      "labels": [],
-      "actions": [
-        "handleDeleteProspect",
-        "loadAll",
-        "loadSegment"
-      ]
+      "route": "/dashboard/market/[[...path]]"
     },
     {
       "id": "foodybackoffice:src/app/dashboard/menu/page.tsx:next-page:1",
@@ -2711,20 +2567,6 @@
         "backoffice-assets"
       ],
       "route": "/dashboard/menu"
-    },
-    {
-      "id": "foodybackoffice:src/app/dashboard/menu/page.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/app/dashboard/menu/page.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-assets"
-      ],
-      "labels": [],
-      "actions": [
-        "handleDeleteModifier",
-        "loadMenu"
-      ]
     },
     {
       "id": "foodybackoffice:src/app/dashboard/onboard/page.tsx:next-page:1",
@@ -2794,6 +2636,20 @@
       "route": "/dashboard"
     },
     {
+      "id": "foodybackoffice:src/app/dashboard/page.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/app/dashboard/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [],
+      "actions": [
+        "loadPastDue",
+        "loadStats"
+      ]
+    },
+    {
       "id": "foodybackoffice:src/app/dashboard/payments/page.tsx:next-page:1",
       "kind": "next-page",
       "source": "src/app/dashboard/payments/page.tsx",
@@ -2813,7 +2669,8 @@
       ],
       "labels": [],
       "actions": [
-        "handleSave"
+        "handleSave",
+        "loadConfig"
       ]
     },
     {
@@ -2878,6 +2735,7 @@
         "handleThemeUpdate",
         "handleToggle",
         "loadData",
+        "openTab",
         "savedPaymentCreds"
       ]
     },
@@ -2929,8 +2787,8 @@
       "actions": [
         "confirmed",
         "handleDelete",
-        "handleSearch",
-        "loadRestaurants"
+        "loadRestaurants",
+        "loadSubscriptions"
       ]
     },
     {
@@ -3034,7 +2892,6 @@
       "actions": [
         "confirmed",
         "handleDeleteUser",
-        "handleFilter",
         "handleResetPassword",
         "loadUsers"
       ]
@@ -3090,33 +2947,6 @@
       ]
     },
     {
-      "id": "foodybackoffice:src/components/ProspectStatusChip.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/components/ProspectStatusChip.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-access"
-      ],
-      "labels": [],
-      "actions": [
-        "closeReasonLabel"
-      ]
-    },
-    {
-      "id": "foodybackoffice:src/components/StringListField.tsx:ui-controls:1",
-      "kind": "ui-controls",
-      "source": "src/components/StringListField.tsx",
-      "line": 1,
-      "features": [
-        "backoffice-access"
-      ],
-      "labels": [],
-      "actions": [
-        "remove",
-        "update"
-      ]
-    },
-    {
       "id": "foodybackoffice:src/components/VerifoneDiagnostics.tsx:ui-controls:1",
       "kind": "ui-controls",
       "source": "src/components/VerifoneDiagnostics.tsx",
@@ -3168,17 +2998,10 @@
       "labels": [],
       "actions": [
         "cancelTerminalFleetChange",
-        "createCombo",
         "createPOSLoginSlide",
-        "createProspect",
-        "createSegment",
-        "deleteCombo",
         "deleteIngredientIcon",
-        "deleteModifier",
         "deletePOSLoginSlide",
-        "deleteProspect",
         "deleteRestaurant",
-        "deleteSegment",
         "deleteUser",
         "onboardRestaurant",
         "saveFoodyMerchant",
@@ -3186,16 +3009,13 @@
         "sendInviteEmail",
         "sendResetPassword",
         "updateCibusConfig",
-        "updateCombo",
         "updateCustomDomain",
         "updateExternalApiQuotas",
         "updateIngredientIcon",
         "updatePOSLoginConfig",
         "updatePOSLoginSlide",
         "updatePaymentConfig",
-        "updateProspect",
         "updateSchedule",
-        "updateSegment",
         "updateSpokeConfig",
         "updateTerminalFleet",
         "updateUserEmail"

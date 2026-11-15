@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "bcbd3059b7274d81ecd158cc7edc7082de7c2cf573e6916095e564bff3da9d86",
+      "baseSha256": "359b8aaead4e2dfe4892420743f7b9372761fe4021597a04b0e6a794af96b18a",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The API client follows the documented modular billing view and removes retired Market and menu tools. Calls for retained device, restaurant, login and payment operations preserve their existing transport contracts."
+    }
+  ]
+}

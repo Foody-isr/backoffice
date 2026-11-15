@@ -15,25 +15,45 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [pastDue, setPastDue] = useState<SubscriptionWithRestaurant[]>([]);
   const [error, setError] = useState('');
+  const [pastDueError, setPastDueError] = useState(false);
+
+  async function loadStats() {
+    setError('');
+    try {
+      setStats(await getDashboard());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Dashboard metrics could not be loaded.');
+    }
+  }
+
+  async function loadPastDue() {
+    setPastDueError(false);
+    try {
+      const { subscriptions } = await listSubscriptions('past_due');
+      setPastDue(subscriptions ?? []);
+    } catch {
+      setPastDueError(true);
+    }
+  }
 
   useEffect(() => {
-    getDashboard()
-      .then(setStats)
-      .catch((e) => setError(e.message));
-    listSubscriptions('past_due')
-      .then((d) => setPastDue(d.subscriptions ?? []))
-      .catch(() => {});
+    void loadStats();
+    void loadPastDue();
   }, []);
-
-  if (error) {
-    return <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>;
-  }
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full" />
-      </div>
+      <section className="space-y-6">
+        <h1 className="page-title">Dashboard</h1>
+        {error ? (
+          <div className="error-notice flex flex-wrap items-center justify-between gap-3">
+            <p role="alert">{error}</p>
+            <button type="button" className="btn-secondary" onClick={() => void loadStats()}>Retry</button>
+          </div>
+        ) : (
+          <p role="status" className="text-sm text-[var(--fg-muted)]">Loading dashboard…</p>
+        )}
+      </section>
     );
   }
 
@@ -42,51 +62,53 @@ export default function DashboardPage() {
       label: 'Total Restaurants',
       value: stats.total_restaurants,
       icon: BuildingStorefrontIcon,
-      color: 'text-blue-600 bg-blue-50',
     },
     {
       label: 'Active (7d)',
       value: stats.active_restaurants,
       icon: ChartBarIcon,
-      color: 'text-green-600 bg-green-50',
     },
     {
       label: 'Total Users',
       value: stats.total_users,
       icon: UsersIcon,
-      color: 'text-purple-600 bg-purple-50',
     },
     {
       label: 'Orders This Week',
       value: stats.orders_this_week,
       icon: ShoppingCartIcon,
-      color: 'text-orange-600 bg-orange-50',
     },
   ];
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Platform overview and health metrics</p>
+        <h1 className="page-title">Dashboard</h1>
+        <p className="mt-1 text-sm text-[var(--fg-muted)]">Platform overview and health metrics</p>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-white rounded-xl border border-gray-200 p-5">
+          <div key={kpi.label} className="rounded-lg border border-[var(--line)] p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${kpi.color}`}>
-                <kpi.icon className="w-5 h-5" />
+              <div className="grid size-9 place-items-center rounded-md bg-[var(--surface-2)]">
+                <kpi.icon aria-hidden="true" className="size-5" />
               </div>
               <span className="text-sm text-gray-500">{kpi.label}</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{kpi.value.toLocaleString()}</div>
+            <div className="text-3xl font-semibold tabular-nums">{kpi.value.toLocaleString()}</div>
           </div>
         ))}
       </div>
 
       {/* Past Due Alert */}
+      {pastDueError && (
+        <div className="error-notice mb-8 flex flex-wrap items-center justify-between gap-3">
+          <p role="alert">Past-due subscriptions could not be loaded.</p>
+          <button type="button" className="btn-secondary" onClick={() => void loadPastDue()}>Retry subscriptions</button>
+        </div>
+      )}
       {pastDue.length > 0 && (
         <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
