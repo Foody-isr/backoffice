@@ -18,6 +18,7 @@ export default function TerminalFleetPage() {
   const [search, setSearch] = useState('');
   const [restaurant, setRestaurant] = useState('');
   const [filters, setFilters] = useState({ q: '', restaurant_id: '' });
+  const [includeForgotten, setIncludeForgotten] = useState(false);
   const [offset, setOffset] = useState(0);
   const [more, setMore] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ export default function TerminalFleetPage() {
     setLoading(true);
     setError('');
     try {
-      const result = await listTerminalFleet({ ...filters, offset });
+      const result = await listTerminalFleet({ ...filters, offset, include_forgotten: includeForgotten });
       if (request !== generation.current) return;
       setRows(result.terminals);
       setMore(result.has_more);
@@ -39,7 +40,7 @@ export default function TerminalFleetPage() {
     } finally {
       if (request === generation.current) setLoading(false);
     }
-  }, [filters, offset]);
+  }, [filters, offset, includeForgotten]);
 
   useEffect(() => {
     const generationRef = generation;
@@ -84,6 +85,14 @@ export default function TerminalFleetPage() {
         <button className={button} type="button" disabled={loading} onClick={() => void load()}>Refresh</button>
       </form>
 
+      <label className="flex w-fit items-center gap-2 text-sm text-gray-700">
+        <input type="checkbox" checked={includeForgotten} onChange={event => {
+          setIncludeForgotten(event.target.checked);
+          setOffset(0);
+        }} />
+        Show forgotten terminals
+      </label>
+
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
       {loading ? <p role="status" className="text-sm text-gray-600">Loading terminals…</p> : !error && (
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
@@ -109,12 +118,12 @@ export default function TerminalFleetPage() {
                   </td>
                   <td className="space-y-1 px-4 py-3 tabular-nums">
                     <div>Serial <span className="font-medium">{row.metadata?.serial_number || '—'}</span></div>
-                    <div>DID <span className="font-medium">{row.metadata?.did || '—'}</span></div>
-                    <div>VHQ deviceUid <span className="font-medium">{row.metadata?.vhq_device_uid || '—'}</span></div>
+                    <div>DID / VHQ <span className="font-medium">{row.metadata?.did || '—'}</span></div>
                   </td>
                   <td className="space-y-1 px-4 py-3 tabular-nums">
                     <div>SHVA <span className="font-medium">{row.metadata?.shva_terminal_id || '—'}</span></div>
-                    <div>Ashrait <span className="font-medium">{row.metadata?.ashrait_terminal_id || '—'}</span></div>
+                    {row.metadata?.ashrait_terminal_id && row.metadata.ashrait_terminal_id !== row.metadata.shva_terminal_id &&
+                      <div>Ashrait login <span className="font-medium">{row.metadata.ashrait_terminal_id}</span></div>}
                     <div>Supplier <span className="font-medium">{row.metadata?.supplier_id || '—'}</span></div>
                     {row.metadata?.acquirer && <div className="text-gray-600">{row.metadata.acquirer}</div>}
                   </td>

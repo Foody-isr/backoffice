@@ -19,9 +19,9 @@ const commandStates = {
   confirmed: 'Command acknowledged', not_started: 'Not sent', uncertain: 'Result to verify',
 };
 const bankFields = [
-  ['did', 'DID', 80],
+  ['did', 'DID (VHQ Device ID)', 80],
   ['shva_terminal_id', 'SHVA terminal number', 10],
-  ['ashrait_terminal_id', 'Ashrait provisioning ID', 10],
+  ['ashrait_terminal_id', 'Ashrait login (only if different)', 10],
   ['supplier_id', 'Supplier number', 80],
   ['acquirer', 'Acquirer', 80],
 ] as const;
@@ -73,12 +73,15 @@ function Field({ label, ...props }: InputHTMLAttributes<HTMLInputElement> & { la
   </label>;
 }
 
-function BankFields({ value, onChange, required = false, disabled = false }: {
-  value: TerminalFleetParameters; onChange: (value: TerminalFleetParameters) => void; required?: boolean; disabled?: boolean;
+function BankFields({ value, onChange, required = false, requireCommercial = true, disabled = false, showAshraitLogin = true }: {
+  value: TerminalFleetParameters; onChange: (value: TerminalFleetParameters) => void;
+  required?: boolean; requireCommercial?: boolean; disabled?: boolean; showAshraitLogin?: boolean;
 }) {
   return <div className="grid gap-4 sm:grid-cols-2">
-    {bankFields.map(([key, label, length]) => (
-      <Field key={key} label={label} value={value[key]} maxLength={length} required={required} disabled={disabled}
+    {bankFields.filter(([key]) => showAshraitLogin || key !== 'ashrait_terminal_id').map(([key, label, length]) => (
+      <Field key={key} label={label} value={value[key]} maxLength={length}
+        required={required && (key === 'did' || key === 'shva_terminal_id' || (requireCommercial && key !== 'ashrait_terminal_id'))}
+        disabled={disabled}
         inputMode={length === 10 ? 'numeric' : 'text'}
         pattern={length === 10 ? '[0-9]{10}' : key === 'acquirer' ? undefined : identifierPattern}
         onChange={event => onChange({ ...value, [key]: event.target.value })} />
@@ -156,7 +159,6 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
     ...parametersFrom(terminal.metadata),
     revision: terminal.metadata?.revision ?? 0,
     serial_number: terminal.metadata?.serial_number ?? '',
-    vhq_device_uid: terminal.metadata?.vhq_device_uid ?? '',
     lifecycle: terminal.metadata?.lifecycle ?? 'in_service',
   }));
   const [saving, setSaving] = useState(false);
@@ -177,15 +179,12 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
   }
 
   return <Dialog title={`Edit inventory for ${terminal.name}`} busy={saving} onClose={onClose}>
-    <p className="max-w-prose text-sm text-gray-600">Save the identifiers declared for this terminal. Use Change requests to record a proposed bank or assignment change.</p>
+    <p className="max-w-prose text-sm text-gray-600">Record the identifiers already assigned to this physical terminal. FoodyPOS uses its SHVA number to connect. Use Change requests to change an existing DID or bank assignment.</p>
     <form className="space-y-5" onSubmit={event => { event.preventDefault(); void save(); }}>
       <div className="grid gap-4 border-b border-gray-200 pb-5 sm:grid-cols-2">
         <Field label="Physical serial number" value={draft.serial_number} maxLength={80} pattern={identifierPattern}
           readOnly={terminal.serial_locked} disabled={saving}
           onChange={event => setDraft({ ...draft, serial_number: event.target.value })} />
-        <Field label="VHQ deviceUid" value={draft.vhq_device_uid} maxLength={10} inputMode="numeric"
-          pattern="[1-9][0-9]{0,9}" disabled={saving}
-          onChange={event => setDraft({ ...draft, vhq_device_uid: event.target.value })} />
       </div>
       <BankFields value={draft} onChange={value => setDraft({ ...draft, ...value })} disabled={saving} />
       <label className="flex flex-col gap-1 text-sm font-medium">
@@ -268,8 +267,12 @@ function ChangeForm({ terminal, busy, onPrepare }: {
   async function submit() {
     if (!terminal.metadata || !ready || busy) return;
     requestId.current ??= crypto.randomUUID();
+    const login = kind === 'configure' && terminal.metadata.shva_terminal_id !== requested.shva_terminal_id
+      ? requested.shva_terminal_id
+      : requested.ashrait_terminal_id || requested.shva_terminal_id;
     await onPrepare({
-      request_id: requestId.current, source_revision: terminal.metadata.revision, kind, requested,
+      request_id: requestId.current, source_revision: terminal.metadata.revision, kind,
+      requested: { ...requested, ashrait_terminal_id: login },
       ...(kind === 'replace' && replacement?.metadata ? {
         target_device_id: replacement.device_id, target_revision: replacement.metadata.revision,
       } : {}),
@@ -292,7 +295,8 @@ function ChangeForm({ terminal, busy, onPrepare }: {
     {kind === 'reassign' && <RestaurantSelect value={destination} onChange={setDestination} exclude={terminal.restaurant_id} disabled={busy} />}
     <fieldset className="space-y-3 border-t border-gray-200 pt-4">
       <legend className="pr-2 text-sm font-semibold">Requested identifiers</legend>
-      <BankFields value={requested} onChange={setRequested} disabled={busy} required />
+      <BankFields value={requested} onChange={setRequested} disabled={busy} required
+        requireCommercial={kind !== 'configure'} showAshraitLogin={kind !== 'configure'} />
     </fieldset>
     <button className={primary} type="submit" disabled={busy || !ready}>{busy ? 'Saving…' : 'Prepare change'}</button>
   </form>;
@@ -304,7 +308,6 @@ function ChangeSummary({ change, restaurantName }: { change: TerminalFleetChange
       {change.source_serial_number} → {change.target_serial_number} in {
         change.restaurant_id === change.target_restaurant_id ? restaurantName : `restaurant #${change.target_restaurant_id}`
       }
-      {change.target_vhq_device_uid && ` · VHQ deviceUid ${change.target_vhq_device_uid}`}
     </p>
     <dl className="grid grid-cols-2 gap-4 border-y border-gray-200 py-3">
       {([['Target declaration at preparation', change.target_before], ['Requested', change.requested]] as const).map(([heading, values]) => (
@@ -335,7 +338,7 @@ function ChangeSummary({ change, restaurantName }: { change: TerminalFleetChange
     {change.attempts && change.attempts.length > 0 && <ul className="space-y-3">
       {change.attempts.map(attempt => (
         <li key={attempt.id} className="rounded-lg border border-gray-200 px-3 py-2">
-          <p className="font-medium">{attempt.command === 'UpdateVHQSHVA' ? 'SHVA number in VHQ' : attempt.command}</p>
+          <p className="font-medium">{attempt.command === 'UpdateVHQSHVA' ? 'Legacy VHQ attempt' : attempt.command}</p>
           <p className="text-gray-700">{attempt.state === 'authorized' && change.state !== 'prepared'
             ? 'Not sent · request closed'
             : attempt.command === 'UpdateVHQSHVA' && attempt.state === 'confirmed'
@@ -366,16 +369,15 @@ function CSTActions({ change, busy, save }: {
   const attempts = change.attempts ?? [];
   const didReady = change.target_before.did === change.requested.did ||
     attempts.some(attempt => attempt.command === 'SetVhqDeviceId' && attempt.state === 'confirmed');
-  const needsVHQ = change.target_before.shva_terminal_id !== change.requested.shva_terminal_id;
-  const cloud = attempts.find(attempt => attempt.command === 'UpdateVHQSHVA');
-  const shvaReady = !needsVHQ || cloud?.state === 'confirmed';
   const downloaded = attempts.some(attempt => attempt.command === 'DownloadAshraitParameters' && attempt.state === 'confirmed');
   const waiting = attempts.some(attempt => ['authorized', 'dispatching', 'uncertain'].includes(attempt.state));
   const needsReview = attempts.some(attempt => attempt.dispatched_at && attempt.state !== 'not_started' && !attempt.reviewed_at);
   const command = !didReady ? 'SetVhqDeviceId' : 'DownloadAshraitParameters';
-  const stageVHQ = didReady && !shvaReady && !cloud;
+  const cloud = attempts.find(attempt => attempt.command === 'UpdateVHQSHVA');
+  const pendingVHQ = change.cst_vhq_required && cloud?.state !== 'confirmed';
+  const stageVHQ = didReady && pendingVHQ && !cloud && change.cst_vhq_available;
   const canQueue = change.cst_execution_allowed && !waiting && !downloaded &&
-    (!needsVHQ || change.cst_vhq_available);
+    (!didReady || !pendingVHQ || stageVHQ);
 
   if (!change.cst_execution_allowed && !needsReview) return null;
   return <div className="space-y-4 border-t border-gray-200 pt-4">
@@ -383,8 +385,8 @@ function CSTActions({ change, busy, save }: {
     <p className="text-sm text-gray-700">
       Complete any pending transactions and closing first. Keep the correct FoodyPOS open with the CST terminal connected.
     </p>
-    {needsVHQ && !change.cst_vhq_available &&
-      <ErrorText message="The VHQ CST tenant or SHVA parameter for this model is unavailable. Configure the API before applying this request." />}
+    {didReady && pendingVHQ && !change.cst_vhq_available &&
+      <ErrorText message="This legacy request needs its VHQ SHVA configuration before downloading parameters." />}
     {canQueue && <form className="space-y-3" onSubmit={event => {
       event.preventDefault();
       if (!cstConfirmed || busy) return;
@@ -394,10 +396,10 @@ function CSTActions({ change, busy, save }: {
         : authorizeTerminalFleetCST(change.device_id, change.id, command, remote));
     }}>
       <p className="text-sm text-gray-700">{stageVHQ
-        ? 'Save the reviewed SHVA number in VHQ. Once confirmed, ask FoodyPOS to download the parameters.'
+        ? 'Save the requested SHVA number in VHQ before the parameter download.'
         : command === 'SetVhqDeviceId'
-          ? 'Send the reviewed DID to the selected terminal through FoodyPOS.'
-          : 'Ask the selected terminal to download its Ashrait parameters.'}</p>
+          ? 'Send the requested DID to this terminal through FoodyPOS.'
+          : 'Download the Ashrait parameters on this terminal using the requested terminal number.'}</p>
       <label className="flex items-start gap-2 text-sm">
         <input type="checkbox" className="mt-1" checked={cstConfirmed} disabled={busy}
           onChange={event => setCstConfirmed(event.target.checked)} />
@@ -408,9 +410,9 @@ function CSTActions({ change, busy, save }: {
           onChange={event => setRemote(event.target.checked)} />
         Send to the connected FoodyPOS automatically
       </label>}
-      <button className={primary} disabled={busy || !cstConfirmed} type="submit">{stageVHQ
-        ? 'Save SHVA number in VHQ'
-        : command === 'SetVhqDeviceId' ? 'Authorize DID assignment' : 'Authorize parameter download'}</button>
+      <button className={primary} disabled={busy || !cstConfirmed} type="submit">
+        {stageVHQ ? 'Save SHVA number in VHQ' : command === 'SetVhqDeviceId' ? 'Authorize DID assignment' : 'Authorize parameter download'}
+      </button>
     </form>}
     {cloud && (cloud.state === 'uncertain' || cloud.state === 'dispatching') && <div className="space-y-2">
       <p className="text-sm text-gray-700">Check the value in VHQ before sending a parameter download.</p>
