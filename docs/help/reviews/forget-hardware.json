@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "359b8aaead4e2dfe4892420743f7b9372761fe4021597a04b0e6a794af96b18a",
+      "baseSha256": "5463dc507fb4c0076cbea7bd23dd44d4831b9ae8d1ec634bc7577b3bcac5325b",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The client adds hardware inventory reads, scoped device removal and handling for its empty success response. Access entitlements and other runtime procedures remain unchanged."
+    }
+  ]
+}

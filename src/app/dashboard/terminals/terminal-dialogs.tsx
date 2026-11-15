@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import {
-  authorizeTerminalFleetCST, cancelTerminalFleetChange, listRestaurants, listTerminalFleet, listTerminalFleetChanges,
+  authorizeTerminalFleetCST, cancelTerminalFleetChange, forgetHardware, listRestaurants, listTerminalFleet, listTerminalFleetChanges,
   prepareTerminalFleetChange, registerFleetMini, reviewTerminalFleetCST, stageTerminalFleetVHQ, updateTerminalFleet,
   type Restaurant, type TerminalFleetChange, type TerminalFleetChangeInput, type TerminalFleetDeclaration,
   type TerminalFleetEntry, type TerminalFleetParameters,
@@ -65,6 +65,42 @@ function Dialog({ title, busy, onClose, children }: {
 
 function ErrorText({ message }: { message: string }) {
   return message ? <p className="rounded-md bg-red-50 p-3 text-sm text-red-800" role="alert">{message}</p> : null;
+}
+
+/** Confirms removal of one physical device and its assignments. */
+export function ForgetDevice({ device, onForgotten, onClose }: {
+  device: TerminalFleetEntry; onForgotten: () => void; onClose: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function forget() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      await forgetHardware(device.restaurant_id, device.device_id);
+      onForgotten();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not forget the device.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <Dialog title="Forget device" busy={busy} onClose={onClose}>
+    <p className="text-sm text-gray-700">
+      Remove <strong>{device.name || device.model || 'this device'}</strong> from <strong>{device.restaurant_name || `restaurant #${device.restaurant_id}`}</strong>?
+      Its Foody connections, assignments and access will be removed.
+    </p>
+    <ErrorText message={error} />
+    <div className="flex flex-wrap justify-end gap-2">
+      <button className={action} type="button" disabled={busy} onClick={onClose}>Cancel</button>
+      <button className="rounded-full bg-red-700 px-5 py-2 text-sm font-medium text-white hover:bg-red-800 focus-visible:outline-blue-600 disabled:opacity-40" type="button" disabled={busy} onClick={() => void forget()}>
+        {busy ? 'Removing…' : 'Forget device'}
+      </button>
+    </div>
+  </Dialog>;
 }
 
 function Field({ label, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
@@ -483,14 +519,14 @@ export function ChangeRequests({ terminal, onChanged, onClose }: {
           <h3 className="mt-1 font-semibold">{changeKinds[active.kind]}</h3>
         </div>
         <ChangeSummary change={active} restaurantName={terminal.restaurant_name} />
-        {active.device_id === terminal.device_id && <CSTActions key={active.id} change={active} busy={busy} save={save} />}
-        {active.device_id === terminal.device_id ?
+        {!terminal.forgotten_at && active.device_id === terminal.device_id && <CSTActions key={active.id} change={active} busy={busy} save={save} />}
+        {!terminal.forgotten_at && (active.device_id === terminal.device_id ?
           <button className={action} disabled={busy || active.attempts?.some(attempt => attempt.dispatched_at && attempt.state !== 'not_started')} type="button"
             onClick={() => void save(() => cancelTerminalFleetChange(terminal.device_id, active.id))}>Cancel request</button> :
-          <p className="text-sm text-gray-600">Manage this request from the original terminal’s history.</p>}
+          <p className="text-sm text-gray-600">Manage this request from the original terminal’s history.</p>)}
       </section>
     )}
-    {changes !== null && !active && (terminal.metadata?.serial_number ?
+    {changes !== null && !terminal.forgotten_at && !active && (terminal.metadata?.serial_number ?
       <ChangeForm terminal={terminal} busy={busy} onPrepare={input => save(() => prepareTerminalFleetChange(terminal.device_id, input))} /> :
       <p className="text-sm text-gray-600">Save the physical serial number in Edit inventory to prepare a change.</p>)}
     {changes?.filter(change => change.state !== 'prepared').map(change => (

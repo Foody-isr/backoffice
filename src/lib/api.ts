@@ -244,7 +244,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
     }
     throw error;
   }
-  return res.json();
+  return res.status === 204 ? undefined as T : res.json();
 }
 
 // ─── Auth ───────────────────────────────────────────────────────────
@@ -1478,7 +1478,7 @@ export interface TerminalFleetMetadata {
 /** Non-secret physical inventory, restricted to the superadmin control plane. */
 export interface TerminalFleetEntry {
   device_id: string; restaurant_id: number; restaurant_name: string; name: string;
-  manufacturer: string; model: string; status: string; last_seen_at?: string;
+  manufacturer: string; model: string; status: string; last_seen_at?: string; kind?: string;
   forgotten_at?: string; metadata?: TerminalFleetMetadata; prepared_change_id?: string; serial_locked?: boolean;
 }
 
@@ -1544,16 +1544,34 @@ export interface TerminalFleetChange {
   attempts?: TerminalFleetAttempt[];
 }
 
-/** Lists a bounded page of payment-capable devices across restaurants. */
-export async function listTerminalFleet(options: {
+type HardwareFilters = {
   q?: string;
   restaurant_id?: string;
   offset?: number;
   include_forgotten?: boolean;
-} = {}) {
+};
+
+function hardwareQuery(options: HardwareFilters) {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(options)) if (value !== undefined && value !== '') query.set(key, String(value));
+  return query;
+}
+
+/** Lists a bounded page of payment-capable devices across restaurants. */
+export async function listTerminalFleet(options: HardwareFilters = {}) {
+  const query = hardwareQuery(options);
   return apiFetch<{ terminals: TerminalFleetEntry[]; has_more: boolean }>(`/api/v1/admin/terminals?${query}`);
+}
+
+/** Lists a bounded page of every registered hardware kind across restaurants. */
+export async function listHardware(options: HardwareFilters = {}) {
+  const query = hardwareQuery(options);
+  return apiFetch<{ devices: TerminalFleetEntry[]; has_more: boolean }>(`/api/v1/admin/devices?${query}`);
+}
+
+/** Removes one device within the restaurant shown in the inventory. */
+export async function forgetHardware(restaurantId: number, deviceId: string) {
+  await apiFetch<void>(`/api/v1/restaurants/${restaurantId}/devices/${encodeURIComponent(deviceId)}`, { method: 'DELETE' });
 }
 
 /** Saves declarations only; no bank command or reassignment occurs. */
