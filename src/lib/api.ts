@@ -1375,7 +1375,7 @@ export async function stageTerminalFleetVHQ(deviceId: string, changeId: string, 
 
 export type FoodyModule = 'restaurant' | 'ordering' | 'kitchen';
 
-export type FoodyLicenceCounts = { pos: number; chef: number; kds: number; employees?: number | null; pos_devices?: number | null };
+export type FoodyLicenceCounts = { pos_users_unlimited?: boolean; pos: number; chef: number; kds: number; employees?: number | null; pos_devices?: number | null };
 
 export type FoodyModuleAccess = {
   status: 'pending' | 'trial' | 'active' | 'expired';
@@ -1437,7 +1437,7 @@ export function resendFoodyModularInvite(id: number) {
 }
 
 export type FoodyCapability = { key: string; category: string; name: Record<'en' | 'fr' | 'he', string>; requires_all: string[]; admin_paths: string[] };
-export type FoodyPlan = { capabilities?: string[]; id: string; name: Record<'en' | 'fr' | 'he', string>; modules: FoodyModule[]; monthly_minor: number; included: FoodyLicenceCounts; add_features: string[]; remove_features: string[]; published: boolean };
+export type FoodyPlan = { capabilities?: string[]; id: string; name: Record<'en' | 'fr' | 'he', string>; modules: FoodyModule[]; monthly_minor: number; included: FoodyLicenceCounts; add_features: string[]; remove_features: string[]; published: boolean; automatic?: boolean; recommended?: boolean };
 export type FoodyTariff = { id: string; category: string; name: Record<'en' | 'fr' | 'he', string>; unit: string; amount_minor: number | null; quantity?: number };
 export type FoodyEditableCatalog = FoodyModuleCatalog & { revision: number; plans: FoodyPlan[]; tariffs: FoodyTariff[]; capabilities: FoodyCapability[] };
 /** Reads the published catalogue with its editable prices and composition. */
@@ -1472,4 +1472,9 @@ export async function commercialDocumentRequest<T>(suffix: string, options: Requ
     return await response.blob() as T;
   }
   return response.json();
+}
+
+/** Loads the reviewed software offer template without publishing it. */
+export function getReviewedFoodyCatalog(): Promise<FoodyEditableCatalog> {
+  return apiFetch('/api/v1/admin/foody-billing/catalog/reviewed');
 }

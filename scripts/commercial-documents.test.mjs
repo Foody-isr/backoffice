@@ -86,3 +86,17 @@ test('server totals and inclusions cannot become editable request fields', () =>
   assert.equal('single' in input, false);
   assert.equal(input.lines[0].unit_price_minor, 59000);
 });
+
+test('the offer preview distinguishes an automatic bundle from separate module and payment charges', () => {
+  const code = ts.transpileModule(fs.readFileSync(new URL('../src/lib/commercial-catalog.ts', import.meta.url), 'utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  const preview = {};
+  vm.runInNewContext(code,{exports:preview});
+  const name = {en:'Test',fr:'Test',he:'בדיקה'};
+  const seats = {pos:0,pos_users_unlimited:true,chef:0,kds:0,employees:null,pos_devices:2};
+  const catalog = {products:[{id:'restaurant',name,monthly_minor:59000,included:seats,capabilities:['pos']},{id:'ordering',name,monthly_minor:59000,included:{...seats,pos_devices:0,pos_users_unlimited:false},capabilities:['website']}],plans:[{id:'duo',name,modules:['restaurant','ordering'],monthly_minor:99000,included:seats,capabilities:['pos','website'],automatic:true,published:true}]};
+  assert.equal(preview.commercialSelection(catalog,['restaurant','ordering']).monthlyMinor,99000);
+  assert.equal(preview.commercialSelection(catalog,['restaurant','ordering']).seats.pos_devices,2);
+  assert.equal(preview.commercialSelection(catalog,['restaurant','ordering']).seats.pos,0);
+  catalog.plans[0].included = {...seats,pos_devices:1};
+  assert.equal(preview.commercialSelection(catalog,['restaurant','ordering']).monthlyMinor,118000);
+});
