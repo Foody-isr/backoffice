@@ -345,3 +345,12 @@ Canonical production/development backoffice hosts select their matching API at
 runtime so the exact verified development artifact can be promoted to production.
 The build's Content Security Policy explicitly permits both canonical API origins
 so the browser can use that runtime selection in either environment.
+
+## Versioned plans and licence quotas (development)
+
+The matching migration 320/API provides editable public modules, composed plans,
+prices and categorized capabilities. Backoffice publishes a revision; Landing
+Pricing reads the same environment; Admin reviews purchased rights and paid
+additions. Employee accounts and physical POS devices use separate quotas.
+Accepted contracts and invitations retain their version. See the synchronized
+FR/HE/EN billing, staff and catalogue help for the sandbox test procedures.

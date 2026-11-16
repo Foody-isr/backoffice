@@ -16,5 +16,8 @@ export function foodyLicenceLabels(seats: FoodyLicenceCounts) {
     [seats.chef, 'chef access', 'chef accesses'],
     [seats.kds, 'kitchen display licence', 'kitchen display licences'],
   ];
-  return labels.filter(([count]) => count > 0).map(([count, one, many]) => `${count} ${count === 1 ? one : many}`);
+  const result = labels.filter(([count]) => count > 0).map(([count, one, many]) => `${count} ${count === 1 ? one : many}`);
+  if (seats.employees !== undefined) result.push(seats.employees === null ? 'Unlimited employee accounts' : `${seats.employees} accounts, owner included`);
+  if (seats.pos_devices !== undefined) result.push(seats.pos_devices === null ? 'Unlimited physical POS devices' : `${seats.pos_devices} physical POS devices`);
+  return result;
 }
