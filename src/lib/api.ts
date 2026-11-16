@@ -1375,7 +1375,7 @@ export async function stageTerminalFleetVHQ(deviceId: string, changeId: string, 
 
 export type FoodyModule = 'restaurant' | 'ordering' | 'kitchen';
 
-export type FoodyLicenceCounts = { pos: number; chef: number; kds: number };
+export type FoodyLicenceCounts = { pos: number; chef: number; kds: number; employees?: number | null; pos_devices?: number | null };
 
 export type FoodyModuleAccess = {
   status: 'pending' | 'trial' | 'active' | 'expired';
@@ -1385,6 +1385,9 @@ export type FoodyModuleAccess = {
 };
 
 export type FoodyModuleCatalog = {
+  plans?: FoodyPlan[];
+  capabilities?: FoodyCapability[];
+  tariffs?: FoodyTariff[];
   version: string;
   currency: 'ILS';
   minimum_trial_days: number;
@@ -1395,6 +1398,7 @@ export type FoodyModuleCatalog = {
     monthly_minor: number;
     included: FoodyLicenceCounts;
     features: FeatureKey[];
+    capabilities?: string[];
   }[];
 };
 
@@ -1404,6 +1408,8 @@ export type ModularOnboardingInput = {
   trial_days: number;
   trial_modules: FoodyModule[];
   custom?: {
+    plan_id?: string;
+    extra_licences?: Record<string, number>;
     modules: FoodyModule[];
     extra_pos_licences: number;
     title: string;
@@ -1428,4 +1434,17 @@ export async function getFoodyModuleCatalog(signal?: AbortSignal): Promise<Foody
 /** Requests delivery of the scoped invitation for this sandbox restaurant. */
 export function resendFoodyModularInvite(id: number) {
   return apiFetch<{ invite_sent: boolean }>(`/api/v1/admin/restaurants/${id}/modular-invite`, { method: 'POST' });
+}
+
+export type FoodyCapability = { key: string; category: string; name: Record<'en' | 'fr' | 'he', string>; requires_all: string[]; admin_paths: string[] };
+export type FoodyPlan = { capabilities?: string[]; id: string; name: Record<'en' | 'fr' | 'he', string>; modules: FoodyModule[]; monthly_minor: number; included: FoodyLicenceCounts; add_features: string[]; remove_features: string[]; published: boolean };
+export type FoodyTariff = { id: string; category: string; name: Record<'en' | 'fr' | 'he', string>; unit: string; amount_minor: number | null; quantity?: number };
+export type FoodyEditableCatalog = FoodyModuleCatalog & { revision: number; plans: FoodyPlan[]; tariffs: FoodyTariff[]; capabilities: FoodyCapability[] };
+/** Reads the published catalogue with its editable prices and composition. */
+export function getEditableFoodyCatalog(signal?: AbortSignal): Promise<FoodyEditableCatalog> {
+ return apiFetch('/api/v1/admin/foody-billing/catalog', { signal });
+}
+/** Publishes an immutable revision only if the edited version is still current. */
+export function publishFoodyCatalog(catalog: FoodyEditableCatalog, expectedRevision: number): Promise<FoodyEditableCatalog> {
+ return apiFetch('/api/v1/admin/foody-billing/catalog', { method: 'PUT', body: JSON.stringify({ expected_revision: expectedRevision, catalog }) });
 }

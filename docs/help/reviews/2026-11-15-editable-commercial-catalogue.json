@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "e715f0755fa78847975276bb93fdf210d34d8c3b08badb3434f970b94c83d799",
+      "baseSha256": "bcbd3059b7274d81ecd158cc7edc7082de7c2cf573e6916095e564bff3da9d86",
+      "disposition": "no-user-impact",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "reason": "The diff adds editable commercial catalogue, plan, tariff and separate licence types plus catalogue GET/PUT functions. Existing platform administration and shared authentication/runtime contracts remain unchanged. The internal catalogue, onboarding and sandbox billing guides document these new commercial controls."
+    }
+  ]
+}
