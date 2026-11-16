@@ -11,6 +11,28 @@ const { newCommercialLine, changeLineBilling, changeDocumentTax, sourcePrice, co
 const tax = { tax_mode: 'ht', vat_bps: 1800 };
 const module = { type: 'module', id: 'restaurant', name: 'Restaurant', group: 'Modules', unit: 'subscription', price: 59000 };
 
+test('PDF blobs are embedded only in the document workspace while anti-framing and other policies stay intact', async () => {
+  const { default: nextConfig } = await import('../next.config.mjs');
+  const rules = await nextConfig.headers();
+  const globalRule = rules.find(rule => rule.source === '/(.*)');
+  const documentRule = rules.find(rule => rule.source === '/dashboard/features');
+  assert.ok(globalRule && documentRule);
+  const directives = rule => new Map(rule.headers.find(header => header.key === 'Content-Security-Policy').value
+    .split(';').map(value => { const [name, ...sources] = value.trim().split(/\s+/); return [name, sources.join(' ')]; }));
+  const globalPolicy = directives(globalRule);
+  const documentPolicy = directives(documentRule);
+  assert.equal(globalPolicy.get('object-src'), "'none'");
+  assert.equal(globalPolicy.has('frame-src'), false);
+  assert.equal(documentPolicy.get('object-src'), 'blob:');
+  assert.equal(documentPolicy.get('frame-src'), "'self' blob:");
+  assert.equal(documentPolicy.get('frame-ancestors'), "'none'");
+  assert.equal(globalRule.headers.find(header => header.key === 'X-Frame-Options').value, 'DENY');
+  assert.deepEqual(documentRule.headers.map(header => header.key), ['Content-Security-Policy']);
+  for (const [directive, sources] of globalPolicy) {
+    if (directive !== 'object-src') assert.equal(documentPolicy.get(directive), sources, directive);
+  }
+});
+
 test('prepayment converts a negotiated monthly rate to a whole-period amount exactly once', () => {
   const monthly = newCommercialLine(module, tax);
   monthly.unit_price_minor = 40000;
