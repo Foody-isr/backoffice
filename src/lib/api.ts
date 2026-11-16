@@ -1448,3 +1448,28 @@ export function getEditableFoodyCatalog(signal?: AbortSignal): Promise<FoodyEdit
 export function publishFoodyCatalog(catalog: FoodyEditableCatalog, expectedRevision: number): Promise<FoodyEditableCatalog> {
  return apiFetch('/api/v1/admin/foody-billing/catalog', { method: 'PUT', body: JSON.stringify({ expected_revision: expectedRevision, catalog }) });
 }
+
+/** Carries a safe validation field or conflict code without document contents. */
+export class CommercialDocumentError extends Error {
+  constructor(public readonly status: number, code: string, public readonly field?: string) {
+    super(code); this.name = 'CommercialDocumentError';
+  }
+}
+
+/** Authenticates private document requests, allowing time for the PDF renderer. */
+export async function commercialDocumentRequest<T>(suffix: string, options: RequestInit = {}, pdf = false): Promise<T> {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/v1/admin/foody-billing/documents${suffix}`, {
+    ...options, cache: 'no-store', signal: options.signal ?? AbortSignal.timeout(45_000),
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new CommercialDocumentError(response.status, typeof body.error === 'string' ? body.error : 'commercial_document_unavailable', typeof body.field === 'string' ? body.field : undefined);
+  }
+  if (pdf) {
+    if (!response.headers.get('content-type')?.startsWith('application/pdf')) throw new CommercialDocumentError(503, 'commercial_document_unavailable');
+    return await response.blob() as T;
+  }
+  return response.json();
+}

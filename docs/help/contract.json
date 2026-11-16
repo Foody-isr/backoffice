@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "573f89a2259a8e40de55b5a594d30471100c9d44",
-  "documentationRevision": "7344ec8482d269e9f219a999b312e9bd0f9cf55645c750ddb006b89504723f39",
+  "documentationRef": "a9aa20f0b017711c1e32165ad6351133e2a5c9c5",
+  "documentationRevision": "4c4d01d2518aa6bb9bc63c46988ea591b7c90703542e7c5685c55afe09463368",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -1741,15 +1741,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/features-and-payments.md",
-          "sha256": "d5b7229c54775b8f9156a89d88cf55258c9a192db4875f8c36665a6fe72f995f"
+          "sha256": "992ed13cdf3ed1d806d726d0a6bcbacf120641962c3367620fde870d5442f208"
         },
         "fr": {
           "path": "docs/help/internal/fr/features-and-payments.md",
-          "sha256": "786e45327ebd71f6af8285c93faa3fcb97fbbdec641c4e96ee8ccf91d30ad216"
+          "sha256": "6d34d5ed5f44c2db16ca0ebbe4283c7cce5d664e5677163f7d8e501aa947a808"
         },
         "he": {
           "path": "docs/help/internal/he/features-and-payments.md",
-          "sha256": "db05c36c69050033d2c41996697d8a93a2ec0c595e5f96f269efd47529dd9f9b"
+          "sha256": "32182b6a60932380d001f168e6f2d266c982df653342db2ab7dd95b411525e62"
         }
       }
     },
@@ -2151,6 +2151,25 @@
           "sha256": "fb5940e7216133a9980c6488a7dd27acf39b9609056e51fa2ce26c413a17955c"
         }
       }
+    },
+    "internal/commercial-documents": {
+      "feature": "backoffice-commercial-documents",
+      "audience": "internal",
+      "status": "available",
+      "translations": {
+        "en": {
+          "path": "docs/help/internal/en/commercial-documents.md",
+          "sha256": "c010e4ef41cd95899fe7d0522e1c8290f1b5e76d1e5a06c988ec47d8d81f1360"
+        },
+        "fr": {
+          "path": "docs/help/internal/fr/commercial-documents.md",
+          "sha256": "8cb852b483376da2c75f9cd2589bfe29e8c546abf083e1a8cb49ed3a376c227b"
+        },
+        "he": {
+          "path": "docs/help/internal/he/commercial-documents.md",
+          "sha256": "56940a424f076d08518a8ff1821fbf470793f459dd95ba92b9f7c7de1505f85e"
+        }
+      }
     }
   },
   "sources": {
@@ -2179,7 +2198,7 @@
       ]
     },
     "src/app/dashboard/features/page.tsx": {
-      "sha256": "1c4e99ee639414d3969f4df69ac87d5bc652da0f2a0df43d497686e90e262b79",
+      "sha256": "a2b93fb941c94d0b10aa8cae51c23b547908f23f8df130aa885f764039a72b0f",
       "features": [
         "backoffice-entitlements"
       ]
@@ -2336,6 +2355,12 @@
         "shared-runtime"
       ]
     },
+    "src/components/CommercialDocuments.tsx": {
+      "sha256": "7524da4505f63438e2a5c00cbeddad55a39c3f68761f89f14d4e43ebffd17a3f",
+      "features": [
+        "backoffice-commercial-documents"
+      ]
+    },
     "src/components/CopyRestaurantToDev.tsx": {
       "sha256": "5398103df87c7d2dca52f5d32550acec07cee7133975356a04f3d99f5c56fa7b",
       "features": [
@@ -2388,7 +2413,7 @@
       ]
     },
     "src/lib/api.ts": {
-      "sha256": "e715f0755fa78847975276bb93fdf210d34d8c3b08badb3434f970b94c83d799",
+      "sha256": "2c74f122237ad1b957103e1e38baee2cc618b5dc012bc9f9b843b85f663aa07b",
       "features": [
         "backoffice-entitlements",
         "platform-api",
@@ -2400,6 +2425,12 @@
       "features": [
         "backoffice-access",
         "shared-runtime"
+      ]
+    },
+    "src/lib/commercial-documents.ts": {
+      "sha256": "a792d0b761f47ed17e1d4b7bf506124e1e1561a3fd89b770100542241692756c",
+      "features": [
+        "backoffice-commercial-documents"
       ]
     },
     "src/lib/foody-modules.ts": {
@@ -2935,6 +2966,21 @@
       ]
     },
     {
+      "id": "foodybackoffice:src/components/CommercialDocuments.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/CommercialDocuments.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-commercial-documents"
+      ],
+      "labels": [],
+      "actions": [
+        "open",
+        "save",
+        "update"
+      ]
+    },
+    {
       "id": "foodybackoffice:src/components/CopyRestaurantToDev.tsx:ui-controls:1",
       "kind": "ui-controls",
       "source": "src/components/CopyRestaurantToDev.tsx",
@@ -3035,6 +3081,20 @@
         "updateSpokeConfig",
         "updateTerminalFleet",
         "updateUserEmail"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/lib/commercial-documents.ts:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/lib/commercial-documents.ts",
+      "line": 1,
+      "features": [
+        "backoffice-commercial-documents"
+      ],
+      "labels": [],
+      "actions": [
+        "saveCommercialDefaults",
+        "saveCommercialDocument"
       ]
     }
   ]

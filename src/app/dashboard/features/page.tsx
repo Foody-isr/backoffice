@@ -3,12 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getEditableFoodyCatalog, publishFoodyCatalog, type FoodyEditableCatalog, type FoodyLicenceCounts, type FoodyPlan } from '@/lib/api';
 import { formatFoodyAmount } from '@/lib/foody-modules';
+import CommercialDocuments from '@/components/CommercialDocuments';
 
 const field = 'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm';
 const quotaLabels: Record<keyof FoodyLicenceCounts, string> = {
   pos: 'Named POS users', chef: 'Chef users', kds: 'Kitchen displays', employees: 'Total accounts, including owner', pos_devices: 'Physical POS devices',
 };
-type Tab = 'modules' | 'plans' | 'prices' | 'features';
+type Tab = 'modules' | 'plans' | 'prices' | 'features' | 'documents';
 
 function Quotas({ value, onChange }: { value: FoodyLicenceCounts; onChange: (next: FoodyLicenceCounts) => void }) {
   return <fieldset className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -41,6 +42,7 @@ export default function PlansAndModulesPage() {
   const [saved, setSaved] = useState<FoodyEditableCatalog | null>(null);
   const [draft, setDraft] = useState<FoodyEditableCatalog | null>(null);
   const [tab, setTab] = useState<Tab>('modules');
+  const [documentsDirty, setDocumentsDirty] = useState(false);
   const [selected, setSelected] = useState('restaurant');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
@@ -131,12 +133,13 @@ export default function PlansAndModulesPage() {
         <div className="flex gap-3"><button type="button" className="btn-primary" disabled={busy} onClick={publish}>{busy ? 'Publishing…' : 'Publish new version'}</button><button type="button" className="btn-secondary" disabled={busy} onClick={() => setReview(false)}>Continue editing</button></div>
       </section>}
       <nav aria-label="Catalogue sections" className="flex flex-wrap gap-1 border-b border-gray-200">
-        {(['modules', 'plans', 'prices', 'features'] as Tab[]).map(id => <button type="button" key={id} aria-current={tab === id ? 'page' : undefined}
+        {(['modules', 'plans', 'prices', 'features', 'documents'] as Tab[]).map(id => <button type="button" key={id} aria-current={tab === id ? 'page' : undefined}
           className={`px-4 py-3 text-sm font-semibold ${tab === id ? 'border-b-2 border-brand-500 text-brand-700' : 'text-gray-600 hover:text-gray-900'}`}
-          onClick={() => { setTab(id); setCategory('all'); if (id === 'modules') setSelected('restaurant'); if (id === 'plans') setSelected(draft.plans[0]?.id ?? ''); }}>
-          {{ modules: 'Modules', plans: 'Plans', prices: 'All prices', features: 'Feature inventory' }[id]}
+          onClick={() => { if (tab === 'documents' && id !== tab && documentsDirty && !window.confirm('Discard unsaved document changes?')) return; setTab(id); setCategory('all'); if (id === 'modules') setSelected('restaurant'); if (id === 'plans') setSelected(draft.plans[0]?.id ?? ''); }}>
+          {{ modules: 'Modules', plans: 'Plans', prices: 'All prices', features: 'Feature inventory', documents: 'Quotes & orders' }[id]}
         </button>)}
       </nav>
+      {tab === 'documents' && <CommercialDocuments onDirtyChange={setDocumentsDirty} />}
       {(tab === 'modules' || tab === 'plans') && <div className="grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
         <aside className="space-y-2" aria-label="Select an offer">
           {(tab === 'modules' ? draft.products : draft.plans).map(p => <button key={p.id} type="button" onClick={() => setSelected(p.id)} aria-pressed={selected === p.id}

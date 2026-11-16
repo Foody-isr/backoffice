@@ -354,3 +354,40 @@ Pricing reads the same environment; Admin reviews purchased rights and paid
 additions. Employee accounts and physical POS devices use separate quotas.
 Accepted contracts and invitations retain their version. See the synchronized
 FR/HE/EN billing, staff and catalogue help for the sandbox test procedures.
+
+### Commercial quotations and orders (sandbox)
+
+**Payments & devices → Plans & modules → Quotes & orders** composes Foody PDFs
+with the owned dark logo in Hebrew, French or English. Set Foody's actual company
+identity in **Issuer settings**; sample customer/supplier identities are not
+application defaults. The customer can be a prospect or a linked restaurant.
+
+Use catalogue plans/modules, hardware and tariff rows, or a custom item. Every
+line has a quantity, agreed unit price and payment schedule. Monthly lines have
+an optional minimum commitment. Prepaid subscriptions cover 1–120 months; their
+price is for the **whole period per unit**. Changing the period retains the
+negotiated package price; **Use catalogue price** explicitly recalculates it.
+One-time/prepaid, monthly and usage amounts remain separate. HT/TTC/no-VAT
+pricing and VAT rate are explicit. Catalogue quotas are shown per unit; the
+full feature list is optional.
+
+**Save draft** freezes the source catalogue. **Preview PDF** produces a marked
+draft. **Review & finalize → Finalize document** creates an immutable numbered
+archive. **Create order draft** copies an issued quotation into its single order
+draft without recording customer acceptance. These actions send no email,
+collect no payment and do not change customer subscriptions or licences.
+Concurrent edits return a conflict; local edits remain available for recovery.
+
+API migration **321** adds private document storage. Deploy the matching sandbox
+API before this UI. Production API access is intentionally disabled.
+Validation: `node --test scripts/commercial-documents.test.mjs`, lint, TypeScript,
+build and the service help contract. The API's opt-in `TestBrowserWorkspace`
+harness supports local browser checks with a synthetic in-memory database.
+
+For the synthetic browser flow, start the API harness and `npx next start -p
+19083 -H 127.0.0.1`, then run `node scripts/commercial-documents.browser.cjs`.
+Playwright must be available (or set `FOODY_BROWSER_PLAYWRIGHT_PATH` to its
+installed directory). The check blocks external requests, verifies mixed pricing,
+PDF download/archive, quote-to-order conversion, stale-edit recovery and mobile
+overflow. `FOODY_COMMERCIAL_SAMPLE_DIR` optionally retains synthetic screenshots
+and PDFs. Stop the test API with `POST http://127.0.0.1:19082/__test/stop`.
