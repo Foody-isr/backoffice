@@ -27,6 +27,11 @@ const contentSecurityPolicy = [
   ...(isProduction ? ['upgrade-insecure-requests'] : []),
 ].join('; ');
 
+// Chrome's PDF viewer needs both permissions for our authenticated PDF blobs.
+// Keep object embedding disabled everywhere except the document workspace.
+const commercialDocumentSecurityPolicy = contentSecurityPolicy
+  .replace("object-src 'none'", 'object-src blob:') + "; frame-src 'self' blob:";
+
 const securityHeaders = [
   { key: 'Content-Security-Policy', value: contentSecurityPolicy },
   { key: 'Referrer-Policy', value: 'no-referrer' },
@@ -38,7 +43,10 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
-    return [{ source: '/(.*)', headers: securityHeaders }];
+    return [
+      { source: '/(.*)', headers: securityHeaders },
+      { source: '/dashboard/features', headers: [{ key: 'Content-Security-Policy', value: commercialDocumentSecurityPolicy }] },
+    ];
   },
 };
 

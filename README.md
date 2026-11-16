@@ -391,3 +391,11 @@ installed directory). The check blocks external requests, verifies mixed pricing
 PDF download/archive, quote-to-order conversion, stale-edit recovery and mobile
 overflow. `FOODY_COMMERCIAL_SAMPLE_DIR` optionally retains synthetic screenshots
 and PDFs. Stop the test API with `POST http://127.0.0.1:19082/__test/stop`.
+
+The document workspace's response CSP permits `blob:` PDF frames and objects on
+`/dashboard/features` only. Other pages retain `object-src 'none'`; all pages keep
+`frame-ancestors 'none'` and `X-Frame-Options: DENY`. No external object origin is
+allowed. Browser acceptance must check the visible PDF viewer, not only the modal
+and downloaded bytes. Help impact review: this restores the PDF preview already
+documented in the FR/HE/EN commercial-document guides; labels, actions, permissions,
+prices and contracts are unchanged, so those procedures need no translation change.
