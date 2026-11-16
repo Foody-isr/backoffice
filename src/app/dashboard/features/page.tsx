@@ -1,26 +1,27 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getEditableFoodyCatalog, publishFoodyCatalog, type FoodyEditableCatalog, type FoodyLicenceCounts, type FoodyPlan } from '@/lib/api';
+import { getEditableFoodyCatalog, getReviewedFoodyCatalog, publishFoodyCatalog, type FoodyEditableCatalog, type FoodyLicenceCounts, type FoodyPlan } from '@/lib/api';
 import { formatFoodyAmount } from '@/lib/foody-modules';
 import CommercialDocuments from '@/components/CommercialDocuments';
 
 const field = 'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm';
-const quotaLabels: Record<keyof FoodyLicenceCounts, string> = {
-  pos: 'Named POS users', chef: 'Chef users', kds: 'Kitchen displays', employees: 'Total accounts, including owner', pos_devices: 'Physical POS devices',
+const quotaLabels: Record<Exclude<keyof FoodyLicenceCounts, 'pos_users_unlimited'>, string> = {
+  pos: 'Named POS users', chef: 'Chef users', kds: 'Kitchen displays', employees: 'Total accounts, including owner', pos_devices: 'Active POS devices',
 };
 type Tab = 'modules' | 'plans' | 'prices' | 'features' | 'documents';
 
 function Quotas({ value, onChange }: { value: FoodyLicenceCounts; onChange: (next: FoodyLicenceCounts) => void }) {
   return <fieldset className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
     <legend className="mb-2 text-sm font-semibold">Included users and devices</legend>
-    {(Object.keys(quotaLabels) as (keyof FoodyLicenceCounts)[]).map(key => <label key={key} className="text-sm">
+    <label className="text-sm sm:col-span-2 xl:col-span-3"><input type="checkbox" checked={!!value.pos_users_unlimited} onChange={event => onChange({ ...value, pos_users_unlimited: event.target.checked, pos: 0 })} /> Personal POS accounts without a per-employee charge</label>
+    {(Object.keys(quotaLabels) as (keyof typeof quotaLabels)[]).filter(key => key !== 'pos' || !value.pos_users_unlimited).map(key => <label key={key} className="text-sm">
       {quotaLabels[key]}
       <input className={field} type="number" min={0} max={10000} step={1} value={value[key] ?? ''}
         placeholder={key === 'employees' || key === 'pos_devices' ? 'Unlimited' : '0'}
         onChange={event => onChange({ ...value, [key]: event.target.value === '' && (key === 'employees' || key === 'pos_devices') ? null : Number(event.target.value) })} />
     </label>)}
-    <p className="text-xs text-gray-600 sm:col-span-2 xl:col-span-3">Pending invitations reserve a user licence. Reauthorizing the same physical device does not consume another device licence. Blank total-account or POS-device limits mean unlimited.</p>
+    <p className="text-xs text-gray-600 sm:col-span-2 xl:col-span-3">New device-based offers include personal POS accounts. Named-user quotas still apply to legacy offers and chef access. Reauthorizing the same physical device does not consume another device licence. Blank total-account or POS-device limits mean unlimited.</p>
   </fieldset>;
 }
 
@@ -32,9 +33,9 @@ function Names({ value, onChange }: { value: Record<'en' | 'fr' | 'he', string>;
 
 
 function QuotaChanges({ before, after }: { before?: FoodyLicenceCounts; after: FoodyLicenceCounts }) {
-  return <span className="block text-xs text-gray-600">{(Object.keys(quotaLabels) as (keyof FoodyLicenceCounts)[])
+  return <span className="block text-xs text-gray-600">{(Object.keys(quotaLabels) as (keyof typeof quotaLabels)[])
     .filter(key => !before || before[key] !== after[key])
-    .map(key => `${quotaLabels[key]}: ${before ? before[key] ?? 'Unlimited' : '—'} → ${after[key] ?? 'Unlimited'}`).join(' · ')}</span>;
+    .map(key => `${quotaLabels[key]}: ${before ? before[key] ?? 'Unlimited' : '—'} → ${after[key] ?? 'Unlimited'}`).join(' · ')}{before?.pos_users_unlimited !== after.pos_users_unlimited && ` · Personal POS accounts without per-employee charge: ${after.pos_users_unlimited ? 'Yes' : 'No'}`}</span>;
 }
 
 /** Edits versioned commercial offers while accepted customer contracts remain frozen. */
@@ -87,8 +88,22 @@ export default function PlansAndModulesPage() {
   function addPlan() {
     const id = `plan-${Date.now()}`;
     const next: FoodyPlan = { id, name: { en: '', fr: '', he: '' }, modules: ['restaurant'], monthly_minor: draft?.products[0].monthly_minor ?? 59000,
-      included: { pos: 1, chef: 0, kds: 0, employees: null, pos_devices: null }, add_features: [], remove_features: [], published: false };
+      included: { pos: 0, pos_users_unlimited: true, chef: 0, kds: 0, employees: null, pos_devices: 2 }, add_features: [], remove_features: [], published: false };
     setDraft(current => current && ({ ...current, plans: [...current.plans, next] })); setSelected(id); setReview(false);
+  }
+  async function loadReviewed() {
+    if (!draft || busy) return;
+    setBusy(true); setError('');
+    try {
+      const template = await getReviewedFoodyCatalog();
+      setDraft(current => current && ({ ...current,
+        products: template.products,
+        plans: [...template.plans, ...current.plans.filter(p => !template.plans.some(t => t.id === p.id))],
+        tariffs: current.tariffs.map(row => row.id === 'extraPOSDevice' ? template.tariffs.find(t => t.id === row.id)! : row),
+      }));
+      setReview(true); setNotice('Reviewed software offers loaded into this draft. Review before publication. Equipment, setup and payment prices are retained.');
+    } catch { setError('The reviewed offers could not be loaded. No changes were applied.'); }
+    finally { setBusy(false); }
   }
   async function publish() {
     if (!draft || !saved || busy) return;
@@ -105,6 +120,7 @@ export default function PlansAndModulesPage() {
     <header className="flex flex-wrap items-start justify-between gap-4">
       <div><h1 className="page-title">Plans &amp; modules</h1><p className="mt-1 max-w-2xl text-sm text-gray-600">Manage public offers, included features and licence limits. Prices exclude VAT.</p></div>
       <div className="flex items-center gap-3 text-sm"><span className="text-gray-600">{saved ? `Version ${saved.version}` : 'Loading…'}</span>
+        <button type="button" className="btn-secondary" disabled={!draft || busy} onClick={() => void loadReviewed()}>Load reviewed software offers</button>
         <button type="button" className="btn-primary" disabled={!changed || busy} onClick={() => { setReview(true); setNotice(''); }}>Review changes</button>
       </div>
     </header>
@@ -153,6 +169,8 @@ export default function PlansAndModulesPage() {
           <label className="block max-w-xs text-sm">Monthly price (ILS, excluding VAT)<input className={field} type="number" min={0.01} max={1000000} step={0.01} value={(product ?? plan)!.monthly_minor / 100} onChange={e => product ? updateProduct({ monthly_minor: Math.round(Number(e.target.value) * 100) }) : updatePlan({ monthly_minor: Math.round(Number(e.target.value) * 100) })} /></label>
           {plan && <fieldset className="space-y-2"><legend className="mb-2 text-sm font-semibold">Included modules</legend>{draft.products.map(p => <label key={p.id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.modules.includes(p.id)} onChange={e => updatePlan({ modules: e.target.checked ? [...plan.modules, p.id] : plan.modules.filter(id => id !== p.id) })} />{p.name.en}</label>)}
             <label className="flex items-center gap-2 pt-2 text-sm font-medium"><input type="checkbox" checked={plan.published} onChange={e => updatePlan({ published: e.target.checked })} />Offer this plan to customers</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!plan.automatic} onChange={e => updatePlan({ automatic: e.target.checked })} />Apply automatically when exactly these modules are selected (no feature exclusions)</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!plan.recommended} onChange={e => updatePlan({ recommended: e.target.checked })} />Highlight as recommended on the pricing page</label>
           </fieldset>}
           <Quotas value={(product ?? plan)!.included} onChange={value => product ? updateProduct({ included: value }) : updatePlan({ included: value })} />
           <div className="border-t border-gray-200 pt-4"><h2 className="font-semibold">Included features</h2><p className="mt-1 text-sm text-gray-600">A plan inherits its modules. You can add or exclude individual features here.</p></div>

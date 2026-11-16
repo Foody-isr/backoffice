@@ -1,6 +1,8 @@
 'use client';
 
-import type { FoodyModule, FoodyModuleCatalog, FoodyLicenceCounts, ModularOnboardingInput } from '@/lib/api';
+import { commercialSelection } from '@/lib/commercial-catalog';
+
+import type { FoodyModule, FoodyModuleCatalog, ModularOnboardingInput } from '@/lib/api';
 
 export type BillingDraft = {
   mode: 'public' | 'private';
@@ -46,7 +48,8 @@ export function billingInput(catalog: FoodyModuleCatalog, draft: BillingDraft): 
   const modules = selected?.modules ?? draft.modules;
   const capabilities = selected?.capabilities ?? catalog.products.filter(p => modules.includes(p.id)).flatMap(p => p.capabilities ?? []);
   const hasPOS = ['pos', 'cash_management', 'payment_terminals'].some(key => capabilities.includes(key));
-  const extraPOS = hasPOS ? Number(draft.extraPOS) : 0;
+  const limits = selected?.included ?? commercialSelection(catalog, modules).seats;
+  const extraPOS = hasPOS && !limits.pos_users_unlimited ? Number(draft.extraPOS) : 0;
   if (!draft.title.trim() || !draft.terms.trim() || !modules.length || monthly === null || annual === null ||
     !Number.isSafeInteger(extraPOS) || extraPOS < 0 || request.trial_modules.some(id => !modules.includes(id)) || Object.values(draft.extras).some(n => !Number.isSafeInteger(n) || n < 0 || n > 10000)) return null;
   return { ...request, custom: { modules: selected ? [] : draft.modules, plan_id: draft.planId, extra_licences: draft.extras, title: draft.title.trim(), terms: draft.terms.trim(),
@@ -67,12 +70,11 @@ export default function ModularBillingFields({ catalog, value, onChange }: {
   const capabilities = selectedPlan?.capabilities ?? catalog.products.filter(p => selectedModules.includes(p.id)).flatMap(p => p.capabilities ?? []);
   const hasPOS = ['pos', 'cash_management', 'payment_terminals'].some(key => capabilities.includes(key));
   const hasChef = catalog.capabilities?.some(f => f.category === 'kitchen' && f.key !== 'kds' && capabilities.includes(f.key));
-  const selectedProducts = catalog.products.filter(product => selectedModules.includes(product.id));
-  const limits: FoodyLicenceCounts = selectedPlan?.included ?? selectedProducts.reduce<FoodyLicenceCounts>((total, product) => ({
-    pos: total.pos + product.included.pos, chef: total.chef + product.included.chef, kds: total.kds + product.included.kds,
-    employees: total.employees == null || product.included.employees == null ? null : total.employees + product.included.employees,
-    pos_devices: total.pos_devices == null || product.included.pos_devices == null ? null : total.pos_devices + product.included.pos_devices,
-  }), { pos: 0, chef: 0, kds: 0, employees: 0, pos_devices: 0 });
+  const preview = commercialSelection(catalog, selectedModules);
+  const limits = selectedPlan?.included ?? preview.seats;
+  const deviceBased = catalog.products.some(p => p.included.pos_users_unlimited);
+  const extraDeviceRate = catalog.tariffs?.find(t => t.id === 'extraPOSDevice')?.amount_minor;
+  const additionalRate = deviceBased ? extraDeviceRate : catalog.extra_pos_minor;
   function edit<K extends keyof BillingDraft>(key: K, next: BillingDraft[K]) {
     onChange({ ...value, [key]: next });
   }
@@ -106,7 +108,8 @@ export default function ModularBillingFields({ catalog, value, onChange }: {
         {catalog.products.map(product => <li key={product.id} className="flex flex-wrap justify-between gap-2 py-3">
           <span>{product.name.en}</span><span>{money(product.monthly_minor)} / month excl. VAT</span>
         </li>)}
-        <li className="flex flex-wrap justify-between gap-2 py-3"><span>Additional named POS licence</span><span>{money(catalog.extra_pos_minor)} / month excl. VAT</span></li>
+        {catalog.plans?.filter(p => p.published).map(plan => <li key={plan.id} className="flex flex-wrap justify-between gap-2 py-3"><span>{plan.name.en}</span><span>{money(plan.monthly_minor)} / month excl. VAT</span></li>)}
+        <li className="flex flex-wrap justify-between gap-2 py-3"><span>{deviceBased ? 'Additional active POS device' : 'Additional named POS licence'}</span><span>{additionalRate == null ? 'On quotation' : `${money(additionalRate)} / month excl. VAT`}</span></li>
       </ul>
     ) : (
       <div className="space-y-4">
@@ -124,15 +127,16 @@ export default function ModularBillingFields({ catalog, value, onChange }: {
             <input type="checkbox" checked={selectedModules.includes(product.id)} onChange={event => toggleModule('modules', product.id, event.target.checked)} />{product.name.en}
           </label>)}
         </fieldset>
-        {hasPOS && <label className="block text-sm font-medium">Additional named POS licences
+        {!selectedPlan && preview.planName && <p className="text-sm text-gray-600">Included allowances: {preview.planName.en}. Set the agreed custom price below.</p>}
+        {hasPOS && !limits.pos_users_unlimited && <label className="block text-sm font-medium">Additional named POS licences
           <input className={field} type="number" min={0} step={1} required value={value.extraPOS} onChange={event => edit('extraPOS', event.target.value)} />
         </label>}
         <fieldset className="grid gap-3 sm:grid-cols-2"><legend className="mb-2 text-sm font-medium">Additional licences included in this custom price</legend>
           {(['employees', 'pos_devices', 'chef', 'kds'] as const).filter(key => limits[key] != null && (key === 'employees' || key === 'pos_devices' && hasPOS || key === 'chef' && hasChef || key === 'kds' && capabilities.includes('kds'))).map(key => <label key={key} className="text-sm">
-            {{ employees: 'Employee accounts', pos_devices: 'Physical POS devices', chef: 'Chef users', kds: 'Kitchen displays' }[key]}
+            {{ employees: 'Employee accounts', pos_devices: 'Active POS devices', chef: 'Chef users', kds: 'Kitchen displays' }[key]}
             <input className={field} type="number" min={0} max={10000} step={1} value={value.extras[key] ?? 0} onChange={event => edit('extras', { ...value.extras, [key]: Number(event.target.value) })} />
           </label>)}
-          <p className="text-xs text-gray-600 sm:col-span-2">Employee accounts and physical POS devices are independent. These quantities are included in the agreed custom amount below.</p>
+          <p className="text-xs text-gray-600 sm:col-span-2">{limits.pos_users_unlimited ? 'Personal POS accounts do not consume additional device licences. ' : ''}These quantities are included in the agreed custom amount below.</p>
         </fieldset>
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="block text-sm font-medium">Monthly price (ILS)

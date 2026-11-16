@@ -1,0 +1,16 @@
+{
+  "reason": "Scoped review of shared files for the software offer alignment; changed commercial procedures are updated in FR/HE/EN.",
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "a6c2211f20b307f1217bff211b9d555c90a64f81d94fd44071f9f8d9235242e9",
+      "baseSha256": "2c74f122237ad1b957103e1e38baee2cc618b5dc012bc9f9b843b85f663aa07b",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The diff only adds optional device-based POS and automatic/recommended plan fields to commercial response types and, in Backoffice, a read-only reviewed-catalogue getter behind the existing superadmin sandbox guard. No other API path, request body, authentication, payment or customer workflow changes. Commercial procedures are updated separately in all three languages."
+    }
+  ]
+}
