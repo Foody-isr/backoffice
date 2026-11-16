@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "2c74f122237ad1b957103e1e38baee2cc618b5dc012bc9f9b843b85f663aa07b",
+      "baseSha256": "e715f0755fa78847975276bb93fdf210d34d8c3b08badb3434f970b94c83d799",
+      "disposition": "no-user-impact",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "reason": "Only a separate authenticated commercial-document HTTP helper and safe validation error type are added. Existing API methods, authentication, customer billing and runtime flows are unchanged; the new sandbox document workflow is documented in the dedicated internal guide."
+    }
+  ]
+}
