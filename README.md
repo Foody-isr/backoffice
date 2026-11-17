@@ -346,12 +346,17 @@ runtime so the exact verified development artifact can be promoted to production
 The build's Content Security Policy explicitly permits both canonical API origins
 so the browser can use that runtime selection in either environment.
 
-## Versioned plans and licence quotas (development)
+## Versioned plans and licence quotas (production and development)
 
 The matching migration 320/API provides editable public modules, composed plans,
-prices and categorized capabilities. Backoffice publishes a revision; Landing
-Pricing reads the same environment; Admin reviews purchased rights and paid
-additions. Employee accounts and physical POS devices use separate quotas.
+prices and categorized capabilities. Superadmins can edit and publish the
+production catalogue as well as the development catalogue. The environment
+notice explains which public rates change, after about one minute of website
+cache. Review changes before publishing; publication never charges a customer.
+Employee accounts and physical POS devices use separate quotas. Subscription
+checkouts, paid additions and Quotes & orders remain a separate sandbox pilot;
+the documents tab is hidden against the production API. Onboarding checks the
+dedicated sandbox-only onboarding-catalog endpoint, not the editable catalogue.
 Accepted contracts and invitations retain their version. See the synchronized
 FR/HE/EN billing, staff and catalogue help for the sandbox test procedures.
 
@@ -413,9 +418,11 @@ Hardware, setup, payment services and options are separate.
 
 The API owns the versioned catalogue. Its reviewed seed is
 `foodyserver/internal/entitlements/offer-grid.json`; Landing keeps the identical
-marketing grid. In development, **Load reviewed software offers** prepares the
+marketing grid. **Load reviewed software offers** prepares the
 Backoffice draft without publishing it or overwriting equipment/payment prices.
 Automatic bundles apply only to new exact-module selections and never remove
 features or capacity. Saved quotations, invitations, trials, negotiated prices
 and accepted grants retain their snapshots. Production activation requires the
-normal coordinated API/client release and catalogue review.
+normal coordinated API/client release and catalogue review. Publish the matching
+Backoffice artifact before the API in production to keep legacy onboarding
+available throughout this release.

@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "830bd94a2802456e35a918f9b647cb0195934c71858eb225cc93d7f204adab00",
+      "baseSha256": "a6c2211f20b307f1217bff211b9d555c90a64f81d94fd44071f9f8d9235242e9",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "Only the Backoffice onboarding catalogue request is separated from the production catalogue editor. All other API client methods, restaurant permissions, menu/order/payment/staff workflows and interfaces remain unchanged. The affected internal catalogue, sandbox and commercial-document procedures are updated in French, Hebrew and English."
+    }
+  ]
+}

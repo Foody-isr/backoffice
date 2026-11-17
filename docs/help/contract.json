@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "c3c28d03dbb411d6c59c7addcb6c9c10e38f8cf9",
-  "documentationRevision": "26098240f904953fa61f7c671f9e081c77820d4b23800e8a87ed2df374843bde",
+  "documentationRef": "6195ad887e28116a3003f9d8dc2cf98491b15f39",
+  "documentationRevision": "755273a1f4e730f02b4f6b81181f5bfbf171b79e23c162906e97e5dcb16b380b",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -164,15 +164,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/foody-billing-sandbox.md",
-          "sha256": "2a0c0d7c7fe615011cc34ba1c4ddaa05eaa31c05d78e68a3cbbe7218c0ce6040"
+          "sha256": "574239cd1cb9d1bf541f8694ac5de097a223191c51ca796467bef8a4f02c9a2a"
         },
         "fr": {
           "path": "docs/help/internal/fr/foody-billing-sandbox.md",
-          "sha256": "1058c7878ccc05f74aadb7e073bf2614aa56f97d085304c1223fc4dc0b65f764"
+          "sha256": "1279ad31872a7c5550722609f091f2b0ac4b16d638eaf013607f5f2e854ac8e5"
         },
         "he": {
           "path": "docs/help/internal/he/foody-billing-sandbox.md",
-          "sha256": "e3531a6fca37e871d24ee1f05043aa82bd24bbf513f6510bca9366e221dbca39"
+          "sha256": "76a851212ea78cb5a9cee2a4ead35b6546ab8080cdd120b3c38470532891e1df"
         }
       }
     },
@@ -1741,15 +1741,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/features-and-payments.md",
-          "sha256": "24f361be381df0bbff904a1e697c2358679a2704813f764f1dd58a33802b13ce"
+          "sha256": "e3d2c2d19412df842b851265bef2ab43e8a329e79931057c043526171f7423c7"
         },
         "fr": {
           "path": "docs/help/internal/fr/features-and-payments.md",
-          "sha256": "9152e400b475be1966ad3104192814892e8da6bbd85839312219f047526ebe04"
+          "sha256": "a9dff15a80e7d139a784a1563f04f2905b6c28e25130842972727e22e11adfbd"
         },
         "he": {
           "path": "docs/help/internal/he/features-and-payments.md",
-          "sha256": "f4a70343c43906398beac295287d4bf85bb8dc556b1d2ee749adb61a0db20a63"
+          "sha256": "f4a2323acf17a64c34b6cc9036796f85c29b3bba45642d13a7b1dda6a9568070"
         }
       }
     },
@@ -2159,15 +2159,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/commercial-documents.md",
-          "sha256": "214667442882de47d5d8b038e3cd6e95875f81ae652433db99f8310894fce961"
+          "sha256": "48a292b20ffef345e7663d62aff1017f8849a76e2c50a6063922e26150da52e9"
         },
         "fr": {
           "path": "docs/help/internal/fr/commercial-documents.md",
-          "sha256": "3cec9a8456b3cf4a42f02f714bc68b2955d3d43a8b40af1c952ed3df323dddad"
+          "sha256": "7dc9cd53046d3a688628505e624262a4c43fc747c0e97d9f7fe7988d61099e2a"
         },
         "he": {
           "path": "docs/help/internal/he/commercial-documents.md",
-          "sha256": "0b3d59e6cfc3a9b28eb6485ea4fbd1a40194d8e592b7d73780db23abdf0281fd"
+          "sha256": "b56e36aaccebdb34789f0d12ed21ae3c166dfee4e82a163f5f3137fa0f83ee76"
         }
       }
     }
@@ -2198,7 +2198,7 @@
       ]
     },
     "src/app/dashboard/features/page.tsx": {
-      "sha256": "3aab56760444b3c72197950b255fdb50121e92d8786f883f74b76d7c74b73f59",
+      "sha256": "201ceac40225f0a5c3af5585b7c297daad6c24a1cbd6f2348168e40d3587f117",
       "features": [
         "backoffice-entitlements"
       ]
@@ -2413,7 +2413,7 @@
       ]
     },
     "src/lib/api.ts": {
-      "sha256": "a6c2211f20b307f1217bff211b9d555c90a64f81d94fd44071f9f8d9235242e9",
+      "sha256": "830bd94a2802456e35a918f9b647cb0195934c71858eb225cc93d7f204adab00",
       "features": [
         "backoffice-entitlements",
         "platform-api",
