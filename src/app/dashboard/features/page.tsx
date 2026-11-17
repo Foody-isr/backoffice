@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getEditableFoodyCatalog, getReviewedFoodyCatalog, publishFoodyCatalog, type FoodyEditableCatalog, type FoodyLicenceCounts, type FoodyPlan } from '@/lib/api';
+import { getApiEnvironment, getEditableFoodyCatalog, getReviewedFoodyCatalog, publishFoodyCatalog, type FoodyEditableCatalog, type FoodyLicenceCounts, type FoodyPlan } from '@/lib/api';
 import { formatFoodyAmount } from '@/lib/foody-modules';
 import CommercialDocuments from '@/components/CommercialDocuments';
 
@@ -40,6 +40,8 @@ function QuotaChanges({ before, after }: { before?: FoodyLicenceCounts; after: F
 
 /** Edits versioned commercial offers while accepted customer contracts remain frozen. */
 export default function PlansAndModulesPage() {
+  const production = getApiEnvironment() === 'production';
+  const sections: Tab[] = production ? ['modules', 'plans', 'prices', 'features'] : ['modules', 'plans', 'prices', 'features', 'documents'];
   const [saved, setSaved] = useState<FoodyEditableCatalog | null>(null);
   const [draft, setDraft] = useState<FoodyEditableCatalog | null>(null);
   const [tab, setTab] = useState<Tab>('modules');
@@ -124,12 +126,17 @@ export default function PlansAndModulesPage() {
         <button type="button" className="btn-primary" disabled={!changed || busy} onClick={() => { setReview(true); setNotice(''); }}>Review changes</button>
       </div>
     </header>
+    <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+      {production
+        ? 'Production catalogue. Publication updates public prices and new offers after the website cache refreshes (about one minute). Existing contracts keep their agreed terms. Publishing does not charge a customer.'
+        : 'Development catalogue. Publications here do not change production prices. Quotes, orders and subscription payment trials remain available in this environment.'}
+    </p>
     {error && <div role="alert" className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p>{error}</p><button type="button" className="underline" onClick={() => { if (!changed || window.confirm('Discard this local draft and reload the published catalogue?')) { setDraft(null); setSaved(null); setAttempt(n => n + 1); } }}>Reload catalogue</button></div>}
     {notice && <p role="status" className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-900">{notice}</p>}
     {!draft ? <p role="status" className="text-sm text-gray-600">Loading catalogue…</p> : <>
       {review && saved && <section aria-label="Review catalogue publication" className="space-y-3 rounded-xl border border-brand-300 bg-brand-50 p-5">
         <h2 className="font-semibold">Publish the next version</h2>
-        <p className="text-sm">New invitations and additional purchases will use these prices and inclusions. Existing customer contracts keep their agreed prices, features and licence limits.</p>
+        <p className="text-sm">{production ? 'These prices and inclusions will appear on the public website and in new offers.' : 'New invitations and additional purchases in this environment will use these prices and inclusions.'} Existing customer contracts keep their agreed prices, features and licence limits.</p>
         <ul className="list-inside list-disc text-sm">
           {draft.products.filter(p => JSON.stringify(p) !== JSON.stringify(saved.products.find(old => old.id === p.id))).map(p => <li key={p.id}>{p.name.en}: {formatFoodyAmount(saved.products.find(old => old.id === p.id)?.monthly_minor ?? 0)} → {formatFoodyAmount(p.monthly_minor)} / month
             <QuotaChanges before={saved.products.find(old => old.id === p.id)?.included} after={p.included} />
@@ -149,7 +156,7 @@ export default function PlansAndModulesPage() {
         <div className="flex gap-3"><button type="button" className="btn-primary" disabled={busy} onClick={publish}>{busy ? 'Publishing…' : 'Publish new version'}</button><button type="button" className="btn-secondary" disabled={busy} onClick={() => setReview(false)}>Continue editing</button></div>
       </section>}
       <nav aria-label="Catalogue sections" className="flex flex-wrap gap-1 border-b border-gray-200">
-        {(['modules', 'plans', 'prices', 'features', 'documents'] as Tab[]).map(id => <button type="button" key={id} aria-current={tab === id ? 'page' : undefined}
+        {sections.map(id => <button type="button" key={id} aria-current={tab === id ? 'page' : undefined}
           className={`px-4 py-3 text-sm font-semibold ${tab === id ? 'border-b-2 border-brand-500 text-brand-700' : 'text-gray-600 hover:text-gray-900'}`}
           onClick={() => { if (tab === 'documents' && id !== tab && documentsDirty && !window.confirm('Discard unsaved document changes?')) return; setTab(id); setCategory('all'); if (id === 'modules') setSelected('restaurant'); if (id === 'plans') setSelected(draft.plans[0]?.id ?? ''); }}>
           {{ modules: 'Modules', plans: 'Plans', prices: 'All prices', features: 'Feature inventory', documents: 'Quotes & orders' }[id]}

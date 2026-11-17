@@ -1420,10 +1420,10 @@ export type ModularOnboardingInput = {
   };
 };
 
-/** Returns the software catalogue available on the sandbox API. */
+/** Returns a catalogue only when modular onboarding is available on this API. */
 export async function getFoodyModuleCatalog(signal?: AbortSignal): Promise<FoodyModuleCatalog | null> {
   try {
-    return await apiFetch<FoodyModuleCatalog>('/api/v1/admin/foody-billing/catalog', { signal });
+    return await apiFetch<FoodyModuleCatalog>('/api/v1/admin/foody-billing/onboarding-catalog', { signal });
   } catch (error) {
     if (runtimeHost !== 'dev-backoffice.foody-pos.co.il' &&
       error instanceof Error && ['foody_billing_sandbox_only', 'API error 404'].includes(error.message)) return null;
