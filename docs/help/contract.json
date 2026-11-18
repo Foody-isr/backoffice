@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "a15a2d030c5a22bb3ba5e391a70842c68c34d31f",
-  "documentationRevision": "c9975e4dedbc16682dd730c01b1a0773928a744b49afecce802b08395360ab11",
+  "documentationRef": "a6026fda5d9314948be593c9e2d2474dc96cea64",
+  "documentationRevision": "caaef4c03cf3a8ac5d0b41f66f38858f314d38d0d5a94310d6dfd0f7a348ce61",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -145,15 +145,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/account/subscription.mdx",
-          "sha256": "f461aedb3b982743f2ec5717b6410572364f96d162d41fd8a00bd253ae477bf5"
+          "sha256": "cbb381ddbe4ddf9e0c9fb1d67bcf17aec4d74a87604b39f8a7ed94f4cff78a5b"
         },
         "fr": {
           "path": "src/content/help/fr/account/subscription.mdx",
-          "sha256": "512fffa43134f018cd31a9bb6f45bcb043d3ce4c25a2b59b7e27f9913da7e5ac"
+          "sha256": "32c25e612496cb4561c5d30feda13b851074782a85b5e4a3c8875f59274b5d28"
         },
         "he": {
           "path": "src/content/help/he/account/subscription.mdx",
-          "sha256": "42c8cacbfaebe0c85cc379f05317282c2a86aa3d26edd0e0dda474eb2f99d096"
+          "sha256": "b08731708623e29f684f04aae208c68961fc4cefdecbec8108d7856880e8d588"
         }
       }
     },
@@ -164,15 +164,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/foody-billing-sandbox.md",
-          "sha256": "41be56a894da9fde5601733b3ddd34b17bb9f9869402e7b11314ce73bbbdd0fa"
+          "sha256": "b4428577bff4a557abe8649d1534d32ca4359d29f704d878b19dffdc8ddf281b"
         },
         "fr": {
           "path": "docs/help/internal/fr/foody-billing-sandbox.md",
-          "sha256": "3a4f7859b8754515551db3fcaceaeca4f363db210f0c051d9600132d1c1f0d81"
+          "sha256": "d652a90717815bbb0396d08e2cf3425f2003e4eb977b1feca814fc20515163dd"
         },
         "he": {
           "path": "docs/help/internal/he/foody-billing-sandbox.md",
-          "sha256": "3b9b56360f312165cbd4cc62e6785876a32e9979016a5078aa7778e6fbf64c73"
+          "sha256": "aa2d808a49ce3220ab9243c1f2438bd18827076cc7ce5c0a9658203be0e866b2"
         }
       }
     },
@@ -1684,15 +1684,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/getting-started/offers-and-contact.mdx",
-          "sha256": "93cfaad65142988959c77b58297d3cc5453949be62933df5d346a458bf8df33f"
+          "sha256": "e52f42319ff9fd02b457580681260e634a42f49752a446d7e66b3a950a19cecd"
         },
         "fr": {
           "path": "src/content/help/fr/getting-started/offers-and-contact.mdx",
-          "sha256": "db2f52fdee369f5ef593afc7472aef1cbba2e2709b2e1b201a8b58ca562dfeb3"
+          "sha256": "2f64f933708216126cb0b2844ec7a00472eaa50482545ef9d8ed37872672ff13"
         },
         "he": {
           "path": "src/content/help/he/getting-started/offers-and-contact.mdx",
-          "sha256": "067c38847b9643232e1041264ce62b340343e0a847f86211f1d1ba7d1e9fd634"
+          "sha256": "344f9d8d76edd285648757361b705b8f69ddd56b89eb4b28764498bb4ff09da9"
         }
       }
     },
@@ -2159,15 +2159,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/commercial-documents.md",
-          "sha256": "a89ffdc922afe597e139f76ffd515443dd2f6a2d624ad7042254c95e8b30bcfa"
+          "sha256": "d7a09467dc89ee72a0b055075d0ab6870f4e4c7c412f5c87e153a4dd4e7a6471"
         },
         "fr": {
           "path": "docs/help/internal/fr/commercial-documents.md",
-          "sha256": "623b4b978d74fa43ad846bc27c4eeed5c226c88975c52f925023543f420161f0"
+          "sha256": "7831399e9030bec98b01e5c7402eaecc99035405d2161c28557b0abc1897f4d8"
         },
         "he": {
           "path": "docs/help/internal/he/commercial-documents.md",
-          "sha256": "52989ce67ef7c1fdff3a0d79e24d1098dea9d10b0a0059dd4f8814e7d5b1dbe6"
+          "sha256": "8500cedde3ece3fb795cb21cf9de3f1bcabec726c75fbfcfd47f51507c219bfc"
         }
       }
     }
