@@ -11,6 +11,21 @@ const { newCommercialLine, changeLineBilling, changeDocumentTax, sourcePrice, co
 const tax = { tax_mode: 'ht', vat_bps: 1800 };
 const module = { type: 'module', id: 'restaurant', name: 'Restaurant', group: 'Modules', unit: 'subscription', price: 59000 };
 
+test('current annual software policy applies to catalogue prices, excludes services and preserves negotiated amounts', () => {
+  const source = {...module, billingPolicy: {version: '2026-11-18', monthly_commitment_months: 0, annual_period_months: 12, annual_billed_months: 11}};
+  const monthly = newCommercialLine(source, tax);
+  assert.equal(monthly.commitment_months, 0);
+  const annual = changeLineBilling(monthly, 'prepaid', source, tax);
+  assert.equal(annual.unit_price_minor, 649000);
+  assert.equal(changeLineBilling(annual, 'monthly', source, tax).unit_price_minor, 59000);
+  assert.equal(sourcePrice(source, tax, 24), 1298000);
+  assert.equal(sourcePrice(source, {tax_mode: 'ttc', vat_bps: 1800}, 12), 765820);
+  assert.equal(sourcePrice({...source, price: 59725}, tax, 12), 656975);
+  assert.equal(sourcePrice({...source, type: 'tariff', unit: 'device_month', price: 14900}, tax, 12), 178800);
+  assert.equal(sourcePrice(module, tax, 12), 708000, 'old snapshots have no automatic discount');
+  assert.equal(changeLineBilling({...monthly, unit_price_minor: 40000}, 'prepaid', source, tax).unit_price_minor, 480000);
+});
+
 test('PDF blobs are embedded only in the document workspace while anti-framing and other policies stay intact', async () => {
   const { default: nextConfig } = await import('../next.config.mjs');
   const rules = await nextConfig.headers();

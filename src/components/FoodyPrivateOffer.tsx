@@ -170,6 +170,7 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
       <form onSubmit={publish}>
         <fieldset disabled={busy || loading} className="space-y-3">
           <legend className="font-medium">{view.offer ? 'Edit and publish a new version' : 'Create an offer'}</legend>
+          <p className="text-xs text-gray-600">For a new standard offer, monthly software has no minimum commitment and annual prepayment covers 12 months for the price of 11. Apply the saving only to modules and plans; additional licences and services retain their own prices. Enter negotiated totals explicitly. Existing accepted terms remain unchanged.</p>
           <label className="block text-sm">Offer name<input required maxLength={120} className={inputClass} value={draft.title} onChange={(e) => edit('title', e.target.value)} /></label>
           <label className="block text-sm">Offer description<textarea required maxLength={5000} rows={3} className={inputClass} value={draft.includes} onChange={(e) => edit('includes', e.target.value)} /></label>
           <label className="block text-sm">Terms, exclusions and cancellation<textarea required maxLength={5000} rows={3} className={inputClass} value={draft.terms} onChange={(e) => edit('terms', e.target.value)} /></label>

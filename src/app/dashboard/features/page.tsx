@@ -41,7 +41,7 @@ function QuotaChanges({ before, after }: { before?: FoodyLicenceCounts; after: F
 /** Edits versioned commercial offers while accepted customer contracts remain frozen. */
 export default function PlansAndModulesPage() {
   const production = getApiEnvironment() === 'production';
-  const sections: Tab[] = production ? ['modules', 'plans', 'prices', 'features'] : ['modules', 'plans', 'prices', 'features', 'documents'];
+  const sections: Tab[] = ['modules', 'plans', 'prices', 'features', 'documents'];
   const [saved, setSaved] = useState<FoodyEditableCatalog | null>(null);
   const [draft, setDraft] = useState<FoodyEditableCatalog | null>(null);
   const [tab, setTab] = useState<Tab>('modules');
@@ -174,6 +174,11 @@ export default function PlansAndModulesPage() {
         {product || plan ? <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-5">
           <Names value={(product ?? plan)!.name} onChange={name => product ? updateProduct({ name }) : updatePlan({ name })} />
           <label className="block max-w-xs text-sm">Monthly price (ILS, excluding VAT)<input className={field} type="number" min={0.01} max={1000000} step={0.01} value={(product ?? plan)!.monthly_minor / 100} onChange={e => product ? updateProduct({ monthly_minor: Math.round(Number(e.target.value) * 100) }) : updatePlan({ monthly_minor: Math.round(Number(e.target.value) * 100) })} /></label>
+          {draft.billing_policy && <div className="rounded-lg bg-gray-50 p-4 text-sm" aria-label="Monthly and annual payment terms">
+            <p><strong>Monthly · No minimum commitment</strong> — {formatFoodyAmount((product ?? plan)!.monthly_minor)} / month.</p>
+            <p className="mt-2"><strong>Annual · 1 month free</strong> — {formatFoodyAmount((product ?? plan)!.monthly_minor * draft.billing_policy.annual_billed_months)} paid upfront for 12 months. Save {formatFoodyAmount((product ?? plan)!.monthly_minor)} (8.33%).</p>
+            <p className="mt-2 text-xs text-gray-600">Annual prices follow the monthly module or plan price automatically. Additional licences, hardware, setup and payment services are separate. Existing quotations and contracts retain their saved terms.</p>
+          </div>}
           {plan && <fieldset className="space-y-2"><legend className="mb-2 text-sm font-semibold">Included modules</legend>{draft.products.map(p => <label key={p.id} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.modules.includes(p.id)} onChange={e => updatePlan({ modules: e.target.checked ? [...plan.modules, p.id] : plan.modules.filter(id => id !== p.id) })} />{p.name.en}</label>)}
             <label className="flex items-center gap-2 pt-2 text-sm font-medium"><input type="checkbox" checked={plan.published} onChange={e => updatePlan({ published: e.target.checked })} />Offer this plan to customers</label>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!plan.automatic} onChange={e => updatePlan({ automatic: e.target.checked })} />Apply automatically when exactly these modules are selected (no feature exclusions)</label>

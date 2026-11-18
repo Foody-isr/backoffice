@@ -1,4 +1,4 @@
-import type { FoodyEditableCatalog, FoodyLicenceCounts } from './api';
+import type { FoodyEditableCatalog, FoodyLicenceCounts, FoodyBillingPolicy } from './api';
 import { commercialDocumentRequest } from './api';
 
 export type DocumentLocale = 'he' | 'fr' | 'en';
@@ -19,18 +19,18 @@ export type CommercialInput = {
   tax_mode: TaxMode; vat_bps: number; include_features: boolean; lines: CommercialLine[]; terms: string; notes: string;
 };
 export type CommercialAmount = { net: number; vat: number; gross: number };
-export type PricedLine = CommercialLine & { amount: CommercialAmount; reference_price_minor?: number; modules?: string[]; seats?: FoodyLicenceCounts; features?: string[]; commitment: CommercialAmount };
+export type PricedLine = CommercialLine & { amount: CommercialAmount; reference_price_minor?: number; software_saving_minor?: number; modules?: string[]; seats?: FoodyLicenceCounts; features?: string[]; commitment: CommercialAmount };
 export type CommercialSnapshot = CommercialInput & { priced_lines: PricedLine[]; once: CommercialAmount; prepaid: CommercialAmount; monthly: CommercialAmount; single: CommercialAmount };
 export type CommercialMetadata = { id: number; revision: number; kind: DocumentKind; status: 'draft' | 'issued'; number: string; restaurant_id?: number; source_id?: number; title: string; customer_name: string; created_at: string; updated_at: string; issued_at?: string };
 export type CommercialDocument = CommercialMetadata & { content: CommercialSnapshot; catalog: FoodyEditableCatalog };
 export type DraftRequest = { document_id: number; expected_revision: number; idempotency_key: string; document: CommercialInput };
-export type SourceOption = { key: string; type: CommercialLine['source_type']; id: string; name: string; group: string; unit: string; price: number | null; quantity?: number };
+export type SourceOption = { key: string; type: CommercialLine['source_type']; id: string; name: string; group: string; unit: string; price: number | null; quantity?: number; billingPolicy?: FoodyBillingPolicy };
 
 /** Lists sources from the published or document-frozen catalogue. */
 export function documentSources(catalog: FoodyEditableCatalog, locale: DocumentLocale): SourceOption[] {
   return [
-    ...catalog.plans.map(p => ({ key: `plan:${p.id}`, type: 'plan' as const, id: p.id, name: p.name[locale], group: 'Plans', unit: 'subscription', price: p.monthly_minor })),
-    ...catalog.products.map(p => ({ key: `module:${p.id}`, type: 'module' as const, id: p.id, name: p.name[locale], group: 'Modules', unit: 'subscription', price: p.monthly_minor })),
+    ...catalog.plans.map(p => ({ key: `plan:${p.id}`, type: 'plan' as const, id: p.id, name: p.name[locale], group: 'Plans', unit: 'subscription', price: p.monthly_minor, billingPolicy: catalog.billing_policy })),
+    ...catalog.products.map(p => ({ key: `module:${p.id}`, type: 'module' as const, id: p.id, name: p.name[locale], group: 'Modules', unit: 'subscription', price: p.monthly_minor, billingPolicy: catalog.billing_policy })),
     ...catalog.tariffs.map(p => ({ key: `tariff:${p.id}`, type: 'tariff' as const, id: p.id, name: p.name[locale], group: p.category === 'hardware' ? 'Hardware' : 'Fees & licences', unit: p.unit, price: p.amount_minor, quantity: p.quantity })),
   ];
 }
@@ -59,7 +59,9 @@ export function documentInput(content: CommercialSnapshot): CommercialInput {
 /** Returns the catalogue price in the document's selected input tax basis. */
 export function sourcePrice(source: SourceOption, input: Pick<CommercialInput, 'tax_mode' | 'vat_bps'>, months = 1): number | null {
   if (source.price === null) return null;
-  const net = source.price * months;
+  const policy = source.billingPolicy;
+  const eligible = (source.type === 'module' || source.type === 'plan') && policy && policy.annual_period_months > 0 && months > 0 && months % policy.annual_period_months === 0;
+  const net = source.price * (eligible ? months / policy.annual_period_months * policy.annual_billed_months : months);
   return input.tax_mode === 'ttc' ? net + Math.floor((net * input.vat_bps + 5000) / 10000) : net;
 }
 
@@ -75,11 +77,16 @@ export function newCommercialLine(source: SourceOption | null, input: Pick<Comme
 }
 
 /** Changes frequency without confusing a monthly rate with a whole-period price. */
-export function changeLineBilling(line: CommercialLine, billing: BillingMode): CommercialLine {
+export function changeLineBilling(line: CommercialLine, billing: BillingMode, source?: SourceOption, input?: Pick<CommercialInput, 'tax_mode' | 'vat_bps'>): CommercialLine {
   let price = line.unit_price_minor;
   const period = billing === 'prepaid' ? 12 : 0;
   if (price !== null && line.billing === 'prepaid') price = Math.round(price / line.period_months);
   if (price !== null && billing === 'prepaid') price *= period;
+  // Reprice a catalogue amount only. A negotiated or historical amount stays explicit.
+  if (source && input && line.billing !== 'included' && line.unit_price_minor !== null &&
+      line.unit_price_minor === sourcePrice(source, input, line.billing === 'prepaid' ? line.period_months : 1)) {
+    price = sourcePrice(source, input, billing === 'prepaid' ? period : 1);
+  }
   if (billing === 'included') price = 0;
   return { ...line, billing, unit_price_minor: price, period_months: period, commitment_months: billing === 'monthly' ? line.commitment_months : 0, quantity: billing === 'usage' ? 1 : line.quantity };
 }
