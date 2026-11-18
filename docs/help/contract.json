@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "c434ca0ff1910dc1367387c5c9a90ae102a4b7c3",
-  "documentationRevision": "b7842fc4a30222327c3a3cc5d5019e35442879638bb69ba3b3de013eeb69e3fc",
+  "documentationRef": "a6026fda5d9314948be593c9e2d2474dc96cea64",
+  "documentationRevision": "caaef4c03cf3a8ac5d0b41f66f38858f314d38d0d5a94310d6dfd0f7a348ce61",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -1688,7 +1688,7 @@
         },
         "fr": {
           "path": "src/content/help/fr/getting-started/offers-and-contact.mdx",
-          "sha256": "f7ce20ad0ebaae90ab89a690827d567ea2dabd92e2d22497817e23364797073e"
+          "sha256": "2f64f933708216126cb0b2844ec7a00472eaa50482545ef9d8ed37872672ff13"
         },
         "he": {
           "path": "src/content/help/he/getting-started/offers-and-contact.mdx",
