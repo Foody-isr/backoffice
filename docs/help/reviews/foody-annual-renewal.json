@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "7e5e6e04f48c9069ef909a2e4788aa51c167c10c22c71be44b61ed5bb5f5c8ec",
+      "baseSha256": "893ac2b9aa2e1a9bb1182e2c330c1e9e2b9de727fbae538b7a20aec74428ae25",
+      "features": [
+        "backoffice-entitlements",
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "Only the Foody CST subscription types and renewal endpoint changed. The shared transport and other administrative, authentication and order workflows retain their previous contracts."
+    }
+  ]
+}
