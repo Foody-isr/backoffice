@@ -1,5 +1,7 @@
 'use client';
 
+import { useMFA } from '@/components/MFAChallenge';
+
 import { useState, FormEvent } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -7,6 +9,7 @@ import { login } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
+  const mfa = useMFA();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password, mfa.prompt);
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -29,6 +32,7 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-dvh place-items-center px-4 py-8">
+      {mfa.view}
       <div className="w-full max-w-md rounded-lg border border-[var(--line)] p-6 sm:p-8">
         <div className="mb-8">
           <Image src="/brand/foody-symbol.svg" alt="" width={36} height={36} unoptimized className="mb-5" />

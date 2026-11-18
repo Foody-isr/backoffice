@@ -1,3 +1,4 @@
+import { isMFAChallenge, requireCompleteAuth, type MFAReply, type MFAPrompt, type MFAResponse } from './mfa';
 // Foody Backoffice API client
 // All calls go through the Go API at /api/v1/admin/* (superadmin only)
 
@@ -258,12 +259,13 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 // ─── Auth ───────────────────────────────────────────────────────────
 
-export async function login(email: string, password: string) {
-  const data = await apiFetch<{ token: string; user: User }>('/api/v1/auth/login', {
+export async function login(email: string, password: string, mfa?: MFAPrompt) {
+  const reply = await apiFetch<MFAReply>('/api/v1/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
 
+  const data = await resolveMFASignIn(reply, mfa);
   // Only allow superadmin
   if (data.user.role !== 'superadmin') {
     throw new Error('Access denied. Superadmin role required.');
@@ -1024,7 +1026,7 @@ async function cloneFetch(session: CloneSession, path: string, options?: Request
 
 /** Signs in separately without storing the other environment's credentials. */
 export async function loginCloneEnvironment(
-  environment: CloneEnvironment, email: string, password: string,
+  environment: CloneEnvironment, email: string, password: string, mfa?: MFAPrompt,
 ): Promise<CloneSession> {
   const res = await fetch(`${CLONE_API_URLS[environment]}/api/v1/auth/login`, {
     method: 'POST',
@@ -1035,7 +1037,7 @@ export async function loginCloneEnvironment(
     redirect: 'error',
   });
   if (!res.ok) throw new Error(`${environment}: sign-in failed`);
-  const data: { token: string; user: User } = await res.json();
+  const data = await resolveMFASignIn(await res.json() as MFAReply, mfa, CLONE_API_URLS[environment]);
   if (data.user.role !== 'superadmin') throw new Error(`${environment}: superadmin access required`);
   return { environment, token: data.token };
 }
@@ -1489,4 +1491,38 @@ export async function commercialDocumentRequest<T>(suffix: string, options: Requ
 /** Loads the reviewed software offer template without publishing it. */
 export function getReviewedFoodyCatalog(): Promise<FoodyEditableCatalog> {
   return apiFetch('/api/v1/admin/foody-billing/catalog/reviewed');
+}
+/** Completes a second-factor challenge before the normal session persistence. */
+async function resolveMFASignIn(reply: MFAReply, prompt?: MFAPrompt, baseURL = API_URL): Promise<MFAResponse> {
+  if (!isMFAChallenge(reply)) return requireCompleteAuth(reply);
+  if (!prompt || !reply.challenge) throw new Error('Second-factor sign-in required');
+  return prompt(reply, async (code) => {
+    const response = await fetch(`${baseURL}/api/v1/auth/mfa/verify`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ challenge: reply.challenge, code }),
+      credentials: 'omit', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok) throw new Error('Second-factor verification failed');
+    return requireCompleteAuth(await response.json() as MFAReply);
+  });
+}
+
+/** Returns activation and MFA state without secrets. */
+export function getAuthSecurityStatus(): Promise<{ enabled: boolean; mfa_verified: boolean }> {
+  return apiFetch('/api/v1/auth/security');
+}
+/** Replaces MFA and persists the newly verified session only after acknowledgment. */
+export async function replaceAuthenticator(password: string, prompt: MFAPrompt): Promise<void> {
+  const reply = await apiFetch<MFAReply>('/api/v1/auth/mfa/replace', { method: 'POST', body: JSON.stringify({ password }) });
+  const data = await resolveMFASignIn(reply, prompt);
+  if (data.user.role !== 'superadmin') throw new Error('Superadmin required');
+  localStorage.setItem('foody_admin_token', data.token);
+  localStorage.setItem('foody_admin_user', JSON.stringify(data.user));
+}
+export interface ConnectionJournalEntry {
+ id: string; occurred_at: string; retain_until: string; action: string; outcome: string; user_id?: number; address?: string; http_status: number;
+}
+/** Reads at most 1,000 verified entries; the API journals each read. */
+export function getConnectionJournal(from: string, to: string): Promise<{ entries: ConnectionJournalEntry[] }> {
+  return apiFetch(`/api/v1/admin/auth/connection-journal?${new URLSearchParams({ from, to })}`);
 }

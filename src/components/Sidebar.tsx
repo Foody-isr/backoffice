@@ -54,6 +54,7 @@ const sections = [
     links: [
       { href: '/dashboard/api-usage', label: 'Usage and quotas', icon: PresentationChartLineIcon },
       { href: '/dashboard/operations', label: 'Operations', icon: SignalIcon },
+      { href: '/dashboard/security', label: 'Account security', icon: SignalIcon },
       { href: '/dashboard/servers', label: 'Servers', icon: ServerStackIcon },
       { href: '/dashboard/clone', label: 'Clone data', icon: CircleStackIcon },
     ],

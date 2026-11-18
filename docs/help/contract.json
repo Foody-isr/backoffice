@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "8fa3fafa4a4ead0cca7a022ddd86bae70ade0d53",
-  "documentationRevision": "a49908306a5a43f68d08827453bcf5480411ae40365c62426bb6e765b9c03acb",
+  "documentationRef": "a0dbca6ac89b33bd47657f8c470a40d94f89bbb4",
+  "documentationRevision": "313c42642d851a8cd5ab90ee65525f2a9033346a13be0f9a927c1c65e1265da1",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -12,15 +12,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/getting-started/first-login.mdx",
-          "sha256": "fe364f6b3f5220619f03ec0fbc2c990a7db0352ecb031cfa53a56834e9e0cfb6"
+          "sha256": "47c16762f459ef6f7b182561a82a4402f33459f87b2debe8bbedf88392e1570e"
         },
         "fr": {
           "path": "src/content/help/fr/getting-started/first-login.mdx",
-          "sha256": "e019829b9a25151c8bb8a7d517577f070ae453057534b809ee0d540984938a74"
+          "sha256": "7ea4224cb41ec467ac30bd57fd37ae1405a61be8e36073842befa7fac8b66cb4"
         },
         "he": {
           "path": "src/content/help/he/getting-started/first-login.mdx",
-          "sha256": "b62c845c3d06a5ec631f190edf9b70cc6296b082435eaa8ebce4b0e8fdb56623"
+          "sha256": "e8f79091d7f2d972e8d2ac11851313f31687fabbf0d347927ca1f2819de1a8fe"
         }
       }
     },
@@ -31,15 +31,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/account/security.mdx",
-          "sha256": "770b7a397c1589b7ec7ce6e9f5976fd737a57c4ea59b6e27e392a9c9f305baaf"
+          "sha256": "ee9fe77203966cfba7d672bea13a1c9bd5d2f34edf1ee04e6a4c5d3114f4e8f6"
         },
         "fr": {
           "path": "src/content/help/fr/account/security.mdx",
-          "sha256": "4da1a6c1e8d97204284cda9278196327bdf5cacd1942a7d53dd0298d6b298023"
+          "sha256": "823578ddff465988d7ffb75d2119c1613204192479a09e0d454d7f231dc2a090"
         },
         "he": {
           "path": "src/content/help/he/account/security.mdx",
-          "sha256": "6f2342d8d5dcd411324391b01f1987ae09061c42b5523f401a786d75ec3e10e5"
+          "sha256": "1079e8e8d6c489f73250ff01095f93309658c5bca77101396b7a886e91fca208"
         }
       }
     },
@@ -88,15 +88,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/staff/devices-and-shifts.mdx",
-          "sha256": "d40f1596fa44ac52f6d033748926d50bef5b3542b128515bf82f9a69a6e7ee6e"
+          "sha256": "95caedea7a4cb01a56428675819df51927d8831f038ca067b852aaf3f0d279f2"
         },
         "fr": {
           "path": "src/content/help/fr/staff/devices-and-shifts.mdx",
-          "sha256": "7f1236b50662ed1dcbe5d6a3bea29867775f4942d21be27593a58e7f771c805c"
+          "sha256": "9a37231758f2dedf79402bcbab90edfbf776b528673c9b41ef9baaa4df3b523b"
         },
         "he": {
           "path": "src/content/help/he/staff/devices-and-shifts.mdx",
-          "sha256": "79ad4d51a74c47d519a45d3b06d5ea94452f04b876e29fe7f9a983ff3d2683d9"
+          "sha256": "1d00c3e5ef812802888bb1b19b50928f9baf084585be77b79fd09a3686ebee83"
         }
       }
     },
@@ -1703,15 +1703,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/access-and-dashboard.md",
-          "sha256": "b7a1489a7025af41a29c1439cee8e0e0534f24d9673ce28050a54345178329da"
+          "sha256": "f1d49dbb82a230ef6f5b1c2e459ec45e2fbdafc3739260b787cee7dd88a13a7e"
         },
         "fr": {
           "path": "docs/help/internal/fr/access-and-dashboard.md",
-          "sha256": "47d50bda4505cc9bd7a0a58f5a5d42ed80460afa1262f497999a570d4fa1d7f1"
+          "sha256": "a0d35b3bb2f19c82b64db348078169b26c35dc9f7748cd33eed0606f44e65eff"
         },
         "he": {
           "path": "docs/help/internal/he/access-and-dashboard.md",
-          "sha256": "c313331e2ef4dd8d11bc15b0a60ff569c31cb324828da423441fb88011b7fa0c"
+          "sha256": "d4aa7f4f50d10f19be3299d0e11573f95070878cae85e0ba0a108ce0fb48d3fd"
         }
       }
     },
@@ -1817,15 +1817,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/api-and-release.md",
-          "sha256": "f12fb43e86d3836f61cc4565e2a14bb8d018add1e8fcd79e1ee6220e5c5a4053"
+          "sha256": "ad10bccec8e6b4280f632e3f517212fb405220cf57446439a638100c7afab60f"
         },
         "fr": {
           "path": "docs/help/internal/fr/api-and-release.md",
-          "sha256": "ad260600bd1f3aad4f57c218dfccdb03c35216b912908210f943b82aa5ec77a8"
+          "sha256": "556940635e9b57ca8d346de529a5aea62eafd2e48e9618bf7c1811d34e2aaf89"
         },
         "he": {
           "path": "docs/help/internal/he/api-and-release.md",
-          "sha256": "f57f6b448748f8a23274620a86dcfaa02cc2d69b9a8c399441131032683ef567"
+          "sha256": "d05ff72bc0327e1c03e5b52e51db320a782207909ca37936accc61489f4a4e95"
         }
       }
     },
@@ -2295,6 +2295,12 @@
         "backoffice-onboarding"
       ]
     },
+    "src/app/dashboard/security/page.tsx": {
+      "sha256": "d4ab4b5ce08666b0f274c5617c1f70b6c038d124c132fddf441b778c17209f7b",
+      "features": [
+        "backoffice-access"
+      ]
+    },
     "src/app/dashboard/servers/page.tsx": {
       "sha256": "94ebf5c0b8a06a2794b050622e0d1d97d564c8d1f758e1f79c3e8a867aa0f376",
       "features": [
@@ -2344,7 +2350,7 @@
       ]
     },
     "src/app/login/page.tsx": {
-      "sha256": "2924d4e59dacafad173e6b631f9deb53eb1bb018ca234fb93c4f50d3e4d56013",
+      "sha256": "eb3ca5ba0fba2c1914247dbc5ba176480336fa499a57b29183ad1c4291002a77",
       "features": [
         "backoffice-access"
       ]
@@ -2362,7 +2368,7 @@
       ]
     },
     "src/components/CopyRestaurantToDev.tsx": {
-      "sha256": "5398103df87c7d2dca52f5d32550acec07cee7133975356a04f3d99f5c56fa7b",
+      "sha256": "44a0ecbe92b02d7f98b3b8ec839f35461cc2f9ade1580e88d6cfeeb3987f7de0",
       "features": [
         "backoffice-access"
       ]
@@ -2379,6 +2385,18 @@
         "foody-billing-sandbox"
       ]
     },
+    "src/components/MFAChallenge.tsx": {
+      "sha256": "f84ab7336c09ce00afa9da83a45c48939321a35eb072b48268a7385c4ba8e3b0",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/components/MFASettings.tsx": {
+      "sha256": "d8ef94476d89de3bb34b6b7fda7876608090de47ff8ba2ad19a8daf120404c97",
+      "features": [
+        "backoffice-access"
+      ]
+    },
     "src/components/RestaurantFeatureAccess.tsx": {
       "sha256": "2a7e7adfa0d9cf568be3ba93daf5b663ed0c2114f681742b907f22dc84846ae5",
       "features": [
@@ -2387,7 +2405,7 @@
       ]
     },
     "src/components/Sidebar.tsx": {
-      "sha256": "97b12e7552fff05ae69b8df5764e394b12213794fefb8a4652cecdbc91c24f48",
+      "sha256": "0a25c731635bbaffe5921b1061ede092eae0aa98f714d0d73663177432eeb2f3",
       "features": [
         "backoffice-access",
         "backoffice-entitlements",
@@ -2413,7 +2431,7 @@
       ]
     },
     "src/lib/api.ts": {
-      "sha256": "09b427d1fed9449ac6dcf17a185ecfddfffcb24bb48ac0f258942dfab15ec660",
+      "sha256": "893ac2b9aa2e1a9bb1182e2c330c1e9e2b9de727fbae538b7a20aec74428ae25",
       "features": [
         "backoffice-entitlements",
         "platform-api",
@@ -2445,10 +2463,28 @@
         "foody-billing-sandbox"
       ]
     },
+    "src/lib/mfa-strings.ts": {
+      "sha256": "6d1f7bf6fb70e7ce4699ef8187e183a845de726fff80f25cb037ec33ede938ae",
+      "features": [
+        "backoffice-access"
+      ]
+    },
+    "src/lib/mfa.ts": {
+      "sha256": "0812332d44c18af45a4b4672f931f80d2053b786acad53ad2a846bc6b183abc8",
+      "features": [
+        "backoffice-access"
+      ]
+    },
     "src/lib/sentry-options.ts": {
       "sha256": "627d62aba8deead841a79f8575469777b989f10eae7c8bd2336d15db3d77dbd5",
       "features": [
         "shared-runtime"
+      ]
+    },
+    "src/lib/use-mfa-copy.ts": {
+      "sha256": "01458142a33c837a5961aae1f63c6b85477c5cff4ceb06aeadd02254b3f4d986",
+      "features": [
+        "backoffice-access"
       ]
     },
     "src/lib/utils.ts": {
@@ -2848,6 +2884,16 @@
       ]
     },
     {
+      "id": "foodybackoffice:src/app/dashboard/security/page.tsx:next-page:1",
+      "kind": "next-page",
+      "source": "src/app/dashboard/security/page.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "route": "/dashboard/security"
+    },
+    {
       "id": "foodybackoffice:src/app/dashboard/servers/page.tsx:next-page:1",
       "kind": "next-page",
       "source": "src/app/dashboard/servers/page.tsx",
@@ -3016,6 +3062,43 @@
         "load",
         "publish"
       ]
+    },
+    {
+      "id": "foodybackoffice:src/components/MFAChallenge.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/MFAChallenge.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [
+        "mfaCancel",
+        "mfaCode",
+        "mfaEnroll",
+        "mfaFailed",
+        "mfaPinEnroll"
+      ],
+      "actions": [
+        "submit"
+      ]
+    },
+    {
+      "id": "foodybackoffice:src/components/MFASettings.tsx:ui-controls:1",
+      "kind": "ui-controls",
+      "source": "src/components/MFASettings.tsx",
+      "line": 1,
+      "features": [
+        "backoffice-access"
+      ],
+      "labels": [
+        "mfaFailed",
+        "mfaPassword",
+        "mfaReplaced",
+        "mfaSettingsHint",
+        "mfaSettingsTitle",
+        "mfaUnavailable"
+      ],
+      "actions": []
     },
     {
       "id": "foodybackoffice:src/components/VerifoneDiagnostics.tsx:ui-controls:1",

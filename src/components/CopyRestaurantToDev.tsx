@@ -1,5 +1,7 @@
 'use client';
 
+import { useMFA } from '@/components/MFAChallenge';
+
 import { useState } from 'react';
 import { ArrowPathIcon, CircleStackIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import {
@@ -207,16 +209,19 @@ function CopyDialog({ restaurant, onClose }: { restaurant?: RestaurantHint; onCl
 function EnvironmentLogin({ environment, disabled, onLogin }: {
   environment: CloneEnvironment; disabled: boolean; onLogin: (session: CloneSession) => void;
 }) {
+  const mfa = useMFA();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   return (
+    <>
+    {mfa.view}
     <form className="space-y-2 rounded-lg border border-gray-200 p-3" onSubmit={async (e) => {
       e.preventDefault();
       setBusy(true);
       setError('');
-      try { onLogin(await loginCloneEnvironment(environment, email, password)); }
+      try { onLogin(await loginCloneEnvironment(environment, email, password, mfa.prompt)); }
       catch (err) { setError(err instanceof Error ? err.message : 'Sign-in failed.'); }
       finally { setPassword(''); setBusy(false); }
     }}>
@@ -226,5 +231,6 @@ function EnvironmentLogin({ environment, disabled, onLogin }: {
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       <button type="submit" disabled={busy || disabled} className={buttonClass}>{busy ? 'Signing in…' : `Sign in to ${environment}`}</button>
     </form>
+    </>
   );
 }
