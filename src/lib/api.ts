@@ -32,6 +32,7 @@ export interface Restaurant {
   id: number;
   owner_id: number;
   name: string;
+  currency?: string;
   slug: string;
   address: string;
   timezone: string;
@@ -425,6 +426,7 @@ export async function adminDeactivateSubscription(restaurantId: number) {
 // ─── Payment Provider Config ────────────────────────────────────────
 
 export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone' | 'stancer';
+export type VerifoneCardFlow = 'hosted' | 'integrated';
 
 export interface PaymentConfigResponse {
   verifone_checkout_theme?: VerifoneCheckoutThemeStatus;
@@ -514,7 +516,14 @@ export interface UpdatePaymentConfigInput {
 }
 
 export async function getPaymentConfig(restaurantId: number): Promise<PaymentConfigResponse> {
-  return apiFetch<PaymentConfigResponse>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`);
+  return apiFetch<PaymentConfigResponse>(`/api/v1/admin/restaurants/${restaurantId}/payment-config`, { cache: 'no-store' });
+}
+
+/** Saves the new-card flow without resubmitting merchant credentials or wallet settings. */
+export function setVerifoneCardFlow(restaurantId: number, mode: VerifoneCardFlow): Promise<{ mode: VerifoneCardFlow }> {
+  return apiFetch(`/api/v1/admin/restaurants/${restaurantId}/payment-config/verifone-card-flow`, {
+    method: 'PUT', body: JSON.stringify({ mode }),
+  });
 }
 
 export interface VerifoneCheckoutThemeStatus {

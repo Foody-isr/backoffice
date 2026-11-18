@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "path": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "sha256": "0cb972274c8653ad9d77aa08c140aaced51ab9144546404a8cbadeadcdefaf4d",
+      "baseSha256": "13227e28f8b3db046c018fe8f3f00ac6ff4cd8317edba67b7edf3d03936c3afa",
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The new selector is inside the existing restaurant Payment tab. The operator can continue to onboard a restaurant and manage unrelated settings using their existing steps."
+    }
+  ]
+}
