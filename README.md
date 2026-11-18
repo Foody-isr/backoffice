@@ -410,7 +410,7 @@ prices and contracts are unchanged, so those procedures need no translation chan
 
 The software catalogue uses three independent modules: Restaurant 590 ILS/month
 with 2 active POS devices, Orders 590 standalone, and Kitchen 890 with 1 chef and
-1 KDS. Restaurant + Orders is 990 with 2 devices; recommended Foody Integral is
+1 KDS. Restaurant + Online is 990 with 2 devices; recommended Foody Integral is
 1,790 with 3 devices, 1 chef and 1 KDS. Additional active POS devices cost 149.
 All prices exclude VAT and are per site. Personal POS accounts are not charged
 per employee on these offers; historical named-user grants keep their rules.
