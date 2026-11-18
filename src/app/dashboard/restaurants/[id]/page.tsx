@@ -16,6 +16,7 @@ import {
   toggleFeature,
   setRestaurantPlan,
   getPaymentConfig,
+  setVerifoneCardFlow,
   linkVerifoneCheckoutTheme,
   syncVerifoneCheckoutTheme,
   updatePaymentConfig,
@@ -31,6 +32,7 @@ import {
   SubscriptionDetail,
   PaymentConfigResponse,
   PaymentProvider,
+  VerifoneCardFlow,
   UpdatePaymentConfigInput,
   SpokeConfigResponse,
 } from '@/lib/api';
@@ -89,6 +91,9 @@ function RestaurantDetail({ id }: { id: number }) {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentLoadError, setPaymentLoadError] = useState('');
   const [paymentSaving, setPaymentSaving] = useState(false);
+  const [pendingCardFlow, setPendingCardFlow] = useState<VerifoneCardFlow | null>(null);
+  const cardFlowSaving = pendingCardFlow !== null;
+  const [cardFlowError, setCardFlowError] = useState('');
   const [themeAction, setThemeAction] = useState<'link' | 'sync' | null>(null);
   const [themeError, setThemeError] = useState('');
   const [themeReference, setThemeReference] = useState('');
@@ -185,7 +190,6 @@ function RestaurantDetail({ id }: { id: number }) {
           verifone_apple_pay_enabled: cfg.verifone_apple_pay_enabled || false,
           verifone_google_pay_enabled: cfg.verifone_google_pay_enabled || false,
           verifone_checkout_theme_enabled: cfg.verifone_checkout_theme?.enabled || false,
-          verifone_direct_card_enabled: cfg.verifone_direct_card_enabled || false,
           verifone_direct_apple_pay_enabled: cfg.verifone_direct_apple_pay_enabled || false,
           verifone_direct_google_pay_enabled: cfg.verifone_direct_google_pay_enabled || false,
           verifone_apple_pay_domain: cfg.verifone_apple_pay_domain ?? '',
@@ -365,7 +369,6 @@ function RestaurantDetail({ id }: { id: number }) {
         input.verifone_token_scope = paymentCreds.verifone_token_scope;
         input.verifone_public_key_alias = paymentCreds.verifone_public_key_alias;
         input.verifone_public_key = paymentCreds.verifone_public_key;
-        input.verifone_direct_card_enabled = input.verifone_environment === 'sandbox' && paymentCreds.verifone_direct_card_enabled === true;
         input.verifone_direct_apple_pay_enabled = paymentCreds.verifone_direct_apple_pay_enabled;
         input.verifone_direct_google_pay_enabled = paymentCreds.verifone_direct_google_pay_enabled;
         input.verifone_direct_apple_pay_contract_id = paymentCreds.verifone_direct_apple_pay_contract_id;
@@ -398,6 +401,20 @@ function RestaurantDetail({ id }: { id: number }) {
       alert(e instanceof Error ? e.message : 'Failed to save payment config');
     } finally {
       setPaymentSaving(false);
+    }
+  }
+
+  async function handleCardFlowChange(mode: VerifoneCardFlow) {
+    setCardFlowError('');
+    setPendingCardFlow(mode);
+    try {
+      const saved = await setVerifoneCardFlow(id, mode);
+      setPaymentConfig((cfg) => cfg && { ...cfg, verifone_direct_card_enabled: saved.mode === 'integrated' });
+    } catch (error: unknown) {
+      setCardFlowError(error instanceof Error ? error.message : 'Could not save the card payment flow.');
+      setPaymentConfig(null); // Read the saved choice if the update response was lost.
+    } finally {
+      setPendingCardFlow(null);
     }
   }
 
@@ -435,6 +452,16 @@ function RestaurantDetail({ id }: { id: number }) {
 
   const checkoutTheme = paymentConfig?.verifone_checkout_theme;
   const paymentSettingsSaved = paymentConfig?.provider === paymentProvider && JSON.stringify(paymentCreds) === JSON.stringify(savedPaymentCreds.current);
+  const savedCardFlow = paymentConfig?.provider === 'verifone'
+    ? paymentConfig.verifone_direct_card_enabled ? 'integrated' : 'hosted'
+    : null;
+  const cardFlowRequirement = paymentConfig?.verifone_environment === 'production'
+    ? 'The Foody card form is available in CST Sandbox.'
+    : restaurant.currency && restaurant.currency !== 'ILS'
+      ? 'The Foody card form is available for restaurants priced in ILS.'
+      : !paymentConfig?.verifone_public_key_configured || !paymentConfig.masked_verifone_public_key_alias
+        ? 'Save the Verifone public key and its alias below to enable the Foody card form.'
+        : '';
 
   const plans = catalog?.plans ?? [];
 
@@ -635,11 +662,12 @@ function RestaurantDetail({ id }: { id: number }) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Provider</label>
                 <select
                   value={paymentProvider}
-                  disabled={themeAction !== null}
+                  disabled={themeAction !== null || cardFlowSaving}
                   onChange={(e) => {
                     const v = e.target.value as PaymentProvider;
                     setPaymentProvider(v);
-                    setPaymentCreds({ provider: v });
+                    setPaymentCreds(savedPaymentCreds.current?.provider === v ? savedPaymentCreds.current : { provider: v });
+                    setCardFlowError('');
                   }}
                   className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 >
@@ -659,8 +687,9 @@ function RestaurantDetail({ id }: { id: number }) {
                     Initial Checkout uses the CVV contract. Customer-present saved-card charges use the separately configured no-CVV contract and remain disabled until explicitly enabled. Configure the signed webhook in Verifone Central as <code>/api/v1/webhooks/verifone/{id}</code>.
                   </p>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Environment</label>
+                    <label htmlFor="verifone-environment" className="block text-xs font-medium text-gray-500 mb-1">Environment</label>
                     <select
+                      id="verifone-environment"
                       value={paymentCreds.verifone_environment || 'sandbox'}
                       onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_environment: e.target.value as 'sandbox' | 'production' })}
                       className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -669,6 +698,31 @@ function RestaurantDetail({ id }: { id: number }) {
                       <option value="production">EMEA Production</option>
                     </select>
                   </div>
+                  <fieldset className="space-y-2" disabled={!paymentSettingsSaved || cardFlowSaving || paymentSaving || themeAction !== null || !!paymentLoadError}>
+                    <legend className="mb-2 text-sm font-semibold text-gray-800">Card payment flow</legend>
+                    <div className="grid max-w-2xl gap-2 sm:grid-cols-2">
+                      {(['hosted', 'integrated'] as const).map((mode) => (
+                        <label key={mode} className="flex items-start gap-2 rounded-lg border border-gray-300 p-3 text-sm has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:disabled]:opacity-60">
+                          <input type="radio" name="verifone-card-flow" value={mode} checked={(pendingCardFlow ?? savedCardFlow) === mode}
+                            disabled={mode === 'integrated' && !!cardFlowRequirement}
+                            onChange={() => handleCardFlowChange(mode)} aria-describedby="verifone-card-flow-help"
+                            className="mt-1 accent-brand-600" />
+                          <span><strong>{mode === 'hosted' ? 'Verifone Checkout' : 'Foody · Verifone.js'}</strong>
+                            <span className="mt-1 block text-xs leading-5 text-gray-600">
+                              {mode === 'hosted' ? 'Foody creates a payment link. The customer enters their card on the Verifone page.' : 'The customer enters their card and pays directly in the Foody checkout.'}
+                            </span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <p id="verifone-card-flow-help" role="status" className="max-w-2xl text-xs leading-5 text-gray-600">
+                      {cardFlowSaving ? 'Saving the card payment flow…' : !paymentSettingsSaved
+                        ? 'Save Payment Config below before choosing a flow.'
+                        : 'Selecting a flow saves it immediately for this restaurant. Test with a new card on a fixed-price prepaid pickup or delivery order.'}
+                      {paymentSettingsSaved && cardFlowRequirement && ` ${cardFlowRequirement}`}
+                    </p>
+                    {cardFlowError && <p role="alert" className="text-sm text-red-700">{cardFlowError}</p>}
+                  </fieldset>
                   {([
                     ['verifone_user_id', 'User ID', paymentConfig?.masked_verifone_user_id],
                     ['verifone_api_key', 'API Key', paymentConfig?.masked_verifone_api_key],
@@ -691,7 +745,7 @@ function RestaurantDetail({ id }: { id: number }) {
                     </div>
                   ))}
                   <fieldset className="space-y-3 border-t border-gray-200 pt-4">
-                    <legend className="text-sm font-semibold text-gray-700">Card form in Foody</legend>
+                    <legend className="text-sm font-semibold text-gray-700">Verifone.js encryption key</legend>
                     <p id="verifone-capture-key-help" className="max-w-md text-xs leading-5 text-gray-500">
                       Use the public key and alias issued for this restaurant&apos;s Verifone organization and environment. Enter the corresponding key when you change either.
                     </p>
@@ -713,19 +767,13 @@ function RestaurantDetail({ id }: { id: number }) {
                         className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
                       {paymentConfig?.verifone_public_key_configured && (
                         <label className="mt-2 flex items-start gap-2 text-xs text-gray-700">
-                          <input type="checkbox" checked={paymentCreds.verifone_public_key === ''}
-                            onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_public_key: e.target.checked ? '' : undefined, verifone_direct_card_enabled: e.target.checked ? false : paymentCreds.verifone_direct_card_enabled })} />
+                          <input type="checkbox" disabled={savedCardFlow === 'integrated'} checked={paymentCreds.verifone_public_key === ''}
+                            onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_public_key: e.target.checked ? '' : undefined })} />
                           Remove the saved public key on save
                         </label>
                       )}
                     </div>
-                    <label className="flex items-start gap-2 text-sm text-gray-700">
-                      <input type="checkbox" className="mt-0.5"
-                        disabled={paymentCreds.verifone_environment === 'production' || paymentCreds.verifone_public_key === ''}
-                        checked={paymentCreds.verifone_environment === 'sandbox' && paymentCreds.verifone_direct_card_enabled === true}
-                        onChange={(e) => setPaymentCreds({ ...paymentCreds, verifone_direct_card_enabled: e.target.checked })} />
-                      <span>Enable the card form in Foody for CST test payments</span>
-                    </label>
+                    {savedCardFlow === 'integrated' && <p className="text-xs text-gray-500">Select Verifone Checkout before removing the key or leaving CST.</p>}
                   </fieldset>
                   <fieldset className="space-y-5 border-t border-gray-200 pt-4">
                     <legend className="text-sm font-semibold text-gray-700">Wallets in the Foody checkout</legend>
@@ -790,7 +838,7 @@ function RestaurantDetail({ id }: { id: number }) {
                       </section>
                     </div>
                   </fieldset>
-                  <fieldset disabled={themeAction !== null || paymentSaving} className="space-y-3 border-t border-gray-200 pt-4">
+                  <fieldset disabled={themeAction !== null || paymentSaving || cardFlowSaving} className="space-y-3 border-t border-gray-200 pt-4">
                     <legend className="text-sm font-semibold text-gray-700">Hosted payment page appearance</legend>
                     <p className="max-w-2xl text-xs leading-5 text-gray-500">
                       Checkout follows the customer&apos;s ordering language, with English as fallback and a language selector. The selected theme applies to new Checkout links.
@@ -1083,7 +1131,7 @@ function RestaurantDetail({ id }: { id: number }) {
               {/* Save button */}
               <button
                 onClick={handlePaymentSave}
-                disabled={paymentSaving || themeAction !== null || paymentLoading || !paymentConfig || !!paymentLoadError}
+                disabled={paymentSaving || cardFlowSaving || themeAction !== null || paymentLoading || !paymentConfig || !!paymentLoadError}
                 className="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition"
               >
                 {paymentSaving ? 'Saving...' : 'Save Payment Config'}
