@@ -1259,6 +1259,8 @@ export type FoodyMerchant = {
   revision: number;
   enabled: boolean;
   recurring_enabled: boolean;
+  requires_restaurant_selection: boolean;
+  cst_test_restaurant_id: number;
   configured: Record<FoodyMerchantField, boolean>;
 };
 type FoodyOfferTerms = {
@@ -1284,6 +1286,7 @@ export type FoodyPrivateBilling = {
   checkout_enabled: boolean;
   monthly_enabled: boolean;
   can_simulate_renewal: boolean;
+  can_simulate_annual_renewal: boolean;
   owner_url?: string;
 };
 export type FoodyObservedUsage = {
@@ -1299,7 +1302,7 @@ export function getFoodyMerchant(): Promise<FoodyMerchant> {
 }
 
 /** Replace supplied credentials only; blanks keep previously stored values. */
-export function saveFoodyMerchant(input: Pick<FoodyMerchant, 'revision' | 'enabled' | 'recurring_enabled'> & Partial<Record<FoodyMerchantField, string>>): Promise<FoodyMerchant> {
+export function saveFoodyMerchant(input: Pick<FoodyMerchant, 'revision' | 'enabled' | 'recurring_enabled'> & { cst_test_restaurant_id?: number } & Partial<Record<FoodyMerchantField, string>>): Promise<FoodyMerchant> {
   return apiFetch('/api/v1/admin/foody-billing/merchant', { method: 'PUT', body: JSON.stringify(input) });
 }
 
@@ -1322,9 +1325,10 @@ export function reconcileFoodyBilling(rid: number, transaction_id?: string): Pro
   return apiFetch(foodyBillingPath(rid) + '/reconcile', { method: 'POST', body: JSON.stringify({ transaction_id }) });
 }
 
-/** Advance the first authorized monthly renewal in the sandbox. */
-export function simulateFoodyRenewal(rid: number): Promise<FoodyPrivateBilling> {
-  return apiFetch(foodyBillingPath(rid) + '/simulate-renewal', { method: 'POST', signal: AbortSignal.timeout(45_000) });
+/** Advance the first authorized renewal for the selected cycle in CST. */
+export function simulateFoodyRenewal(rid: number, cycle: 'monthly' | 'annual' = 'monthly'): Promise<FoodyPrivateBilling> {
+  const path = cycle === 'annual' ? '/simulate-annual-renewal' : '/simulate-renewal';
+  return apiFetch(foodyBillingPath(rid) + path, { method: 'POST', signal: AbortSignal.timeout(45_000) });
 }
 
 /** Read measured activity; it is never used to calculate a debit. */

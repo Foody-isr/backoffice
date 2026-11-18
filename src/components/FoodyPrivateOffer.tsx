@@ -51,7 +51,7 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
     } catch (e) {
       setView(null);
       setError(e instanceof Error && e.message === 'foody_billing_sandbox_only'
-        ? 'Private offers are available in the development Backoffice.'
+        ? 'Select this test restaurant in Foody billing (sandbox) to enable private CST offers here.'
         : 'Could not load sandbox billing.');
     } finally { setLoading(false); }
   }, [restaurantId]);
@@ -99,11 +99,14 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
   }
 
   async function simulateRenewal() {
-    if (lock.current || !view?.can_simulate_renewal) return;
-    if (!window.confirm('Send the next monthly test debit to Verifone sandbox now? A confirmed payment covers the next period. This is allowed once for this mandate.')) return;
+    const cycle = view?.agreement?.cycle;
+    if (lock.current || !view?.accepted_offer || !cycle || !(cycle === 'annual' ? view.can_simulate_annual_renewal : view.can_simulate_renewal)) return;
+    const amount = money(view.accepted_offer[cycle].total_minor);
+    const date = formatDate(view.agreement!.period_end);
+    if (!window.confirm(`Charge ${amount} in Verifone CST for the ${cycle} period starting ${date}? You can advance the first renewal once.`)) return;
     lock.current = true; setBusy(true); setError(''); setNotice('');
     try {
-      const next = await simulateFoodyRenewal(restaurantId);
+      const next = await simulateFoodyRenewal(restaurantId, cycle);
       setView(next);
       if (next.payment?.status === 'paid') setNotice('Sandbox renewal confirmed.');
     } catch {
@@ -113,6 +116,10 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
   }
 
   const edit = (field: Exclude<keyof Draft, 'tax'>, value: string) => setDraft((prev) => ({ ...prev, [field]: value }));
+  const testRenewal = (view?.can_simulate_annual_renewal || view?.can_simulate_renewal) &&
+    <button type="button" disabled={busy || loading} className={secondary + ' mt-2'} onClick={() => void simulateRenewal()}>
+      {view.can_simulate_annual_renewal ? 'Tester le premier renouvellement annuel' : 'Test first monthly renewal'}
+    </button>;
   const payment = view?.payment;
   const paymentDetails = payment && <div className="mt-2 border-t border-gray-200 pt-2 text-sm">
     <p>{statusLabels[payment.status] ?? payment.status} · {money(payment.amount_minor)} · <bdi>{payment.reference}</bdi></p>
@@ -130,6 +137,8 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
       {loading && <p role="status" className="text-sm text-gray-600">Loading subscription…</p>}
       {view?.owner_url && <a href={view.owner_url} className="text-sm font-semibold text-brand-700 underline underline-offset-2">Open owner billing page</a>}
       {paymentDetails}
+      {testRenewal}
+      {notice && <p role="status" className="text-sm text-green-800">{notice}</p>}
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       {!loading && !view?.onboarding && (
         <div className="space-y-2">
@@ -163,8 +172,7 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
           <p className="text-gray-600">Accepted amount {money(view.accepted_offer[view.agreement.cycle].total_minor)} incl. VAT</p>
         )}
         {!view.agreement && <p className="mt-1 text-gray-600">Awaiting a confirmed sandbox payment.</p>}
-        {view.can_simulate_renewal && <button type="button" disabled={busy || loading} className={secondary + ' mt-2'}
-          onClick={() => void simulateRenewal()}>Test first monthly renewal</button>}
+        {testRenewal}
         {paymentDetails}
       </div>}
       <form onSubmit={publish}>

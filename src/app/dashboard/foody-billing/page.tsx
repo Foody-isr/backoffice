@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { getFoodyMerchant, saveFoodyMerchant, type FoodyMerchant, type FoodyMerchantField } from '@/lib/api';
+import { getFoodyMerchant, listRestaurants, saveFoodyMerchant, type FoodyMerchant, type FoodyMerchantField } from '@/lib/api';
 
 const fields: { key: FoodyMerchantField; label: string; max: number }[] = [
   { key: 'user_id', label: 'Verifone user ID', max: 255 },
@@ -15,6 +15,7 @@ const fields: { key: FoodyMerchantField; label: string; max: number }[] = [
 /** Manage Foody's own Verifone sandbox merchant, separately from restaurants. */
 export default function FoodyMerchantPage() {
   const [merchant, setMerchant] = useState<FoodyMerchant | null>(null);
+  const [restaurants, setRestaurants] = useState<{id: number; name: string}[]>([]);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,12 @@ export default function FoodyMerchantPage() {
   const form = useRef<HTMLFormElement>(null);
   const load = useCallback(async () => {
     setLoading(true); setError(''); setNotice('');
-    try { setMerchant(await getFoodyMerchant()); form.current?.reset(); }
+    try {
+      const config = await getFoodyMerchant();
+      if (config.requires_restaurant_selection) setRestaurants((await listRestaurants()).restaurants);
+      setMerchant(config);
+      form.current?.reset();
+    }
     catch (e) { setMerchant(null); setError(e instanceof Error && e.message === 'foody_billing_sandbox_only' ? 'Open the development Backoffice to configure sandbox billing.' : 'Could not read the Foody merchant configuration.'); }
     finally { setLoading(false); }
   }, []);
@@ -41,14 +47,15 @@ export default function FoodyMerchantPage() {
     try {
       const next = await saveFoodyMerchant({
         revision: merchant.revision, enabled: data.has('enabled'), recurring_enabled: data.has('recurring_enabled'), ...values,
+        ...(merchant.requires_restaurant_selection && { cst_test_restaurant_id: Number(data.get('test_restaurant')) }),
       });
       setMerchant(next);
       setNotice('Sandbox merchant saved.');
     } catch (e) {
       const code = e instanceof Error ? e.message : '';
       setError(code === 'foody_billing_conflict' || code === 'foody_billing_payment_pending'
-        ? 'The configuration changed or these contracts still have an open payment or renewal. Reload before editing.'
-        : code === 'foody_billing_invalid' ? 'Fill in the required credentials for the selected payment options.'
+        ? 'Reload the settings. To change the test restaurant, verify any pending payment and stop its automatic renewal in Foody Admin.'
+        : code === 'foody_billing_invalid' ? 'Check the credentials and choose a test restaurant without an active modular billing enrollment.'
         : 'Could not confirm the save. Reload to check the stored configuration.');
     } finally {
       form.current?.reset(); lock.current = false; setLoading(false);
@@ -76,8 +83,17 @@ export default function FoodyMerchantPage() {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2" />
           </label>)}
         </div>
+        {merchant.requires_restaurant_selection && <label className="block text-sm font-medium text-gray-900">
+          CST test restaurant
+          <select key={'cst-' + merchant.revision} name="test_restaurant" defaultValue={merchant.cst_test_restaurant_id}
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2">
+            <option value="0">None · disable CST subscriptions on production</option>
+            {restaurants.filter(r => r.id > 0).map(r => <option key={r.id} value={r.id}>{r.name} (#{r.id})</option>)}
+          </select>
+          <span className="mt-1 block font-normal text-gray-600">Only this restaurant can use Foody subscription checkout and renewals on the production site. Payments go to Verifone CST.</span>
+        </label>}
         <label className="flex items-start gap-2 text-sm"><input key={'enabled-' + merchant.revision} name="enabled" type="checkbox" defaultChecked={merchant.enabled} /> Allow new sandbox checkouts</label>
-        <label className="flex items-start gap-2 text-sm"><input key={'recurring-' + merchant.revision} name="recurring_enabled" type="checkbox" defaultChecked={merchant.recurring_enabled} /> Enable monthly enrollment and renewals once Verifone confirms this sandbox contract</label>
+        <label className="flex items-start gap-2 text-sm"><input key={'recurring-' + merchant.revision} name="recurring_enabled" type="checkbox" defaultChecked={merchant.recurring_enabled} /> Enable monthly and annual recurring payments on the CST contract</label>
         <div className="flex gap-3">
           <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Save configuration</button>
           <button type="button" onClick={() => void load()} className="rounded-lg border px-4 py-2 text-sm font-medium">Reload</button>
