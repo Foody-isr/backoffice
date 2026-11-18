@@ -1384,7 +1384,10 @@ export type FoodyModuleAccess = {
   trial_ends_at?: string;
 };
 
+export type FoodyBillingPolicy = { version: string; monthly_commitment_months: number; annual_period_months: number; annual_billed_months: number };
+
 export type FoodyModuleCatalog = {
+  billing_policy?: FoodyBillingPolicy;
   plans?: FoodyPlan[];
   capabilities?: FoodyCapability[];
   tariffs?: FoodyTariff[];

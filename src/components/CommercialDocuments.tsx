@@ -79,7 +79,7 @@ function LineEditor({ line, index, source, input, onChange, onRemove, onMove, co
         const category = e.target.value as CommercialLine['category'];
         onChange(category === 'subscription' && !['monthly', 'prepaid', 'included'].includes(line.billing) ? { ...changeLineBilling(line, 'monthly'), category } : { ...line, category });
       }}><option value="fee">Fee / service</option><option value="hardware">Hardware</option><option value="subscription">Subscription</option></select></label>}
-      <label className="text-sm">Payment schedule<select className={field} value={line.billing} onChange={e => onChange(changeLineBilling(line, e.target.value as BillingMode))}>{modes.map(mode => <option key={mode} value={mode}>{billingLabels[mode]}</option>)}</select></label>
+      <label className="text-sm">Payment schedule<select className={field} value={line.billing} onChange={e => onChange(changeLineBilling(line, e.target.value as BillingMode, source, input))}>{modes.map(mode => <option key={mode} value={mode}>{billingLabels[mode]}</option>)}</select></label>
       {line.billing === 'prepaid' && <label className="text-sm">Months covered<input className={field} type="number" min={1} max={120} required value={line.period_months || ''} onChange={e => update({ period_months: Number(e.target.value) })} /><span className="mt-1 block text-xs text-gray-600">12, 24, 36 or another duration. Changing this keeps your agreed period price.</span></label>}
       {line.billing === 'monthly' && <label className="text-sm">Minimum commitment (months)<input className={field} type="number" min={0} max={120} required value={line.commitment_months} onChange={e => update({ commitment_months: Number(e.target.value) })} /><span className="mt-1 block text-xs text-gray-600">0 = no minimum commitment. Payment remains monthly.</span></label>}
       <label className="text-sm">Quantity<input className={field} type="number" required min={1} max={10000} disabled={line.billing === 'usage'} value={line.quantity || ''} onChange={e => update({ quantity: Number(e.target.value) })} /></label>
@@ -92,6 +92,7 @@ function LineEditor({ line, index, source, input, onChange, onRemove, onMove, co
       {line.due === 'date' && <label className="text-sm">Date<input className={field} type="date" min="2000-01-01" max="2200-12-31" required value={line.start_date} onChange={e => update({ start_date: e.target.value })} /></label>}
       <label className="text-sm sm:col-span-2">Line details (optional)<textarea className={field} rows={2} dir="auto" maxLength={1500} value={line.notes} onChange={e => update({ notes: e.target.value })} /></label>
     </div>
+    {source?.billingPolicy && <p className="mt-3 text-xs text-gray-600">Standard software terms: monthly without a minimum commitment, or 12 months prepaid for the price of 11 (8.33% saving). Complete prepaid years use the same annual rate. Hardware, additional licences and services are excluded. Negotiated amounts stay unchanged; use the catalogue price to apply the standard annual rate.</p>}
     {line.billing === 'usage' && <p className="mt-3 text-xs text-gray-600">The actual quantity will be billed by usage. This rate is excluded from fixed totals.</p>}
   </fieldset>;
 }
@@ -104,6 +105,7 @@ function Totals({ content }: { content: CommercialSnapshot }) {
     {content.lines.some(l => l.billing === 'once' || l.billing === 'prepaid') && amount('One-time & prepaid', content.single)}
     {content.lines.some(l => l.billing === 'monthly') && amount('Each month', content.monthly)}
     {content.lines.some(l => l.billing === 'usage') && <p className="mt-4 text-xs text-gray-600">Usage fees are additional, according to actual consumption.</p>}
+    {content.priced_lines.filter(l => (l.software_saving_minor ?? 0) > 0).map((l, i) => <p key={`saving-${i}`} className="mt-3 text-sm text-gray-700"><span dir="auto">{l.description}</span>: save {money(l.software_saving_minor!)} excl. VAT against {l.period_months} monthly software payments.</p>)}
     {content.priced_lines.filter(l => l.commitment_months > 0).map((l, i) => <p key={i} className="mt-3 text-xs text-gray-600"><span dir="auto">{l.description}</span>: {l.commitment_months} monthly payments, {money(l.commitment.gross)} {content.tax_mode === 'none' ? 'total' : 'incl. VAT'} over the commitment.</p>)}
     <p className="mt-4 text-xs leading-relaxed text-gray-600">Payment dates are defined on each line. These totals are not an amount collected today.</p>
   </div>;
@@ -218,7 +220,7 @@ export default function CommercialDocuments({ onDirtyChange }: { onDirtyChange: 
   }
 
   return <section className="space-y-6" aria-label="Quotes and orders" aria-busy={!!busy}>
-    <header className="flex flex-wrap items-start justify-between gap-4"><div><div className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">Commercial documents · Sandbox</div><h2 className="text-2xl font-semibold">Quotes &amp; orders</h2><p className="mt-2 max-w-2xl text-sm text-gray-600">Bring software, equipment and services together. Review the payment schedule, then finalize a numbered PDF.</p></div>
+    <header className="flex flex-wrap items-start justify-between gap-4"><div><div className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">Commercial documents</div><h2 className="text-2xl font-semibold">Quotes &amp; orders</h2><p className="mt-2 max-w-2xl text-sm text-gray-600">Bring software, equipment and services together. Monthly software has no minimum commitment; annual prepayment includes one free month. Review the payment schedule, then finalize a numbered PDF. This does not collect payment or activate a subscription.</p></div>
       <div className="flex flex-wrap gap-2"><button type="button" className="btn-secondary" disabled={!!busy || loading} onClick={() => setSettings(!settings)}>Issuer settings</button><button type="button" className="btn-secondary" disabled={!!busy || loading} onClick={() => start('order')}>New order</button><button type="button" className="btn-primary" disabled={!!busy || loading} onClick={() => start('quote')}>New quotation</button></div>
     </header>
     {error && <div role="alert" className="error-notice"><p>{error}</p>{!input && <button type="button" className="mt-2 underline" onClick={() => setAttempt(n => n + 1)}>Retry</button>}</div>}

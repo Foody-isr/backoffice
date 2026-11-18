@@ -354,13 +354,13 @@ production catalogue as well as the development catalogue. The environment
 notice explains which public rates change, after about one minute of website
 cache. Review changes before publishing; publication never charges a customer.
 Employee accounts and physical POS devices use separate quotas. Subscription
-checkouts, paid additions and Quotes & orders remain a separate sandbox pilot;
-the documents tab is hidden against the production API. Onboarding checks the
+checkouts and paid additions remain a separate sandbox pilot. Quotes & orders
+are available to superadmins in production and development without charging customers. Onboarding checks the
 dedicated sandbox-only onboarding-catalog endpoint, not the editable catalogue.
 Accepted contracts and invitations retain their version. See the synchronized
 FR/HE/EN billing, staff and catalogue help for the sandbox test procedures.
 
-### Commercial quotations and orders (sandbox)
+### Commercial quotations and orders (production and development)
 
 **Payments & devices → Plans & modules → Quotes & orders** composes Foody PDFs
 with the owned dark logo in Hebrew, French or English. Set Foody's actual company
@@ -383,8 +383,9 @@ draft without recording customer acceptance. These actions send no email,
 collect no payment and do not change customer subscriptions or licences.
 Concurrent edits return a conflict; local edits remain available for recovery.
 
-API migration **321** adds private document storage. Deploy the matching sandbox
-API before this UI. Production API access is intentionally disabled.
+API migration **321** adds private document storage. Deploy the matching API
+before this UI. All document endpoints require an authenticated superadmin in
+either environment. No customer invoice or subscription is changed.
 Validation: `node --test scripts/commercial-documents.test.mjs`, lint, TypeScript,
 build and the service help contract. The API's opt-in `TestBrowserWorkspace`
 harness supports local browser checks with a synthetic in-memory database.
@@ -426,3 +427,20 @@ and accepted grants retain their snapshots. Production activation requires the
 normal coordinated API/client release and catalogue review. Publish the matching
 Backoffice artifact before the API in production to keep legacy onboarding
 available throughout this release.
+
+## Monthly and annual terms — 18 November 2026
+
+Standard monthly software has no minimum commitment. The API billing policy
+calculates annual module and plan prices as 11 monthly amounts for 12 months
+prepaid (24 for 22). Licences and payment services keep their full period cost.
+The catalogue editor previews the annual amount. New quotes use this policy;
+saved documents freeze it, while historical quotes without it keep their prior
+reference. Negotiated amounts remain explicit and are never silently repriced.
+Annual software savings appear in totals and PDF when applicable.
+
+Prepaid benefits stack with the annual saving: 12 months include one relevant
+setup service, 24 months include relevant website/setup services and one training
+day. Add selected gifts as Included lines and record the scope in quote terms;
+there is no automatic gift insertion. Kitchen assistance remains quoted.
+The internal FR/HE/EN guides describe this flow. Checkouts and renewals stay
+sandbox-only. No existing contract, saved invitation or private offer is migrated.

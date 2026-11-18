@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "92d502515a06624dcaf7f8b3c66a6edadce1819c9a537eab13234fe3a8ff45cf",
+      "baseSha256": "830bd94a2802456e35a918f9b647cb0195934c71858eb225cc93d7f204adab00",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "Only the typed Foody commercial catalogue gains its optional billing policy. No shared HTTP transport, authentication, error handling, customer payment operation or runtime routing changes. Updated catalogue and document guides cover the new annual pricing behavior in FR/HE/EN."
+    }
+  ]
+}

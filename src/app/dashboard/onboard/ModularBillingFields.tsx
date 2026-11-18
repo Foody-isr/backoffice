@@ -93,6 +93,7 @@ export default function ModularBillingFields({ catalog, value, onChange }: {
         <span className="rounded-md bg-amber-50 px-2 py-1 text-xs text-amber-900">Sandbox</span>
       </div>
       <p className="mt-1 text-sm text-gray-600">The invitation opens the owner’s subscription setup.</p>
+      {catalog.billing_policy && <p className="mt-2 text-sm text-gray-600">Standard modules and plans: monthly with no minimum commitment, or 12 months prepaid for the price of 11. Additional licences and services are excluded from the annual saving. Custom offers keep their explicitly agreed amounts and terms.</p>}
     </div>
     <label className="block text-sm font-medium">Offer type
       <select className={field} value={value.mode} onChange={event => {
@@ -106,9 +107,9 @@ export default function ModularBillingFields({ catalog, value, onChange }: {
     {value.mode === 'public' ? (
       <ul className="divide-y divide-gray-200 rounded-md border border-gray-200 px-4 text-sm">
         {catalog.products.map(product => <li key={product.id} className="flex flex-wrap justify-between gap-2 py-3">
-          <span>{product.name.en}</span><span>{money(product.monthly_minor)} / month excl. VAT</span>
+          <span>{product.name.en}</span><span>{money(product.monthly_minor)} / month excl. VAT{catalog.billing_policy && <span className="block">{money(product.monthly_minor * catalog.billing_policy.annual_billed_months)} / year prepaid</span>}</span>
         </li>)}
-        {catalog.plans?.filter(p => p.published).map(plan => <li key={plan.id} className="flex flex-wrap justify-between gap-2 py-3"><span>{plan.name.en}</span><span>{money(plan.monthly_minor)} / month excl. VAT</span></li>)}
+        {catalog.plans?.filter(p => p.published).map(plan => <li key={plan.id} className="flex flex-wrap justify-between gap-2 py-3"><span>{plan.name.en}</span><span>{money(plan.monthly_minor)} / month excl. VAT{catalog.billing_policy && <span className="block">{money(plan.monthly_minor * catalog.billing_policy.annual_billed_months)} / year prepaid</span>}</span></li>)}
         <li className="flex flex-wrap justify-between gap-2 py-3"><span>{deviceBased ? 'Additional active POS device' : 'Additional named POS licence'}</span><span>{additionalRate == null ? 'On quotation' : `${money(additionalRate)} / month excl. VAT`}</span></li>
       </ul>
     ) : (
