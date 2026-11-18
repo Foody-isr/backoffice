@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "a0dbca6ac89b33bd47657f8c470a40d94f89bbb4",
-  "documentationRevision": "313c42642d851a8cd5ab90ee65525f2a9033346a13be0f9a927c1c65e1265da1",
+  "documentationRef": "4e43293d30df0f1d83a44138cbf99eebccc95e2c",
+  "documentationRevision": "ce0bda72c38c311da295553e40993f0778b3c5b766a97054b8df24d69f52e20b",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -145,15 +145,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/account/subscription.mdx",
-          "sha256": "cbb381ddbe4ddf9e0c9fb1d67bcf17aec4d74a87604b39f8a7ed94f4cff78a5b"
+          "sha256": "ea8812fe54a61f4072c34d0d8eb17a843c3d7704c078532327683b01060de7c3"
         },
         "fr": {
           "path": "src/content/help/fr/account/subscription.mdx",
-          "sha256": "32c25e612496cb4561c5d30feda13b851074782a85b5e4a3c8875f59274b5d28"
+          "sha256": "8c19efcddb385e6ae4603f3dce02844a051bc28e2c0bab83822b5928dbb9b2bb"
         },
         "he": {
           "path": "src/content/help/he/account/subscription.mdx",
-          "sha256": "b08731708623e29f684f04aae208c68961fc4cefdecbec8108d7856880e8d588"
+          "sha256": "2c1660ab3d5b5154b10745bc4f75c1210bc569b66b719504187236f16702fb6b"
         }
       }
     },
@@ -164,15 +164,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/foody-billing-sandbox.md",
-          "sha256": "b4428577bff4a557abe8649d1534d32ca4359d29f704d878b19dffdc8ddf281b"
+          "sha256": "738aab58848b2071ed76bfe04a67aa2a37be7c366e44e2525b6f7e7272b6b579"
         },
         "fr": {
           "path": "docs/help/internal/fr/foody-billing-sandbox.md",
-          "sha256": "d652a90717815bbb0396d08e2cf3425f2003e4eb977b1feca814fc20515163dd"
+          "sha256": "5aa2fd76c0209f1d880119ce56430f778e9d7b9f88a73f943ce118562c5ccd57"
         },
         "he": {
           "path": "docs/help/internal/he/foody-billing-sandbox.md",
-          "sha256": "aa2d808a49ce3220ab9243c1f2438bd18827076cc7ce5c0a9658203be0e866b2"
+          "sha256": "ec7117dbd306e88fdb5a7f35de342d09d004152cce252875f73402d10cebb5b9"
         }
       }
     },
@@ -2204,7 +2204,7 @@
       ]
     },
     "src/app/dashboard/foody-billing/page.tsx": {
-      "sha256": "e1f6818f165e55ee1ab57b824bbf3236f5d754919486beaab18d55d2c57c4246",
+      "sha256": "f1b1ae49977c70e3ba66dcc2fed4e029ade54772b4cc7276b24f3201db1fe6ec",
       "features": [
         "foody-billing-sandbox"
       ]
@@ -2374,7 +2374,7 @@
       ]
     },
     "src/components/FoodyPrivateOffer.tsx": {
-      "sha256": "3707bb0f11d30ece95e55a0a2892e0903c74520c55ebd87623a1367741a3b0f0",
+      "sha256": "44cc7144c7e962bca084ac6646590e2c6fded4d122cfc84ebf79afb825453a08",
       "features": [
         "foody-billing-sandbox"
       ]
@@ -2431,7 +2431,7 @@
       ]
     },
     "src/lib/api.ts": {
-      "sha256": "893ac2b9aa2e1a9bb1182e2c330c1e9e2b9de727fbae538b7a20aec74428ae25",
+      "sha256": "7e5e6e04f48c9069ef909a2e4788aa51c167c10c22c71be44b61ed5bb5f5c8ec",
       "features": [
         "backoffice-entitlements",
         "platform-api",
