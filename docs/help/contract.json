@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "service": "foodybackoffice",
   "documentationRepository": "Foody-isr/landing",
-  "documentationRef": "fd93bd557612898691d5dcf6ff482a90d1d2126d",
-  "documentationRevision": "e792542851db3a8667f0067783c48a11647e9c9879f80b1b9dedf4d1d7f24ff6",
+  "documentationRef": "60b9f1ce30a5d49798a0a05b15a72b22920b15de",
+  "documentationRevision": "5e613cd1269ea91c26f62c06cd36d508fec7a07c718f9582d4b115bbc7863f8a",
   "articles": {
     "getting-started/first-login": {
       "feature": "account-access",
@@ -12,15 +12,15 @@
       "translations": {
         "en": {
           "path": "src/content/help/en/getting-started/first-login.mdx",
-          "sha256": "2a37b4b560c1d96e4e3d3ff06e7e1687294cf169d750e965e5cb266a46808902"
+          "sha256": "6db98ce07e087418c581852c4c213d8451c0edc36dfeffee69b40cd34659ba2e"
         },
         "fr": {
           "path": "src/content/help/fr/getting-started/first-login.mdx",
-          "sha256": "d515921fc290cd06b4fdb4ace8a8dbe5cfd9895159e687c41180e8e24faacbae"
+          "sha256": "4a9b672cebaa8a7dad63d21c5ce2d3458007b3747f2323462524a9059d548592"
         },
         "he": {
           "path": "src/content/help/he/getting-started/first-login.mdx",
-          "sha256": "5c27d1d96b07856c1775a1a3a1ddc7068e8a2d244c8c48f713da3cf9554ccb19"
+          "sha256": "5792ec7a9c32ed368151d33b0d2a739865570993fdc9257905a0af375e398bbc"
         }
       }
     },
@@ -1703,15 +1703,15 @@
       "translations": {
         "en": {
           "path": "docs/help/internal/en/access-and-dashboard.md",
-          "sha256": "f1d49dbb82a230ef6f5b1c2e459ec45e2fbdafc3739260b787cee7dd88a13a7e"
+          "sha256": "f2c52e32579cf88c422d3f3c6828ec042a845552ac76e5e7d036696fd4be3150"
         },
         "fr": {
           "path": "docs/help/internal/fr/access-and-dashboard.md",
-          "sha256": "a0d35b3bb2f19c82b64db348078169b26c35dc9f7748cd33eed0606f44e65eff"
+          "sha256": "faca69378564f3935ebe77bc6ffc01f2a76add0b0004f930abaf8b8622d8f9ca"
         },
         "he": {
           "path": "docs/help/internal/he/access-and-dashboard.md",
-          "sha256": "d4aa7f4f50d10f19be3299d0e11573f95070878cae85e0ba0a108ce0fb48d3fd"
+          "sha256": "84e77dfb2d5d810255584c7cab76fad79ebb5065341aee3ff9adb74a3bdd0820"
         }
       }
     },
@@ -2437,7 +2437,7 @@
       ]
     },
     "src/lib/api.ts": {
-      "sha256": "a4b1a59e12aa8dbf8c8b3a853d6ab3b02e0de7424bd6f02ff491c306408170c7",
+      "sha256": "953aade4e26898cad26330a854e5f8235f880cc6e1f73533683f5a9a2e08440d",
       "features": [
         "backoffice-entitlements",
         "platform-api",
@@ -2445,7 +2445,7 @@
       ]
     },
     "src/lib/auth-context.tsx": {
-      "sha256": "15911aa4bc7e2472a12b29d4584dad3d5269e20e23ab039a5c2950a4749ef851",
+      "sha256": "de7d3e9ea1c93f2678c901671f0448077f98075d8232bd06c973c3392da6e351",
       "features": [
         "backoffice-access",
         "shared-runtime"
@@ -2479,6 +2479,13 @@
       "sha256": "0812332d44c18af45a4b4672f931f80d2053b786acad53ad2a846bc6b183abc8",
       "features": [
         "backoffice-access"
+      ]
+    },
+    "src/lib/portal-session.ts": {
+      "sha256": "7c47ee310bee84aacf17e6624e936b343d4c5500492f8f333291e4a07c949dc6",
+      "features": [
+        "backoffice-access",
+        "shared-runtime"
       ]
     },
     "src/lib/sentry-options.ts": {
@@ -3182,6 +3189,7 @@
         "deleteUser",
         "onboardRestaurant",
         "publishFoodyCatalog",
+        "refreshPortalSession",
         "saveFoodyMerchant",
         "saveFoodyOffer",
         "sendInviteEmail",

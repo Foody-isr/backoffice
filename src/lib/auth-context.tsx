@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { User, getStoredUser, isAuthenticated, logout as apiLogout } from '@/lib/api';
+import { User, getStoredUser, isAuthenticated, refreshPortalSession, logout as apiLogout } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -24,19 +24,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      const stored = getStoredUser();
-      if (stored && stored.role === 'superadmin') {
-        setUser(stored);
+    let active = true;
+    async function restore() {
+      try {
+        if (isAuthenticated() && await refreshPortalSession()) {
+          const stored = getStoredUser();
+          if (active && stored?.role === 'superadmin') setUser(stored);
+        }
+      } catch {
+        // A disconnected browser can retry this check on reload.
+      } finally {
+        if (active) setLoading(false);
       }
     }
-    setLoading(false);
+    void restore();
+    return () => { active = false; };
   }, []);
 
-  const logout = useCallback(() => {
-    apiLogout();
+  const logout = useCallback(async () => {
+    const clearing = apiLogout();
     setUser(null);
-    window.location.href = '/login';
+    try { await clearing; } finally { window.location.href = '/login'; }
   }, []);
 
   return (

@@ -11,18 +11,22 @@ const compiled = ts.transpileModule(fs.readFileSync(new URL('../src/lib/api.ts',
 function client(host, respond) {
   const exports = {};
   const requests = [];
-  vm.runInNewContext(compiled, {
+  const context = {
     exports, Error, AbortSignal, URLSearchParams,
     window: { location: { hostname: host } },
-    localStorage: { getItem: () => null },
+    localStorage: { getItem: () => null, removeItem() {} },
     process: { env: { NODE_ENV: 'production', NEXT_PUBLIC_API_URL: 'https://dev-api.foody-pos.co.il' } },
-    require: () => ({ withScope: fn => fn({ setTag() {}, setContext() {} }), captureException() {} }),
+    require: name => name === './portal-session' ? portal : ({ withScope: fn => fn({ setTag() {}, setContext() {} }), captureException() {} }),
     fetch: async (url, options) => {
       requests.push({ url, ...options });
       const result = respond(url, options);
       return { ok: result.status === 200, status: result.status, json: async () => result.body, headers: new Headers() };
     },
-  });
+  };
+  const portal = {};
+  const helpers = ts.transpileModule(fs.readFileSync(new URL('../src/lib/portal-session.ts', import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  vm.runInNewContext(helpers,{...context,exports:portal,Headers,URL});
+  vm.runInNewContext(compiled,context);
   return { api: exports, requests };
 }
 

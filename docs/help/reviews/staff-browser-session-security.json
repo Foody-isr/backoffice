@@ -1,0 +1,32 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "953aade4e26898cad26330a854e5f8235f880cc6e1f73533683f5a9a2e08440d",
+      "disposition": "no-user-impact",
+      "reason": "The first-login guides cover the changed browser credential and renewal. Restaurant API paths, business payloads, catalogue workflows and the authority of each user remain as reviewed.",
+      "features": [
+        "backoffice-entitlements",
+        "platform-api",
+        "shared-runtime"
+      ],
+      "baseSha256": "a4b1a59e12aa8dbf8c8b3a853d6ab3b02e0de7424bd6f02ff491c306408170c7"
+    },
+    {
+      "path": "src/lib/auth-context.tsx",
+      "sha256": "de7d3e9ea1c93f2678c901671f0448077f98075d8232bd06c973c3392da6e351",
+      "disposition": "no-user-impact",
+      "reason": "The updated access guide covers session restoration and sign-out. This provider manages authentication state without changing restaurant workflows or their business fields.",
+      "features": [
+        "shared-runtime"
+      ],
+      "baseSha256": "15911aa4bc7e2472a12b29d4584dad3d5269e20e23ab039a5c2950a4749ef851"
+    },
+    {
+      "path": "src/lib/portal-session.ts",
+      "sha256": "7c47ee310bee84aacf17e6624e936b343d4c5500492f8f333291e4a07c949dc6",
+      "disposition": "no-user-impact",
+      "reason": "The updated access guides cover the browser cookie requirement. This internal transport helper leaves non-authentication workflow steps, permissions and data fields intact."
+    }
+  ]
+}
