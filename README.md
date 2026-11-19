@@ -330,17 +330,6 @@ checks all French, Hebrew and English procedures. New source and behavior change
 require an updated inventory/guide release or an exact reviewed no-user-impact
 explanation. See Landing’s `docs/help/MAINTENANCE.md` for the complete workflow.
 
-## External-service usage and allowances
-
-**Platform → Usage and quotas** compares restaurant consumption by service in the current
-environment and links to each restaurant allocation. The restaurant detail page
-also links there. Complete monthly overrides require a reason and explicit save;
-zero pauses new calls, restoring defaults only edits the form, and concurrent
-edits require reloading the current revision. Saves are audited and never reset
-usage. These controls currently cover Google location APIs and all Geoapify
-categories, with optimization shipments and estimated credits distinct from request
-counts. Tracking starts at activation; UTC monthly renewal is displayed. Existing
-shared Google protection remains independent. Deploy API migration 268 first.
 Canonical production/development backoffice hosts select their matching API at
 runtime so the exact verified development artifact can be promoted to production.
 The build's Content Security Policy explicitly permits both canonical API origins
