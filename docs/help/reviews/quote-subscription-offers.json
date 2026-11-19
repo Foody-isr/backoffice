@@ -1,0 +1,15 @@
+{
+  "reviewedAt": "2026-11-19",
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "a4b1a59e12aa8dbf8c8b3a853d6ab3b02e0de7424bd6f02ff491c306408170c7",
+      "baseSha256": "7e5e6e04f48c9069ef909a2e4788aa51c167c10c22c71be44b61ed5bb5f5c8ec",
+      "features": [
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "This shared client adds the private-offer preview, the restaurant quotation filter and their typed payloads. Existing users of the other administration endpoints keep their documented procedures."
+    }
+  ]
+}

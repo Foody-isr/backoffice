@@ -2,7 +2,7 @@
   "files": [
     {
       "path": "src/lib/api.ts",
-      "sha256": "dbe22021ecf62a41032edd49750f320967f8987e1808e112bb3be3dc0052cc5e",
+      "sha256": "953aade4e26898cad26330a854e5f8235f880cc6e1f73533683f5a9a2e08440d",
       "disposition": "no-user-impact",
       "reason": "The first-login guides cover the changed browser credential and renewal. Restaurant API paths, business payloads, catalogue workflows and the authority of each user remain as reviewed.",
       "features": [
@@ -10,7 +10,7 @@
         "platform-api",
         "shared-runtime"
       ],
-      "baseSha256": "7e5e6e04f48c9069ef909a2e4788aa51c167c10c22c71be44b61ed5bb5f5c8ec"
+      "baseSha256": "a4b1a59e12aa8dbf8c8b3a853d6ab3b02e0de7424bd6f02ff491c306408170c7"
     },
     {
       "path": "src/lib/auth-context.tsx",

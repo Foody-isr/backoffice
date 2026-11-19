@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { CommercialDocumentError, getEditableFoodyCatalog, listRestaurants, type FoodyEditableCatalog, type Restaurant } from '@/lib/api';
 import {
   changeDocumentTax, changeLineBilling, convertCommercialDocument, documentInput, documentSources,
@@ -281,6 +282,7 @@ export default function CommercialDocuments({ onDirtyChange }: { onDirtyChange: 
         <button type="button" className="btn-secondary w-full" disabled={!!busy || !input.lines.length} onClick={previewPDF}>{locked ? 'View archived PDF' : 'Preview PDF'}</button>
         {!locked && current && <button type="button" className="btn-primary w-full" disabled={!!busy || serialized !== baseline} onClick={() => setReview(true)}>Review &amp; finalize</button>}
         {!locked && <p className="text-xs leading-relaxed text-gray-600">Save the draft before finalizing. Finalization assigns a number and freezes its PDF.</p>}
+        {locked && current?.kind === 'quote' && current.restaurant_id && <Link className="btn-primary block w-full text-center" href={`/dashboard/restaurants/${current.restaurant_id}?quotation=${current.id}&revision=${current.revision}#private-offer`}>Prepare subscription offer</Link>}
         {locked && current?.kind === 'quote' && <button type="button" className="btn-primary w-full" disabled={!!busy} onClick={() => void act('Creating order draft…', async () => { adopt(await convertCommercialDocument(current.id, current.revision)); setNotice('Order draft opened with the quotation’s prices and inclusions. Review it before finalizing.'); await reload(); })}>Create order draft</button>}
         <p className="border-t border-gray-200 pt-4 text-xs leading-relaxed text-gray-600">Commercial documents only. Finalizing does not collect a payment, activate licences or replace a subscription contract.</p>
         {review && current && !locked && <div role="region" aria-label="Finalize document" className="space-y-3 border-t border-gray-300 pt-4"><h4 className="font-semibold">Finalize this {input.kind === 'quote' ? 'quotation' : 'order'}?</h4><p className="text-sm">Check the issuer, customer, prices, VAT and terms in the PDF. The numbered document will be read-only.</p><button type="button" className="btn-primary w-full" disabled={!!busy || serialized !== baseline} onClick={() => void act('Finalizing…', async () => { adopt(await issueCommercialDocument(current.id, current.revision)); setNotice('Document finalized. Its numbered PDF is archived and ready to download.'); await reload(); })}>Finalize document</button><button type="button" className="text-sm underline" disabled={!!busy} onClick={() => setReview(false)}>Continue reviewing</button></div>}

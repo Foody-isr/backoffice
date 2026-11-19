@@ -102,8 +102,10 @@ export function changeDocumentTax(input: CommercialInput, mode: TaxMode, vatBps:
 }
 
 /** Loads private metadata without customer document bodies or archived PDFs. */
-export function listCommercialDocuments(page: number, kind: string, status: string) {
-  return commercialDocumentRequest<{ documents: CommercialMetadata[]; has_more: boolean }>(`?${new URLSearchParams({ page: String(page), kind, status })}`);
+export function listCommercialDocuments(page: number, kind: string, status: string, restaurantId?: number) {
+  const query = new URLSearchParams({ page: String(page), kind, status });
+  if (restaurantId !== undefined) query.set('restaurant_id', String(restaurantId));
+  return commercialDocumentRequest<{ documents: CommercialMetadata[]; has_more: boolean }>(`?${query}`);
 }
 /** Retrieves a saved document and the catalogue used when it was created. */
 export function getCommercialDocument(id: number) { return commercialDocumentRequest<CommercialDocument>(`/${id}`); }
