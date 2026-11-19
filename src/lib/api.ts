@@ -1265,12 +1265,13 @@ export type FoodyMerchant = {
   cst_test_restaurant_id: number;
   configured: Record<FoodyMerchantField, boolean>;
 };
-type FoodyOfferTerms = {
+export type FoodyOfferSelection = { kind: 'module' | 'plan' | 'quote'; id: string; revision: number };
+export type FoodyOfferTerms = {
   title: string; includes: string; terms: string;
   monthly_minor: number; annual_minor: number; tax_mode: 'ht' | 'ttc'; start_date: string;
 };
 type FoodyPrice = { net_minor: number; vat_minor: number; total_minor: number };
-type FoodyOffer = FoodyOfferTerms & { id: number; version: number; monthly: FoodyPrice; annual: FoodyPrice };
+export type FoodyOffer = FoodyOfferTerms & { commercial_source?: FoodyOfferSelection & { number?: string; valid_until?: string; first_date?: string }; vat_bps: number; id: number; version: number; monthly: FoodyPrice; annual: FoodyPrice };
 export type FoodyPrivateBilling = {
   onboarding?: {
     mode: 'public' | 'private';
@@ -1317,8 +1318,15 @@ export function getFoodyPrivateBilling(rid: number): Promise<FoodyPrivateBilling
   return apiFetch(foodyBillingPath(rid), { cache: 'no-store' });
 }
 
+/** Previews subscription terms from the same catalogue or issued quotation used at publication. */
+export function previewFoodyOffer(rid: number, source: FoodyOfferSelection, signal?: AbortSignal): Promise<FoodyOffer> {
+  return apiFetch(foodyBillingPath(rid) + '/offer/preview', { method: 'POST', body: JSON.stringify(source), signal });
+}
+
+export type FoodyOfferInput = (FoodyOfferTerms | { source: FoodyOfferSelection; start_date: string; terms: string }) & { expected_version: number };
+
 /** Publish a new immutable version of the private offer. */
-export function saveFoodyOffer(rid: number, input: FoodyOfferTerms & { expected_version: number }): Promise<FoodyPrivateBilling> {
+export function saveFoodyOffer(rid: number, input: FoodyOfferInput): Promise<FoodyPrivateBilling> {
   return apiFetch(foodyBillingPath(rid) + '/offer', { method: 'PUT', body: JSON.stringify(input) });
 }
 
