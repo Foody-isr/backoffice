@@ -13,7 +13,6 @@ import {
   CubeIcon,
   DevicePhoneMobileIcon,
   HomeIcon,
-  PresentationChartLineIcon,
   ReceiptPercentIcon,
   ServerStackIcon,
   SignalIcon,
@@ -52,7 +51,6 @@ const sections = [
   {
     label: 'Platform',
     links: [
-      { href: '/dashboard/api-usage', label: 'Usage and quotas', icon: PresentationChartLineIcon },
       { href: '/dashboard/operations', label: 'Operations', icon: SignalIcon },
       { href: '/dashboard/servers', label: 'Servers', icon: ServerStackIcon },
       { href: '/dashboard/clone', label: 'Clone data', icon: CircleStackIcon },

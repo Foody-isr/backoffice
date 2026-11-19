@@ -1,0 +1,57 @@
+{
+  "files": [
+    {
+      "path": "src/app/dashboard/api-usage/page.tsx",
+      "baseSha256": "f44531bfd25e45382e99583e806784061e146ec9023810d9ad7a9d92ffe03e21",
+      "sha256": "deleted",
+      "features": [
+        "backoffice-entitlements"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The map consumption screens and metrics have been retired. The reviewed administration source also supports the listed operations, which continue to use their existing controls for other services and plans."
+    },
+    {
+      "path": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "baseSha256": "0cb972274c8653ad9d77aa08c140aaced51ab9144546404a8cbadeadcdefaf4d",
+      "sha256": "32c7dbfaab65806081fe899dfbce458b116dfc67ae7bebd4a0676bc31623dfa9",
+      "features": [
+        "backoffice-onboarding",
+        "backoffice-entitlements"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The map consumption screens and metrics have been retired. The reviewed administration source also supports the listed operations, which continue to use their existing controls for other services and plans."
+    },
+    {
+      "path": "src/app/dashboard/restaurants/[id]/usage/page.tsx",
+      "baseSha256": "30a3016541b91474389d04aae101bdfc4882b0eba97a304a3644b0e7fb8d62b8",
+      "sha256": "deleted",
+      "features": [
+        "backoffice-onboarding",
+        "backoffice-entitlements"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The map consumption screens and metrics have been retired. The reviewed administration source also supports the listed operations, which continue to use their existing controls for other services and plans."
+    },
+    {
+      "path": "src/components/Sidebar.tsx",
+      "baseSha256": "97b12e7552fff05ae69b8df5764e394b12213794fefb8a4652cecdbc91c24f48",
+      "sha256": "d448c68a8b09918b832176cab298876db170c50875176f242d686ea80f6966fe",
+      "features": [
+        "backoffice-access",
+        "backoffice-entitlements"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The map consumption screens and metrics have been retired. The reviewed administration source also supports the listed operations, which continue to use their existing controls for other services and plans."
+    },
+    {
+      "path": "src/lib/api.ts",
+      "baseSha256": "db615ab21027430ffc6eb8b70bffbb0b59bd510a81370b47e8a0de1ee4824372",
+      "sha256": "1cfe206e1108099ff274ac698dde19d5efe42a41a2a3e12c15fd2af8d2d8619b",
+      "features": [
+        "backoffice-entitlements"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The map consumption screens and metrics have been retired. The reviewed administration source also supports the listed operations, which continue to use their existing controls for other services and plans."
+    }
+  ]
+}

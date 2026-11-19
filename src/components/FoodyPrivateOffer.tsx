@@ -12,9 +12,6 @@ const money = (minor: number) => new Intl.NumberFormat('en-IL', { style: 'curren
 const formatDate = (date: string) => new Intl.DateTimeFormat('en-IL', { dateStyle: 'medium', timeZone: 'Asia/Jerusalem' }).format(new Date(date));
 const statusLabels: Record<string, string> = { creating: 'Preparing checkout', pending: 'Awaiting verification', review: 'Needs review', paid: 'Confirmed', failed: 'Failed or expired' };
 const metricLabels: Record<string, string> = {
-  google_autocomplete: 'Google Places suggestions', google_details: 'Google Places details', google_geocoding: 'Google geocoding',
-  google_routes: 'Google routes', google_optimization_single: 'Google single vehicle shipments',
-  google_optimization_fleet: 'Google fleet shipments', google_tiles: 'Google map tiles', geoapify_credits: 'Geoapify estimated credits',
   openai_whisper_requests: 'OpenAI stock transcriptions', anthropic_stock_input_tokens: 'Claude stock import input tokens',
   anthropic_stock_output_tokens: 'Claude stock import output tokens', twilio_verify_sms_requests: 'Twilio Verify SMS requests',
   anthropic_assistant_input_tokens: 'Claude assistant input tokens', anthropic_assistant_output_tokens: 'Claude assistant output tokens',
@@ -169,7 +166,6 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
       {usage && <><p className="mt-1 text-gray-600">{usage.month} UTC · tracked activity only. Some integrations or periods may not be covered.</p>
         {!usage.complete && <p role="status" className="text-amber-800">Some counters could not be read.</p>}
         <dl className="mt-2 grid gap-2 sm:grid-cols-2">
-          {(usage.quotas?.counters ?? []).map((counter) => <div key={counter.id} className="flex justify-between gap-2"><dt>{metricLabels[counter.id] ?? counter.id}</dt><dd>{counter.used}</dd></div>)}
           {Object.entries(usage.observed).map(([id, count]) => <div key={id} className="flex justify-between gap-2"><dt>{metricLabels[id] ?? id}</dt><dd>{count}</dd></div>)}
         </dl>
       </>}
