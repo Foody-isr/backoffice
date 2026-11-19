@@ -1,3 +1,4 @@
+import { bindPortalSession, endPortalSession, isPortalSession, portalRequest } from './portal-session';
 import { isMFAChallenge, requireCompleteAuth, type MFAReply, type MFAPrompt, type MFAResponse } from './mfa';
 // Foody Backoffice API client
 // All calls go through the Go API at /api/v1/admin/* (superadmin only)
@@ -210,15 +211,31 @@ export interface OnboardInput {
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('foody_admin_token');
+  localStorage.removeItem('foody_admin_token');
+  const ref = localStorage.getItem('foody_backoffice_portal_session');
+  return isPortalSession(ref) ? ref : null;
 }
 
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = getToken();
+/** Renews the same cookie-bound session, preserving concurrent account changes. */
+export async function refreshPortalSession(): Promise<boolean> {
+  const session = getToken();
+  if (!session) return false;
+  const res = await portalRequest(API_URL, API_URL + '/api/v1/auth/refresh', {
+    method: 'POST', headers: { Authorization: 'Bearer ' + session },
+  });
+  if (!res.ok) return false;
+  const data = await res.json();
+  if (!isPortalSession(data.token) || getToken() !== session) return false;
+  localStorage.setItem('foody_backoffice_portal_session', data.token);
+  return true;
+}
+
+async function apiFetch<T>(path: string, options?: RequestInit, retried = false): Promise<T> {
+  const token = path === '/api/v1/auth/login' ? null : getToken();
   let res: Response;
 
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await portalRequest(API_URL, `${API_URL}${path}`, {
       ...options,
       signal: options?.signal ?? AbortSignal.timeout(15_000),
       headers: {
@@ -237,6 +254,9 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
     throw error;
   }
 
+  if (!retried && res.status === 401 && token && !path.startsWith('/api/v1/auth/') && await refreshPortalSession()) {
+    return apiFetch<T>(path, options, true);
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     const error = new Error(body.error || `API error ${res.status}`);
@@ -271,14 +291,17 @@ export async function login(email: string, password: string, mfa?: MFAPrompt) {
     throw new Error('Access denied. Superadmin role required.');
   }
 
-  localStorage.setItem('foody_admin_token', data.token);
+  const session = await bindPortalSession(API_URL, data.token, true);
+  localStorage.setItem('foody_backoffice_portal_session', session);
   localStorage.setItem('foody_admin_user', JSON.stringify(data.user));
-  return data;
+  return { ...data, token: session };
 }
 
 export function logout() {
-  localStorage.removeItem('foody_admin_token');
+  const session = getToken();
+  localStorage.removeItem('foody_backoffice_portal_session');
   localStorage.removeItem('foody_admin_user');
+  if (session) return endPortalSession(API_URL, session);
 }
 
 export function getStoredUser(): User | null {
@@ -802,7 +825,7 @@ export async function uploadPOSLoginSlideImage(file: File): Promise<string> {
   const form = new FormData();
   form.append('image', file);
   const token = getToken();
-  const res = await fetch(`${API_URL}/api/v1/admin/pos-login-slides/upload-image`, {
+  const res = await portalRequest(API_URL, `${API_URL}/api/v1/admin/pos-login-slides/upload-image`, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,
@@ -1010,7 +1033,7 @@ export function getCurrentCloneSession(): CloneSession | null {
 }
 
 async function cloneFetch(session: CloneSession, path: string, options?: RequestInit): Promise<Response> {
-  const res = await fetch(`${CLONE_API_URLS[session.environment]}${path}`, {
+  const res = await portalRequest(API_URL, `${CLONE_API_URLS[session.environment]}${path}`, {
     ...options,
     signal: options?.signal ?? AbortSignal.timeout(240_000),
     headers: { Authorization: `Bearer ${session.token}`, ...options?.headers },
@@ -1028,7 +1051,7 @@ async function cloneFetch(session: CloneSession, path: string, options?: Request
 export async function loginCloneEnvironment(
   environment: CloneEnvironment, email: string, password: string, mfa?: MFAPrompt,
 ): Promise<CloneSession> {
-  const res = await fetch(`${CLONE_API_URLS[environment]}/api/v1/auth/login`, {
+  const res = await portalRequest(API_URL, `${CLONE_API_URLS[environment]}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -1079,7 +1102,7 @@ export async function downloadCloneBundle(restaurantId: number, clusters: CloneC
   const query = new URLSearchParams({ restaurant_id: String(restaurantId) });
   if (clusters.length > 0) query.set('clusters', clusters.join(','));
 
-  const res = await fetch(`${API_URL}/api/v1/admin/env-clone/export?${query.toString()}`, {
+  const res = await portalRequest(API_URL, `${API_URL}/api/v1/admin/env-clone/export?${query.toString()}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!res.ok) {
@@ -1116,7 +1139,7 @@ export async function applyCloneBundle(file: File, confirm: boolean, session?: C
     })).json();
   }
 
-  const res = await fetch(`${API_URL}/api/v1/admin/env-clone/apply${confirm ? '?confirm=1' : ''}`, {
+  const res = await portalRequest(API_URL, `${API_URL}/api/v1/admin/env-clone/apply${confirm ? '?confirm=1' : ''}`, {
     method: 'POST',
     // No Content-Type: the browser sets the multipart boundary itself.
     headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -1477,7 +1500,7 @@ export class CommercialDocumentError extends Error {
 /** Authenticates private document requests, allowing time for the PDF renderer. */
 export async function commercialDocumentRequest<T>(suffix: string, options: RequestInit = {}, pdf = false): Promise<T> {
   const token = getToken();
-  const response = await fetch(`${API_URL}/api/v1/admin/foody-billing/documents${suffix}`, {
+  const response = await portalRequest(API_URL, `${API_URL}/api/v1/admin/foody-billing/documents${suffix}`, {
     ...options, cache: 'no-store', signal: options.signal ?? AbortSignal.timeout(45_000),
     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   });
@@ -1501,7 +1524,7 @@ async function resolveMFASignIn(reply: MFAReply, prompt?: MFAPrompt, baseURL = A
   if (!isMFAChallenge(reply)) return requireCompleteAuth(reply);
   if (!prompt || !reply.challenge) throw new Error('Second-factor sign-in required');
   return prompt(reply, async (code) => {
-    const response = await fetch(`${baseURL}/api/v1/auth/mfa/verify`, {
+    const response = await portalRequest(API_URL, `${baseURL}/api/v1/auth/mfa/verify`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ challenge: reply.challenge, code }),
       credentials: 'omit', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(15_000),
@@ -1520,7 +1543,8 @@ export async function replaceAuthenticator(password: string, prompt: MFAPrompt):
   const reply = await apiFetch<MFAReply>('/api/v1/auth/mfa/replace', { method: 'POST', body: JSON.stringify({ password }) });
   const data = await resolveMFASignIn(reply, prompt);
   if (data.user.role !== 'superadmin') throw new Error('Superadmin required');
-  localStorage.setItem('foody_admin_token', data.token);
+  const session = await bindPortalSession(API_URL, data.token, true);
+  localStorage.setItem('foody_backoffice_portal_session', session);
   localStorage.setItem('foody_admin_user', JSON.stringify(data.user));
 }
 export interface ConnectionJournalEntry {

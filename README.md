@@ -200,7 +200,7 @@ For existing contracts, **Billing & modules** shows the legacy subscription and 
 | Icons | Heroicons v2 |
 | State | `useState` + `useEffect` (no external state lib) |
 | API calls | Centralized in `src/lib/api.ts` |
-| Auth | JWT stored in `localStorage`, role must be `superadmin` |
+| Auth | Cookie-bound encrypted session reference, superadmin role required |
 
 ## Project Structure
 
@@ -228,8 +228,8 @@ src/
 - Login at `/login` with email + password
 - JWT returned by `POST /api/v1/auth/login`
 - Role must be `superadmin` — any other role gets rejected at login
-- Token stored in `localStorage` under `foody_backoffice_token`
-- All API calls send `Authorization: Bearer <token>`
+- The API encrypts the credential and binds it to a Secure HttpOnly cookie for this browser. Backoffice keeps the encrypted reference under `foody_backoffice_portal_session`.
+- Authenticated portal requests send the reference and its matching API cookie.
 
 ## API Reference (used by this app)
 
