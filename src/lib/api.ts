@@ -1152,17 +1152,6 @@ export async function applyCloneBundle(file: File, confirm: boolean, session?: C
   return res.json();
 }
 
-/** Restaurant usage counts provider units separately from outbound attempts. */
-export interface ExternalApiCounter { id: string; provider: string; unit: string; default_limit: number; used: number; requests: number; limit: number; remaining: number; status: 'available' | 'warning' | 'exhausted' }
-export interface ExternalApiUsage { restaurant_id: number; revision: number; month: string; resets_at: string; tracked_since: string; counters: ExternalApiCounter[] }
-export const getExternalApiUsage = (id: number) => apiFetch<ExternalApiUsage>(`/api/v1/admin/restaurants/${id}/api-usage`);
-export const updateExternalApiQuotas = (id: number, revision: number, limits: Record<string, number>, reason: string) => apiFetch<ExternalApiUsage>(`/api/v1/admin/restaurants/${id}/api-quotas`, { method: 'PUT', body: JSON.stringify({ revision, limits, reason }) });
-export const listExternalApiUsage = (page: number) => apiFetch<{ restaurants: { id: number; name: string; usage: ExternalApiUsage }[]; page: number; page_size: number; total: number }>(`/api/v1/admin/api-usage?page=${page}`);
-
-export const externalApiLabels: Record<string, string> = {
- google_autocomplete: 'Address suggestions', google_details: 'Address details', google_geocoding: 'Google geocoding', google_routes: 'Google route calculations', google_optimization_single: 'Single-courier optimization', google_optimization_fleet: 'Fleet optimization', google_tiles: 'Google map tiles', geoapify_credits: 'Geoapify estimated credits',
-};
-
 /** Fleet declaration and separately verified CST state. */
 export interface TerminalFleetMetadata {
   id: string; device_id: string; restaurant_id: number; revision: number;
@@ -1317,7 +1306,6 @@ export type FoodyPrivateBilling = {
 };
 export type FoodyObservedUsage = {
   month: string;
-  quotas: { counters: { id: string; used: number; unit: string }[] } | null;
   observed: Record<string, number>;
   complete: boolean;
 };

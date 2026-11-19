@@ -482,7 +482,6 @@ function RestaurantDetail({ id }: { id: number }) {
               ID #{restaurant.id} · {restaurant.slug || 'no slug'} · Created {formatDate(restaurant.created_at)}
             </p>
           </div>
-          <Link className="text-sm underline" href={`/dashboard/restaurants/${id}/usage`}>Usage and quotas</Link>
           <CopyRestaurantToDev restaurant={restaurant} />
           {modular ? (
             <span className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">Sandbox modules</span>
