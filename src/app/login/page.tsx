@@ -1,6 +1,7 @@
 'use client';
 
 import { useMFA } from '@/components/MFAChallenge';
+import { refreshOutdatedLogin } from '@/lib/portal-session';
 
 import { useState, FormEvent } from 'react';
 import Image from 'next/image';
@@ -21,6 +22,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      if (await refreshOutdatedLogin()) return;
       await login(email, password, mfa.prompt);
       router.push('/dashboard');
     } catch (err: unknown) {

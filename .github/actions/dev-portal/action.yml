@@ -1,0 +1,9 @@
+name: Publish verified Foody development portal
+description: Route the development domain to the successful develop artifact
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: node "$GITHUB_ACTION_PATH/publish.mjs"
+      env:
+        GH_TOKEN: ${{ github.token }}

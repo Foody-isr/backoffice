@@ -226,7 +226,8 @@ src/
 ## Authentication
 
 - Login at `/login` with email + password
-- JWT returned by `POST /api/v1/auth/login`
+- A 202 response opens the authenticator step. The portal checks the role only after sign-in is complete.
+- A tab left on the sign-in form across a release checks the current page before submitting a password. If it refreshes, enter your credentials on the refreshed page.
 - Role must be `superadmin` — any other role gets rejected at login
 - The API encrypts the credential and binds it to a Secure HttpOnly cookie for this browser. Backoffice keeps the encrypted reference under `foody_backoffice_portal_session`.
 - Authenticated portal requests send the reference and its matching API cookie.
@@ -296,6 +297,10 @@ npm run build         # Full production build (catches all errors)
 Always run `npm run build` locally before pushing — CI runs the same command on Vercel.
 
 ## Deployment (Vercel)
+
+Keep the development domain assigned to the Preview branch `dev-portal-routing`. The **Publish development portal** workflow selects a successful Vercel build of the current `develop` commit, checks the Git revision served by `/login`, and publishes a static rewrite to that immutable deployment. The generated branch contains only routing metadata. The same verified application artifact remains available for manual production promotion.
+
+After a release, compare the public `X-Foody-Login-Revision` header on `/login` with the application commit. Retry the workflow on `develop` if publication failed. Both portal projects use the routing action in this repository. Foody Admin pins it to an immutable commit.
 
 | Setting | Value |
 |---------|-------|
