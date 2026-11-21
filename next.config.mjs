@@ -41,10 +41,18 @@ const securityHeaders = [
 ];
 
 /** @type {import('next').NextConfig} */
+const loginRevision = process.env.VERCEL_GIT_COMMIT_SHA || '';
+const loginHeaders = loginRevision ? [{
+  source: '/login',
+  headers: [{ key: 'X-Foody-Login-Revision', value: loginRevision }],
+}] : [];
+
 const nextConfig = {
+  env: { NEXT_PUBLIC_FOODY_LOGIN_REVISION: loginRevision },
   async headers() {
     return [
       { source: '/(.*)', headers: securityHeaders },
+      ...loginHeaders,
       { source: '/dashboard/features', headers: [{ key: 'Content-Security-Policy', value: commercialDocumentSecurityPolicy }] },
     ];
   },
