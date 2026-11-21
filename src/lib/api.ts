@@ -1284,7 +1284,10 @@ export type FoodyOfferTerms = {
 };
 type FoodyPrice = { net_minor: number; vat_minor: number; total_minor: number };
 export type FoodyOffer = FoodyOfferTerms & { commercial_source?: FoodyOfferSelection & { number?: string; valid_until?: string; first_date?: string }; vat_bps: number; id: number; version: number; monthly: FoodyPrice; annual: FoodyPrice };
+export type TrialAction = 'start' | 'extend' | 'end' | 'reset';
 export type FoodyPrivateBilling = {
+  lifecycle?: {state: 'available'|'trial'|'expired'|'paid'; trial_end?: string; version: string; can_manage: boolean; can_publish: boolean; can_reset: boolean; needs_trial_modules?: boolean};
+  archived_reviews?: {id:number; amount_minor:number; reference:string}[];
   onboarding?: {
     mode: 'public' | 'private';
     trial_days: number;
@@ -1342,8 +1345,13 @@ export function saveFoodyOffer(rid: number, input: FoodyOfferInput): Promise<Foo
 }
 
 /** Read provider status without initiating or repeating a charge. */
-export function reconcileFoodyBilling(rid: number, transaction_id?: string): Promise<FoodyPrivateBilling> {
-  return apiFetch(foodyBillingPath(rid) + '/reconcile', { method: 'POST', body: JSON.stringify({ transaction_id }) });
+export function reconcileFoodyBilling(rid: number, transaction_id?: string, payment_id?: number): Promise<FoodyPrivateBilling> {
+  return apiFetch(foodyBillingPath(rid) + '/reconcile', { method: 'POST', body: JSON.stringify({ transaction_id, payment_id }) });
+}
+
+/** Record a sandbox operator's trial decision or retire the current sandbox billing agreement. */
+export function changeFoodyTrial(rid: number, input: {action: TrialAction; days: number; version: string; trial_modules?: FoodyModule[]}): Promise<FoodyPrivateBilling> {
+  return apiFetch(foodyBillingPath(rid) + '/lifecycle', { method: 'POST', body: JSON.stringify(input) });
 }
 
 /** Advance the first authorized renewal for the selected cycle in CST. */

@@ -1,0 +1,17 @@
+{
+  "reviewedAt": "2026-11-21",
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "ac034137207f8b77db005acdecf98ae20f12cbba0918086ad2ee7ea77f8d6e6b",
+      "baseSha256": "60c302688bfbe8d522df6c254739ca518fc55cfbbd759a948bc51199a2883d13",
+      "disposition": "no-user-impact",
+      "features": [
+        "backoffice-entitlements",
+        "platform-api",
+        "shared-runtime"
+      ],
+      "reason": "The new operator API method handles sandbox trial decisions for one restaurant. The existing Features & access configuration, account permissions and platform administration procedures keep their existing operations."
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import FoodyBillingLifecycle from '@/components/FoodyBillingLifecycle';
 import FoodyOfferEditor from '@/components/FoodyOfferEditor';
 import FoodySubscriptionSummary from '@/components/FoodySubscriptionSummary';
 import { getFoodyObservedUsage, getFoodyPrivateBilling, reconcileFoodyBilling, saveFoodyOffer, simulateFoodyRenewal, type FoodyObservedUsage, type FoodyOfferInput, type FoodyPrivateBilling } from '@/lib/api';
@@ -52,7 +53,7 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
   }, [offerID, restaurantId, view?.onboarding]);
 
   async function publish(input: FoodyOfferInput) {
-    if (!view || modular || view.onboarding || lock.current) return;
+    if (!view || !view.lifecycle?.can_publish && (modular || view.onboarding) || lock.current) return;
     lock.current = true; setBusy(true); setError(''); setNotice('');
     try {
       const next = await saveFoodyOffer(restaurantId, input);
@@ -109,6 +110,7 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
     {['creating', 'pending', 'review'].includes(payment.status) && <button type="button" disabled={busy || loading} className={secondary + ' mt-2'} onClick={() => void reconcile()}>Verify payment</button>}
   </div>;
 
+  const lifecycle = view?.lifecycle && <FoodyBillingLifecycle key={restaurantId} rid={restaurantId} view={view} disabled={busy || loading} onChange={setView} onReload={load} />;
   if (modular || view?.onboarding) {
     return <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-6" aria-label="Sandbox subscription and modules">
       {view?.onboarding
@@ -118,6 +120,10 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
       {view?.owner_url && <a href={view.owner_url} className="text-sm font-semibold text-brand-700 underline underline-offset-2">Open owner billing page</a>}
       {paymentDetails}
       {testRenewal}
+      {lifecycle}
+      {view?.lifecycle?.can_publish && <details className="border-t border-gray-200 pt-3"><summary className="cursor-pointer text-sm font-semibold">Publish a private offer</summary>
+        <FoodyOfferEditor key={view.offer?.id ?? 0} restaurantId={restaurantId} offer={view.offer} busy={busy} onPublish={publish} onReload={load} />
+      </details>}
       {notice && <p role="status" className="text-sm text-green-800">{notice}</p>}
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       {!loading && !view?.onboarding && (
@@ -155,6 +161,7 @@ export default function FoodyPrivateOffer({ restaurantId, modular }: { restauran
         {testRenewal}
         {paymentDetails}
       </div>}
+      {lifecycle}
       {!loading && <FoodyOfferEditor key={restaurantId + ':' + (view.offer?.version ?? 0)} restaurantId={restaurantId} offer={view.offer}
         busy={busy} onPublish={publish} onReload={load} />}
 
