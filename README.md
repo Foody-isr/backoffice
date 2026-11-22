@@ -302,6 +302,8 @@ Keep the development domain assigned to the Preview branch `dev-portal-routing`.
 
 After a release, compare the public `X-Foody-Login-Revision` header on `/login` with the application commit. Retry the workflow on `develop` if publication failed. Both portal projects use the routing action in this repository. Foody Admin pins it to an immutable commit.
 
+For Foody Admin, the development router redirects the homepage to `/login` on the same domain. The publisher checks that redirect and the login revision on both the application deployment and the development domain. This restores the sign-in procedure covered by the French, Hebrew and English first-login guides.
+
 | Setting | Value |
 |---------|-------|
 | Root Directory | `foodybackoffice` |
