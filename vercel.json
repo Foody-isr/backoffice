@@ -3,10 +3,17 @@
   "installCommand": "",
   "buildCommand": "",
   "outputDirectory": "public",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/dashboard",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/:path*",
-      "destination": "https://backoffice-6dph0gvkd-mickaz.vercel.app/:path*"
+      "destination": "https://backoffice-8snvvafv8-mickaz.vercel.app/:path*"
     }
   ]
 }
