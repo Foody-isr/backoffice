@@ -12,15 +12,31 @@ export function deploymentOrigin(project, address) {
 }
 
 /** Generate a static routing deployment. No application code or credentials enter this branch. */
-export function routingFiles(origin) {
+export function routingFiles(origin, rootRedirect) {
   const config = {
     framework: null, installCommand: '', buildCommand: '', outputDirectory: 'public',
     rewrites: [{ source: '/:path*', destination: origin + '/:path*' }],
   };
+  if (rootRedirect) {
+    config.redirects = [{ source: '/', destination: rootRedirect, permanent: false }];
+  }
   return [
     { path: 'vercel.json', mode: '100644', type: 'blob', content: JSON.stringify(config, null, 2) + '\n' },
     { path: 'public/.gitkeep', mode: '100644', type: 'blob', content: '' },
   ];
+}
+
+/** Check the login revision and, when configured, the browser's first redirect on this host. */
+export async function servesExpectedPortal(origin, sha, rootRedirect) {
+  const options = { redirect: 'manual', cache: 'no-store', signal: AbortSignal.timeout(15000) };
+  const login = await fetch(origin + '/login', { ...options, method: 'HEAD' });
+  if (login.status !== 200 || login.headers.get('X-Foody-Login-Revision') !== sha) return false;
+  if (!rootRedirect) return true;
+
+  const root = await fetch(origin + '/', options);
+  await root.body?.cancel();
+  const location = root.headers.get('location');
+  return root.status === 307 && (location === rootRedirect || location === origin + rootRedirect);
 }
 
 async function publish() {
@@ -54,17 +70,15 @@ async function publish() {
   }
   if (!origin) throw new Error('No successful Vercel deployment for the current develop commit');
 
-  const login = await fetch(origin + '/login', {
-    method: 'HEAD', redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(15000),
-  });
-  if (!login.ok || login.headers.get('X-Foody-Login-Revision') !== sha) {
-    throw new Error('The immutable deployment does not serve the expected login revision');
+  const rootRedirect = project === 'admin' ? '/login' : undefined;
+  if (!await servesExpectedPortal(origin, sha, rootRedirect)) {
+    throw new Error('The immutable deployment failed the portal entry check for ' + project);
   }
 
   const reference = 'refs/heads/' + routingBranch;
   const refs = await github('/git/matching-refs/heads/' + routingBranch);
   const parent = refs.find(ref => ref.ref === reference)?.object.sha;
-  const tree = await github('/git/trees', 'POST', { tree: routingFiles(origin) });
+  const tree = await github('/git/trees', 'POST', { tree: routingFiles(origin, rootRedirect) });
   if (!parent || (await github('/git/commits/' + parent)).tree.sha !== tree.sha) {
     if (await head() !== sha) return;
     const commit = await github('/git/commits', 'POST', {
@@ -73,20 +87,17 @@ async function publish() {
     if (parent) await github('/git/refs/heads/' + routingBranch, 'PATCH', { sha: commit.sha, force: false });
     else await github('/git/refs', 'POST', { ref: reference, sha: commit.sha });
   }
-  const canonical = 'https://dev-' + project + '.foody-pos.co.il/login';
+  const canonical = 'https://dev-' + project + '.foody-pos.co.il';
   const deadline = Date.now() + 150_000;
   while (Date.now() < deadline) {
-    const page = await fetch(canonical, {
-      method: 'HEAD', redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(10000),
-    });
-    if (page.ok && page.headers.get('X-Foody-Login-Revision') === sha) {
+    if (await servesExpectedPortal(canonical, sha, rootRedirect)) {
       console.log('Verified development portal ' + project + ' at ' + sha);
       return;
     }
     if (await head() !== sha) return;
     await new Promise(resolve => setTimeout(resolve, 5000));
   }
-  throw new Error('The development domain did not serve the verified build. Check its Preview branch assignment.');
+  throw new Error('The development domain failed the portal entry check. Check its Preview branch assignment and routing.');
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await publish();
