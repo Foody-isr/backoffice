@@ -2,11 +2,16 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
 const routingBranch = 'dev-portal-routing';
-const repositories = { 'Foody-isr/admin': 'admin', 'Foody-isr/backoffice': 'backoffice' };
+
+/** Each repository publishes its own application's homepage redirect on its development domain. */
+export const portals = {
+  'Foody-isr/admin': { project: 'admin', rootRedirect: '/login' },
+  'Foody-isr/backoffice': { project: 'backoffice', rootRedirect: '/dashboard' },
+};
 
 /** Accept only immutable deployments in the caller's Foody project and Vercel team. */
 export function deploymentOrigin(project, address) {
-  if (!Object.values(repositories).includes(project) || typeof address !== 'string') return null;
+  if (!Object.values(portals).some(portal => portal.project === project) || typeof address !== 'string') return null;
   const pattern = new RegExp('^https://' + project + '-[a-z0-9]{9}-mickaz\\.vercel\\.app/?$');
   return pattern.test(address) ? new URL(address).origin : null;
 }
@@ -15,34 +20,34 @@ export function deploymentOrigin(project, address) {
 export function routingFiles(origin, rootRedirect) {
   const config = {
     framework: null, installCommand: '', buildCommand: '', outputDirectory: 'public',
+    redirects: [{ source: '/', destination: rootRedirect, permanent: false }],
     rewrites: [{ source: '/:path*', destination: origin + '/:path*' }],
   };
-  if (rootRedirect) {
-    config.redirects = [{ source: '/', destination: rootRedirect, permanent: false }];
-  }
   return [
     { path: 'vercel.json', mode: '100644', type: 'blob', content: JSON.stringify(config, null, 2) + '\n' },
     { path: 'public/.gitkeep', mode: '100644', type: 'blob', content: '' },
   ];
 }
 
-/** Check the login revision and, when configured, the browser's first redirect on this host. */
+/** Check the login revision, the homepage redirect on this host and its destination. */
 export async function servesExpectedPortal(origin, sha, rootRedirect) {
   const options = { redirect: 'manual', cache: 'no-store', signal: AbortSignal.timeout(15000) };
   const login = await fetch(origin + '/login', { ...options, method: 'HEAD' });
   if (login.status !== 200 || login.headers.get('X-Foody-Login-Revision') !== sha) return false;
-  if (!rootRedirect) return true;
-
   const root = await fetch(origin + '/', options);
   await root.body?.cancel();
   const location = root.headers.get('location');
-  return root.status === 307 && (location === rootRedirect || location === origin + rootRedirect);
+  if (root.status !== 307 || (location !== rootRedirect && location !== origin + rootRedirect)) return false;
+  if (rootRedirect === '/login') return true;
+
+  const destination = await fetch(origin + rootRedirect, { ...options, method: 'HEAD' });
+  return destination.status === 200;
 }
 
 async function publish() {
   const repo = process.env.GITHUB_REPOSITORY;
-  const project = repositories[repo];
-  if (!project || !process.env.GH_TOKEN) throw new Error('Expected an authorized Foody portal workflow');
+  if (!Object.hasOwn(portals, repo) || !process.env.GH_TOKEN) throw new Error('Expected an authorized Foody portal workflow');
+  const { project, rootRedirect } = portals[repo];
   const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8'));
   async function github(endpoint, method = 'GET', body) {
     const response = await fetch('https://api.github.com/repos/' + repo + endpoint, {
@@ -70,7 +75,6 @@ async function publish() {
   }
   if (!origin) throw new Error('No successful Vercel deployment for the current develop commit');
 
-  const rootRedirect = project === 'admin' ? '/login' : undefined;
   if (!await servesExpectedPortal(origin, sha, rootRedirect)) {
     throw new Error('The immutable deployment failed the portal entry check for ' + project);
   }

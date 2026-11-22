@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deploymentOrigin, routingFiles, servesExpectedPortal } from './publish.mjs';
+import { deploymentOrigin, portals, routingFiles, servesExpectedPortal } from './publish.mjs';
 
 test('uses only immutable URLs from the correct Foody project and team', () => {
   const target = 'https://admin-1234abcde-mickaz.vercel.app';
@@ -12,22 +12,46 @@ test('uses only immutable URLs from the correct Foody project and team', () => {
   }
 });
 
-test('the routing branch contains only a static rewrite to the verified build', () => {
-  const origin = 'https://backoffice-1234abcde-mickaz.vercel.app';
-  const [manifest, directory] = routingFiles(origin);
-  assert.equal(directory.path, 'public/.gitkeep');
-  assert.deepEqual(JSON.parse(manifest.content), {
-    framework: null, installCommand: '', buildCommand: '', outputDirectory: 'public',
-    rewrites: [{ source: '/:path*', destination: origin + '/:path*' }],
+for (const [project, entryPath] of [['backoffice', '/dashboard'], ['admin', '/login']]) {
+  test(project + ' redirects the homepage on the same host and forwards other paths to its build', () => {
+    const origin = 'https://' + project + '-1234abcde-mickaz.vercel.app';
+    const portal = portals['Foody-isr/' + project];
+    assert.equal(portal.project, project);
+    const [manifest, directory] = routingFiles(origin, portal.rootRedirect);
+    assert.equal(directory.path, 'public/.gitkeep');
+    assert.deepEqual(JSON.parse(manifest.content), {
+      framework: null, installCommand: '', buildCommand: '', outputDirectory: 'public',
+      redirects: [{ source: '/', destination: entryPath, permanent: false }],
+      rewrites: [{ source: '/:path*', destination: origin + '/:path*' }],
+    });
   });
-});
+}
 
-test('Admin redirects only the homepage to sign-in on the same host', () => {
-  const origin = 'https://admin-1234abcde-mickaz.vercel.app';
-  const [manifest] = routingFiles(origin, '/login');
-  const config = JSON.parse(manifest.content);
-  assert.deepEqual(config.redirects, [{ source: '/', destination: '/login', permanent: false }]);
-  assert.deepEqual(config.rewrites, [{ source: '/:path*', destination: origin + '/:path*' }]);
+test('a healthy Backoffice login cannot hide a broken homepage or dashboard', async t => {
+  const origin = 'https://dev-backoffice.foody-pos.co.il';
+  const { rootRedirect } = portals['Foody-isr/backoffice'];
+  let root = new Response(null, { status: 404 });
+  let dashboardStatus = 200;
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    assert.equal(options.redirect, 'manual');
+    if (url === origin + '/') {
+      assert.equal(options.method ?? 'GET', 'GET');
+      return root;
+    }
+    assert.equal(options.method, 'HEAD');
+    if (url === origin + '/login') return new Response(null, { headers: { 'X-Foody-Login-Revision': 'current' } });
+    assert.equal(url, origin + '/dashboard');
+    return new Response(null, { status: dashboardStatus });
+  });
+
+  assert.equal(await servesExpectedPortal(origin, 'current', rootRedirect), false);
+  root = new Response(null, { status: 307, headers: { location: '/login' } });
+  assert.equal(await servesExpectedPortal(origin, 'current', rootRedirect), false);
+  root = new Response(null, { status: 307, headers: { location: '/dashboard' } });
+  dashboardStatus = 404;
+  assert.equal(await servesExpectedPortal(origin, 'current', rootRedirect), false);
+  dashboardStatus = 200;
+  assert.equal(await servesExpectedPortal(origin, 'current', rootRedirect), true);
 });
 
 test('Admin publication requires both the homepage redirect and the expected login revision', async t => {
