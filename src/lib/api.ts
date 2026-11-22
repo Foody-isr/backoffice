@@ -451,10 +451,11 @@ export async function adminDeactivateSubscription(restaurantId: number) {
 // ─── Payment Provider Config ────────────────────────────────────────
 
 export type PaymentProvider = 'payplus' | 'sumit' | 'cibus' | 'verifone' | 'stancer';
-export type VerifoneCardFlow = 'hosted' | 'integrated';
+export type VerifoneCardFlow = 'hosted' | 'iframe' | 'integrated';
 
 export interface PaymentConfigResponse {
   verifone_checkout_theme?: VerifoneCheckoutThemeStatus;
+  verifone_checkout_iframe_enabled?: boolean;
   restaurant_id: number;
   provider: PaymentProvider;
   has_custom_credentials: boolean;

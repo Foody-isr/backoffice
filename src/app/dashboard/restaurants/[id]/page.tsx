@@ -409,7 +409,11 @@ function RestaurantDetail({ id }: { id: number }) {
     setPendingCardFlow(mode);
     try {
       const saved = await setVerifoneCardFlow(id, mode);
-      setPaymentConfig((cfg) => cfg && { ...cfg, verifone_direct_card_enabled: saved.mode === 'integrated' });
+      setPaymentConfig((cfg) => cfg && {
+        ...cfg,
+        verifone_direct_card_enabled: saved.mode === 'integrated',
+        verifone_checkout_iframe_enabled: saved.mode === 'iframe',
+      });
     } catch (error: unknown) {
       setCardFlowError(error instanceof Error ? error.message : 'Could not save the card payment flow.');
       setPaymentConfig(null); // Read the saved choice if the update response was lost.
@@ -453,7 +457,8 @@ function RestaurantDetail({ id }: { id: number }) {
   const checkoutTheme = paymentConfig?.verifone_checkout_theme;
   const paymentSettingsSaved = paymentConfig?.provider === paymentProvider && JSON.stringify(paymentCreds) === JSON.stringify(savedPaymentCreds.current);
   const savedCardFlow = paymentConfig?.provider === 'verifone'
-    ? paymentConfig.verifone_direct_card_enabled ? 'integrated' : 'hosted'
+    ? paymentConfig.verifone_direct_card_enabled ? 'integrated'
+      : paymentConfig.verifone_checkout_iframe_enabled ? 'iframe' : 'hosted'
     : null;
   const cardFlowRequirement = paymentConfig?.verifone_environment === 'production'
     ? 'The Foody card form is available in CST Sandbox.'
@@ -699,17 +704,19 @@ function RestaurantDetail({ id }: { id: number }) {
                   </div>
                   <fieldset className="space-y-2" disabled={!paymentSettingsSaved || cardFlowSaving || paymentSaving || themeAction !== null || !!paymentLoadError}>
                     <legend className="mb-2 text-sm font-semibold text-gray-800">Card payment flow</legend>
-                    <div className="grid max-w-2xl gap-2 sm:grid-cols-2">
-                      {(['hosted', 'integrated'] as const).map((mode) => (
+                    <div className="grid max-w-3xl gap-2 sm:grid-cols-3">
+                      {([
+                        { mode: 'hosted', title: 'Verifone Checkout', description: 'The customer opens the Verifone payment page.' },
+                        { mode: 'iframe', title: 'Verifone iframe', description: 'Verifone hosts the card form inside the restaurant’s online checkout.' },
+                        { mode: 'integrated', title: 'Foody · Verifone.js', description: 'The customer enters their card in the Foody card form.' },
+                      ] as const).map(({ mode, title, description }) => (
                         <label key={mode} className="flex items-start gap-2 rounded-lg border border-gray-300 p-3 text-sm has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:disabled]:opacity-60">
                           <input type="radio" name="verifone-card-flow" value={mode} checked={(pendingCardFlow ?? savedCardFlow) === mode}
-                            disabled={mode === 'integrated' && !!cardFlowRequirement}
+                            disabled={mode === 'integrated' && !!cardFlowRequirement || mode === 'iframe' && !!restaurant.currency && restaurant.currency !== 'ILS'}
                             onChange={() => handleCardFlowChange(mode)} aria-describedby="verifone-card-flow-help"
                             className="mt-1 accent-brand-600" />
-                          <span><strong>{mode === 'hosted' ? 'Verifone Checkout' : 'Foody · Verifone.js'}</strong>
-                            <span className="mt-1 block text-xs leading-5 text-gray-600">
-                              {mode === 'hosted' ? 'Foody creates a payment link. The customer enters their card on the Verifone page.' : 'The customer enters their card and pays directly in the Foody checkout.'}
-                            </span>
+                          <span><strong>{title}</strong>
+                            <span className="mt-1 block text-xs leading-5 text-gray-600">{description}</span>
                           </span>
                         </label>
                       ))}
@@ -838,9 +845,9 @@ function RestaurantDetail({ id }: { id: number }) {
                     </div>
                   </fieldset>
                   <fieldset disabled={themeAction !== null || paymentSaving || cardFlowSaving} className="space-y-3 border-t border-gray-200 pt-4">
-                    <legend className="text-sm font-semibold text-gray-700">Hosted payment page appearance</legend>
+                    <legend className="text-sm font-semibold text-gray-700">Verifone Checkout appearance</legend>
                     <p className="max-w-2xl text-xs leading-5 text-gray-500">
-                      Checkout follows the customer&apos;s ordering language, with English as fallback and a language selector. The selected theme applies to new Checkout links.
+                      Checkout follows the customer&apos;s ordering language. The selected theme applies to new hosted and embedded Checkout sessions.
                     </p>
                     <label className="flex items-start gap-2 text-sm text-gray-700">
                       <input type="checkbox" className="mt-0.5" disabled={!checkoutTheme?.ready && !paymentCreds.verifone_checkout_theme_enabled}
