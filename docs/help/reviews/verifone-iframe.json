@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "path": "src/app/dashboard/restaurants/[id]/page.tsx",
+      "sha256": "a60548654226b7d5e8b5adaffa784d6e3817cea0bed47e0eb0130eeb5bf457c6",
+      "baseSha256": "32c7dbfaab65806081fe899dfbce458b116dfc67ae7bebd4a0676bc31623dfa9",
+      "features": [
+        "backoffice-onboarding"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The affected controls are on the restaurant Payment tab and set its Verifone card flow. The onboarding form, required fields and activation steps use their existing workflow."
+    },
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "4aed8940620a49e5753073768868dad5232c1e7be945a9457540499955a014e5",
+      "baseSha256": "ac034137207f8b77db005acdecf98ae20f12cbba0918086ad2ee7ea77f8d6e6b",
+      "features": [
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "Only the Verifone payment configuration types add an iframe value and flag. The API quota contracts and shared request behavior retain their existing definitions."
+    }
+  ]
+}
