@@ -13,7 +13,7 @@
   "rewrites": [
     {
       "source": "/:path*",
-      "destination": "https://backoffice-2xeo6ik8q-mickaz.vercel.app/:path*"
+      "destination": "https://backoffice-k4ljs5gew-mickaz.vercel.app/:path*"
     }
   ]
 }
