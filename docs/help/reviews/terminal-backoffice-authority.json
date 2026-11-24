@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "3112337795fee63945f60fd40e7da7067bbc399237b44b4d78c944edcb5d40b4",
+      "baseSha256": "4aed8940620a49e5753073768868dad5232c1e7be945a9457540499955a014e5",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The changed fields describe the installment offer on a payment terminal. Subscription entitlements and the shared transport still use their existing contracts."
+    }
+  ]
+}

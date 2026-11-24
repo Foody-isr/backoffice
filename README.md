@@ -20,6 +20,11 @@ The setting persists until disabled; production is blocked server-side. See the
 observability guide for filtering, auditing and CloudWatch access.
 
 **Terminal fleet** is the superadmin inventory for registered Verifone hardware.
+Open **Edit inventory → Installment payments** to set the minimum and maximum
+sale in ILS and, optionally, the maximum number of payments at checkout.
+FoodyPOS reads this offer for the selected terminal. Existing iPad limits
+must be entered once in Backoffice. Use **Change requests** for an existing
+DID or bank assignment.
 On a development API with the VHQ CST configuration, Backoffice stages the
 reviewed SHVA parameter in VHQ and sends DID and parameter-download authorizations
 to the matching enrolled diagnostic POS. Record the observed identifiers on the
