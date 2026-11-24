@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import CopyRestaurantToDev from '@/components/CopyRestaurantToDev';
+import DevelopmentRefresh from './DevelopmentRefresh';
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
@@ -163,6 +164,8 @@ export default function ClonePage() {
           at <span className="font-medium text-gray-700">{status?.env || 'an unknown environment'}</span>.
         </p>
       </header>
+
+      {status?.env === 'development' && <DevelopmentRefresh />}
 
       <section className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
         <h2 className="font-medium text-gray-900">Copy directly from production to dev</h2>

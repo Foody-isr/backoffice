@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "2985a8ac3c5ce23f5ae4668be260473ac31e8a8d5f25cc004ec198fb0fe6796b",
+      "baseSha256": "3112337795fee63945f60fd40e7da7067bbc399237b44b4d78c944edcb5d40b4",
+      "features": [
+        "backoffice-entitlements",
+        "platform-api",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The added wrappers are dedicated to the development restoration panel and call the deployed restore endpoints through the established session transport. The Backoffice operations guide covers the new controls."
+    }
+  ]
+}
