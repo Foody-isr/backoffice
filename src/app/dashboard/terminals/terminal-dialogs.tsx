@@ -13,7 +13,7 @@ export const fleetLifecycles = {
 };
 
 const changeKinds = { configure: 'Change bank configuration', replace: 'Replace hardware', reassign: 'Reassign to another restaurant' };
-const closedChangeStates = { cancelled: 'Cancelled', verified_cst: 'Verified in CST', verified_unchanged: 'Verified unchanged' };
+const closedChangeStates = { cancelled: 'Cancelled', verified_cst: 'Verified in CST', verified_unchanged: 'Verified unchanged', saved_in_foody: 'Saved in FoodyPOS' };
 const commandStates = {
   authorized: 'Authorized · waiting for the POS', dispatching: 'Claimed · awaiting result',
   confirmed: 'Command acknowledged', not_started: 'Not sent', uncertain: 'Result to verify',
@@ -198,6 +198,8 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
 }) {
   const [draft, setDraft] = useState<TerminalFleetDeclaration>(() => ({
     ...parametersFrom(terminal.metadata),
+    ashrait_terminal_id: terminal.metadata?.ashrait_terminal_id === terminal.metadata?.shva_terminal_id
+      ? '' : terminal.metadata?.ashrait_terminal_id ?? '',
     revision: terminal.metadata?.revision ?? 0,
     serial_number: terminal.metadata?.serial_number ?? '',
     lifecycle: terminal.metadata?.lifecycle ?? 'in_service',
@@ -226,6 +228,9 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
       }
       const installments = { minimum_minor: minimumMinor, maximum_minor: maximumMinor, maximum_payments: maximumPayments };
       const saved = await updateTerminalFleet(terminal.device_id, { ...draft, installments });
+      if (saved.shva_terminal_id !== draft.shva_terminal_id) {
+        throw new Error('The API returned a different SHVA number. Refresh terminal settings.');
+      }
       if ((enabled || policy) && (saved.installments?.minimum_minor !== minimumMinor ||
           saved.installments.maximum_minor !== maximumMinor || (saved.installments.maximum_payments ?? 0) !== maximumPayments)) {
         throw new Error('The API did not confirm these installment settings. Refresh the inventory before editing again.');
@@ -238,8 +243,8 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
     }
   }
 
-  return <Dialog title={`Edit inventory for ${terminal.name}`} busy={saving} onClose={onClose}>
-    <p className="max-w-prose text-sm text-gray-600">Record the identifiers already assigned to this physical terminal. FoodyPOS uses its SHVA number to connect. Use Change requests to change an existing DID or bank assignment.</p>
+  return <Dialog title={`Terminal settings for ${terminal.name}`} busy={saving} onClose={onClose}>
+    <p className="max-w-prose text-sm text-gray-600">Enter the SHVA terminal number supplied by Verifone, including any leading zero. Save it here. FoodyPOS uses it the next time it connects.</p>
     <form className="space-y-5" onSubmit={event => { event.preventDefault(); void save(); }}>
       <div className="grid gap-4 border-b border-gray-200 pb-5 sm:grid-cols-2">
         <Field label="Physical serial number" value={draft.serial_number} maxLength={80} pattern={identifierPattern}
@@ -271,7 +276,7 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
         </div>}
       </fieldset>
       <ErrorText message={error} />
-      <button className={primary} type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save declaration'}</button>
+      <button className={primary} type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
     </form>
   </Dialog>;
 }
@@ -555,9 +560,9 @@ export function ChangeRequests({ terminal, onChanged, onClose }: {
     }
   }
 
-  return <Dialog title={`Change requests for ${terminal.name}`} busy={busy} onClose={onClose}>
+  return <Dialog title={`Verifone maintenance for ${terminal.name}`} busy={busy} onClose={onClose}>
     <p className="max-w-prose text-sm text-gray-600">
-      A prepared request records the proposed change for Verifone. The identifiers applied to the terminal still require verification.
+      Use this panel for a device replacement, a transfer or a Verifone maintenance command. To change the number FoodyPOS uses, open Terminal settings.
     </p>
     <ErrorText message={error} />
     <button className={action} disabled={busy} type="button" onClick={() => void save()}>Refresh requests</button>
@@ -578,7 +583,7 @@ export function ChangeRequests({ terminal, onChanged, onClose }: {
     )}
     {changes !== null && !terminal.forgotten_at && !active && (terminal.metadata?.serial_number ?
       <ChangeForm terminal={terminal} busy={busy} onPrepare={input => save(() => prepareTerminalFleetChange(terminal.device_id, input))} /> :
-      <p className="text-sm text-gray-600">Save the physical serial number in Edit inventory to prepare a change.</p>)}
+      <p className="text-sm text-gray-600">Save the physical serial number in Terminal settings to prepare a change.</p>)}
     {changes?.filter(change => change.state !== 'prepared').map(change => (
       <details key={change.id} className="space-y-3 border-t border-gray-200 pt-3 text-sm">
         <summary className="cursor-pointer font-medium">{closedChangeStates[change.state as keyof typeof closedChangeStates]} · {changeKinds[change.kind]}</summary>

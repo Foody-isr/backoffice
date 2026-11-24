@@ -1197,7 +1197,7 @@ export interface TerminalFleetMetadata {
   vhq_device_uid: string; ashrait_terminal_id: string;
   acquirer: string; lifecycle: 'in_service' | 'repair' | 'returned' | 'quarantine';
   installments?: TerminalInstallments;
-  configuration_state: 'declared_not_applied' | 'verified_cst'; updated_at: string;
+  configuration_state: 'declared_not_applied' | 'verified_cst' | 'cst_login_saved'; updated_at: string;
 }
 
 /** Non-secret physical inventory, restricted to the superadmin control plane. */
@@ -1238,7 +1238,7 @@ export interface TerminalFleetAttempt {
   authorized_at: string;
   dispatched_at?: string;
   reviewed_at?: string;
-  review_result?: 'verified_cst' | 'verified_unchanged';
+  review_result?: 'verified_cst' | 'verified_unchanged' | 'saved_in_foody';
   review_reference?: string;
 }
 
@@ -1249,7 +1249,7 @@ export interface TerminalFleetChange {
   restaurant_id: number;
   source_revision: number;
   kind: TerminalFleetChangeInput['kind'];
-  state: 'prepared' | 'cancelled' | 'verified_cst' | 'verified_unchanged';
+  state: 'prepared' | 'cancelled' | 'verified_cst' | 'verified_unchanged' | 'saved_in_foody';
   source_serial_number: string;
   source: TerminalFleetParameters;
   target_device_id: string;

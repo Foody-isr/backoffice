@@ -155,10 +155,10 @@ export default function TerminalFleetPage() {
                     </time>}
                   </td>
                   <td className="space-y-2 px-4 py-3 text-right">
-                    {!allDevices && <button className="btn-secondary min-h-8 px-3 text-xs" type="button"
-                      onClick={() => setPanel({ kind: 'changes', terminal: row })}>{row.forgotten_at ? 'Change history' : 'Change requests'}</button>}
-                    {!allDevices && !row.forgotten_at && <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm underline focus-visible:outline-blue-600"
-                      type="button" onClick={() => setPanel({ kind: 'declaration', terminal: row })}>Edit inventory</button>}
+                    {!allDevices && !row.forgotten_at && <button className="btn-secondary min-h-8 px-3 text-xs"
+                      type="button" onClick={() => setPanel({ kind: 'declaration', terminal: row })}>Terminal settings</button>}
+                    {!allDevices && <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm underline focus-visible:outline-blue-600" type="button"
+                      onClick={() => setPanel({ kind: 'changes', terminal: row })}>{row.forgotten_at ? 'Change history' : 'Verifone maintenance'}</button>}
                     {!row.forgotten_at && <button className="block w-full whitespace-nowrap rounded px-3 py-1 text-sm text-red-700 underline focus-visible:outline-blue-600"
                       type="button" onClick={() => setPanel({ kind: 'forget', terminal: row })}>Forget device</button>}
                   </td>
