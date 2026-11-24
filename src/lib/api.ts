@@ -1185,12 +1185,18 @@ export async function applyCloneBundle(file: File, confirm: boolean, session?: C
   return res.json();
 }
 
+/** Checkout limits in agorot for a single physical terminal. Zero amounts disable installments. */
+export interface TerminalInstallments {
+  minimum_minor: number; maximum_minor: number; maximum_payments?: number;
+}
+
 /** Fleet declaration and separately verified CST state. */
 export interface TerminalFleetMetadata {
   id: string; device_id: string; restaurant_id: number; revision: number;
   serial_number: string; did: string; shva_terminal_id: string; supplier_id: string;
   vhq_device_uid: string; ashrait_terminal_id: string;
   acquirer: string; lifecycle: 'in_service' | 'repair' | 'returned' | 'quarantine';
+  installments?: TerminalInstallments;
   configuration_state: 'declared_not_applied' | 'verified_cst'; updated_at: string;
 }
 
@@ -1207,7 +1213,7 @@ export type TerminalFleetParameters = Pick<TerminalFleetMetadata,
 
 /** Metadata saved for an inventory device without provisioning the terminal. */
 export type TerminalFleetDeclaration = TerminalFleetParameters & Pick<TerminalFleetMetadata,
-  'revision' | 'serial_number' | 'lifecycle'>;
+  'revision' | 'serial_number' | 'lifecycle' | 'installments'>;
 
 /** One request bound to the declarations reviewed by the operator. */
 export interface TerminalFleetChangeInput {

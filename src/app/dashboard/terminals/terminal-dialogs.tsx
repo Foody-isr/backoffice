@@ -187,7 +187,12 @@ export function RegisterMini({ onSaved, onClose }: { onSaved: () => void; onClos
   </Dialog>;
 }
 
-/** Edits the declared identity and lifecycle of a registered terminal. */
+function parseShekels(value: string): number {
+  const match = /^(\d{1,10})(?:[.,](\d{1,2}))?$/.exec(value.trim());
+  return match ? Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0')) : 0;
+}
+
+/** Edits the fleet declaration and the installment offer for a terminal. */
 export function EditDeclaration({ terminal, onSaved, onClose }: {
   terminal: TerminalFleetEntry; onSaved: () => void; onClose: () => void;
 }) {
@@ -197,6 +202,11 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
     serial_number: terminal.metadata?.serial_number ?? '',
     lifecycle: terminal.metadata?.lifecycle ?? 'in_service',
   }));
+  const policy = terminal.metadata?.installments;
+  const [enabled, setEnabled] = useState((policy?.minimum_minor ?? 0) > 0);
+  const [minimum, setMinimum] = useState(policy?.minimum_minor ? (policy.minimum_minor / 100).toFixed(2) : '');
+  const [maximum, setMaximum] = useState(policy?.maximum_minor ? (policy.maximum_minor / 100).toFixed(2) : '');
+  const [count, setCount] = useState(policy?.maximum_payments ? String(policy.maximum_payments) : '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -205,7 +215,21 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
     setSaving(true);
     setError('');
     try {
-      await updateTerminalFleet(terminal.device_id, draft);
+      const minimumMinor = enabled ? parseShekels(minimum) : 0;
+      const maximumMinor = enabled ? parseShekels(maximum) : 0;
+      const maximumPayments = enabled && count !== '' ? Number(count) : 0;
+      if (enabled && (!minimumMinor || !maximumMinor || minimumMinor > maximumMinor)) {
+        throw new Error('Enter a positive minimum and a maximum at least as large, with at most two decimal places.');
+      }
+      if (enabled && count !== '' && (!/^\d{1,3}$/.test(count) || maximumPayments < 2)) {
+        throw new Error('Enter a maximum of 2 to 999 payments, or leave it blank for terminal selection.');
+      }
+      const installments = { minimum_minor: minimumMinor, maximum_minor: maximumMinor, maximum_payments: maximumPayments };
+      const saved = await updateTerminalFleet(terminal.device_id, { ...draft, installments });
+      if ((enabled || policy) && (saved.installments?.minimum_minor !== minimumMinor ||
+          saved.installments.maximum_minor !== maximumMinor || (saved.installments.maximum_payments ?? 0) !== maximumPayments)) {
+        throw new Error('The API did not confirm these installment settings. Refresh the inventory before editing again.');
+      }
       onSaved();
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Could not save the inventory details.');
@@ -230,6 +254,22 @@ export function EditDeclaration({ terminal, onSaved, onClose }: {
           {Object.entries(fleetLifecycles).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
         </select>
       </label>
+      <fieldset className="space-y-3 border-t border-gray-200 pt-4" disabled={saving}>
+        <legend className="pr-2 text-sm font-semibold">Installment payments</legend>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} />
+          Offer installments on this terminal
+        </label>
+        {enabled && <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Minimum sale (ILS)" inputMode="decimal" required value={minimum} maxLength={13}
+            onChange={event => setMinimum(event.target.value)} />
+          <Field label="Maximum sale (ILS)" inputMode="decimal" required value={maximum} maxLength={13}
+            onChange={event => setMaximum(event.target.value)} />
+          <Field label="Maximum payments at checkout (optional)" type="number" min={2} max={999} step={1}
+            value={count} onChange={event => setCount(event.target.value)} />
+          <p className="self-end text-sm text-gray-600">Leave the count blank to select installments on the payment terminal.</p>
+        </div>}
+      </fieldset>
       <ErrorText message={error} />
       <button className={primary} type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save declaration'}</button>
     </form>
