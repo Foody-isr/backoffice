@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "sha256": "1ac1812ad6ded18eb9e3ebf4247983ebbc4e526e58dc889ec4143853512b50f4",
+      "baseSha256": "4aed8940620a49e5753073768868dad5232c1e7be945a9457540499955a014e5",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The two added request wrappers serve only the development database refresh screen and use the existing session transport. Entitlement and shared application procedures use their existing calls."
+    }
+  ]
+}

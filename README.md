@@ -157,6 +157,14 @@ Internal incident-response entry point:
   concrete runbooks starting from an alert or a customer report, including the
   per-restaurant Sumit and Twilio Tech Provider boundaries
 
+### Clone Data (`/dashboard/clone`)
+
+On development, **Refresh all development data** shows the date and counts for
+the reviewed production snapshot staged by an operator. A superadmin with MFA
+can confirm a whole-database replacement and follow the result. Expect a brief
+API interruption while the previous development database is retained for
+recovery. The individual restaurant copy remains available in **Clone Data**.
+
 ### Subscriptions (`/dashboard/subscriptions`) *(via API)*
 
 Admin subscription endpoints used by the billing tab and dashboard alert:

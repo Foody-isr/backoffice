@@ -1008,6 +1008,38 @@ export interface CloneReport {
 
 export type CloneEnvironment = 'production' | 'development';
 
+export interface DevelopmentRefreshJob {
+  id: string;
+  state: 'queued' | 'running' | 'succeeded' | 'failed';
+  reason?: string;
+}
+
+export interface DevelopmentRefreshStatus {
+  available: boolean;
+  job?: DevelopmentRefreshJob;
+  snapshot?: {
+    id: string;
+    captured_at: string;
+    restaurants: number;
+    orders: number;
+    transactions: number;
+    websites: number;
+  };
+}
+
+/** Reads counts and restore status for the reviewed development snapshot. */
+export function getDevelopmentRefresh() {
+  return apiFetch<DevelopmentRefreshStatus>('/api/v1/admin/env-clone/refresh');
+}
+
+/** Queues the selected production snapshot after destructive confirmation. */
+export function requestDevelopmentRefresh(snapshotId: string, confirmation: string) {
+  return apiFetch<DevelopmentRefreshJob>('/api/v1/admin/env-clone/refresh', {
+    method: 'POST',
+    body: JSON.stringify({ snapshot_id: snapshotId, confirmation }),
+  });
+}
+
 export interface CloneSession {
   environment: CloneEnvironment;
   token: string;
