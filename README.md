@@ -28,8 +28,8 @@ DID or bank assignment.
 On a development API with the VHQ CST configuration, Backoffice stages the
 reviewed SHVA parameter in VHQ and sends DID and parameter-download authorizations
 to the matching enrolled diagnostic POS. Record the observed identifiers on the
-terminal after checking synchronization. Production, replacement and transfer
-requests remain preparation only.
+terminal after checking synchronization. Production CST maintenance is limited
+to individually enrolled terminals. Replacement and transfer requests are preparation only.
 
 ## Quick Start
 
@@ -99,7 +99,11 @@ identifiers before saving. Open the same history to cancel an unused request.
 For a CST configuration request, keep FoodyPOS open on the selected Portable
 or paired iPad. Authorize the DID if needed. Stage the SHVA number in VHQ when
 it differs, then authorize the parameter download. Verify the actual values on
-the terminal and record them in the request. Use **Check VHQ status** to read
+the terminal and record them in the request. For a standalone profile download on an
+enrolled CST Mini, check the physical Mini and requested SHVA number, make sure
+the terminal is idle, and leave automatic delivery to the paired iPad selected.
+An earlier deposit awaiting confirmation keeps its original SHVA number and status.
+Use **Check VHQ status** to read
 back an uncertain write. Each authorization may be claimed once.
 
 Apply API migrations 309–312 after the existing development migrations before

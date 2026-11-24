@@ -2326,7 +2326,7 @@
       ]
     },
     "src/app/dashboard/terminals/terminal-dialogs.tsx": {
-      "sha256": "1308c9209e8ce5b5e78cc35b72c73bb726632b3c6e6e3f3c7b42d65743dfd379",
+      "sha256": "a876906b58960ccc502e3973c67e33aa68f4bdb8eb6489311daa6400037605fa",
       "features": [
         "pos-victa-mini",
         "platform-api"

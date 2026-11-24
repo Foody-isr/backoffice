@@ -434,8 +434,8 @@ function ChangeSummary({ change, restaurantName }: { change: TerminalFleetChange
   </div>;
 }
 
-function CSTActions({ change, busy, save }: {
-  change: TerminalFleetChange; busy: boolean; save: (action: () => Promise<unknown>) => Promise<void>;
+function CSTActions({ change, model, busy, save }: {
+  change: TerminalFleetChange; model: string; busy: boolean; save: (action: () => Promise<unknown>) => Promise<void>;
 }) {
   const [cstConfirmed, setCstConfirmed] = useState(false);
   const [remote, setRemote] = useState(true);
@@ -454,12 +454,20 @@ function CSTActions({ change, busy, save }: {
   const stageVHQ = didReady && pendingVHQ && !cloud && change.cst_vhq_available;
   const canQueue = change.cst_execution_allowed && !waiting && !downloaded &&
     (!didReady || !pendingVHQ || stageVHQ);
+  const before = change.target_before;
+  const next = change.requested;
+  const miniProfileDownload = remote && model.trim().toLowerCase() === 'victa mini' &&
+    command === 'DownloadAshraitParameters' && !pendingVHQ && before.did === next.did &&
+    before.shva_terminal_id !== next.shva_terminal_id && (next.ashrait_terminal_id || next.shva_terminal_id) === next.shva_terminal_id &&
+    before.supplier_id === next.supplier_id && before.acquirer === next.acquirer;
 
   if (!change.cst_execution_allowed && !needsReview) return null;
   return <div className="space-y-4 border-t border-gray-200 pt-4">
     <h4 className="text-sm font-semibold">{change.target_before.did ? 'Verifone CST' : 'First DID enrollment · Verifone CST'}</h4>
     <p className="text-sm text-gray-700">
-      Complete any pending transactions and closing first. Keep the correct FoodyPOS open with the CST terminal connected.
+      {miniProfileDownload
+        ? 'Keep FoodyPOS open on the paired iPad. Any deposit awaiting confirmation stays with its original SHVA number.'
+        : 'Complete any pending transactions and closing first. Keep the correct FoodyPOS open with the CST terminal connected.'}
     </p>
     {didReady && pendingVHQ && !change.cst_vhq_available &&
       <ErrorText message="This legacy request needs its VHQ SHVA configuration before downloading parameters." />}
@@ -479,11 +487,13 @@ function CSTActions({ change, busy, save }: {
       <label className="flex items-start gap-2 text-sm">
         <input type="checkbox" className="mt-1" checked={cstConfirmed} disabled={busy}
           onChange={event => setCstConfirmed(event.target.checked)} />
-        I verified the CST terminal and target identifiers, and any prior batch is closed.
+        {miniProfileDownload
+          ? 'I verified the Mini and the requested SHVA number. No payment or settlement is in progress on the terminal.'
+          : 'I verified the CST terminal and target identifiers, and any prior batch is closed.'}
       </label>
       {!stageVHQ && <label className="flex items-start gap-2 text-sm">
         <input type="checkbox" className="mt-1" checked={remote} disabled={busy}
-          onChange={event => setRemote(event.target.checked)} />
+          onChange={event => { setRemote(event.target.checked); setCstConfirmed(false); }} />
         Send to the connected FoodyPOS automatically
       </label>}
       <button className={primary} disabled={busy || !cstConfirmed} type="submit">
@@ -559,7 +569,7 @@ export function ChangeRequests({ terminal, onChanged, onClose }: {
           <h3 className="mt-1 font-semibold">{changeKinds[active.kind]}</h3>
         </div>
         <ChangeSummary change={active} restaurantName={terminal.restaurant_name} />
-        {!terminal.forgotten_at && active.device_id === terminal.device_id && <CSTActions key={active.id} change={active} busy={busy} save={save} />}
+        {!terminal.forgotten_at && active.device_id === terminal.device_id && <CSTActions key={active.id} change={active} model={terminal.model} busy={busy} save={save} />}
         {!terminal.forgotten_at && (active.device_id === terminal.device_id ?
           <button className={action} disabled={busy || active.attempts?.some(attempt => attempt.dispatched_at && attempt.state !== 'not_started')} type="button"
             onClick={() => void save(() => cancelTerminalFleetChange(terminal.device_id, active.id))}>Cancel request</button> :
