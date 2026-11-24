@@ -25,17 +25,36 @@ async function run() {
       localStorage.setItem('foody_admin_user', JSON.stringify({ id: 7, role: 'superadmin', full_name: 'Demo' }));
     });
     const writes = [];
+    let metadata = { ...before, ashrait_terminal_id: before.shva_terminal_id, revision: 4,
+      lifecycle: 'in_service', serial_number: 'DEMO', configuration_state: 'verified_cst' };
     await page.route('**/*', async route => {
       const { origin: host, pathname } = new URL(route.request().url());
       if (!pathname.startsWith('/api/v1/')) return host === origin ? route.continue() : route.abort();
       if (pathname.endsWith('/auth/refresh')) return route.fulfill({ json: { token: 'fp1s.ZGVtbw.test.00' } });
       if (!['GET', 'OPTIONS'].includes(route.request().method())) writes.push(pathname);
-      const body = pathname.endsWith('/terminals') ? { terminals: [terminal], has_more: false }
+      if (route.request().method() === 'PUT' && pathname.endsWith('/terminals/mini-demo')) {
+        const input = route.request().postDataJSON();
+        assert.equal(input.shva_terminal_id, '0000000012');
+        assert.equal(input.ashrait_terminal_id, '');
+        assert.equal(input.revision, metadata.revision);
+        metadata = { ...metadata, ...input, revision: input.revision + 1 };
+        return route.fulfill({ json: metadata });
+      }
+      const body = pathname.endsWith('/terminals') ? { terminals: [{ ...terminal, metadata }], has_more: false }
         : pathname.endsWith('/changes') ? { changes: [change] } : {};
       return route.fulfill({ json: body });
     });
     await page.goto(origin + '/dashboard/terminals');
-    await page.getByRole('button', { name: 'Change requests' }).click();
+    await page.getByRole('button', { name: 'Terminal settings' }).click();
+    await page.getByLabel('SHVA terminal number').fill('0000000012');
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await page.getByRole('cell').filter({ hasText: 'SHVA 0000000012' }).waitFor();
+    assert.deepEqual(writes, ['/api/v1/admin/terminals/mini-demo']);
+    await page.reload();
+    await page.getByRole('button', { name: 'Terminal settings' }).click();
+    assert.equal(await page.getByLabel('SHVA terminal number').inputValue(), '0000000012');
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await page.getByRole('button', { name: 'Verifone maintenance' }).click();
     const authorize = page.getByRole('button', { name: 'Authorize parameter download' });
     const remote = page.getByLabel('Send to the connected FoodyPOS automatically');
     const checkMini = page.getByLabel('I verified the Mini and the requested SHVA number.', { exact: false });
@@ -49,7 +68,7 @@ async function run() {
     await remote.check();
     assert.ok(await checkMini.isVisible());
     assert.ok(await authorize.isDisabled());
-    assert.deepEqual(writes, []);
+    assert.deepEqual(writes, ['/api/v1/admin/terminals/mini-demo']);
   } finally {
     await browser.close();
   }

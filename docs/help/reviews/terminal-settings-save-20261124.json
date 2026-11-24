@@ -1,0 +1,16 @@
+{
+  "reviewedAt": "2026-11-24",
+  "files": [
+    {
+      "path": "src/lib/api.ts",
+      "baseSha256": "2985a8ac3c5ce23f5ae4668be260473ac31e8a8d5f25cc004ec198fb0fe6796b",
+      "sha256": "c4d132ee5650c5419e17cc60c15f28d26f9afc34d9507a5490da66a23d756f7d",
+      "features": [
+        "backoffice-entitlements",
+        "shared-runtime"
+      ],
+      "disposition": "no-user-impact",
+      "reason": "The terminal configuration and maintenance history types include the states returned after saving a SHVA number. Shared API transport, entitlements and module assignment keep their existing behavior."
+    }
+  ]
+}
